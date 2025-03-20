@@ -2,26 +2,42 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Hide slider content until fully loaded */
+.slick-slider:not(.slick-initialized) {
+  visibility: hidden;
+  opacity: 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.slick-slider.slick-initialized {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+/* Slick arrow button styles */
+.slick-prev,
+.slick-next {
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 50% !important;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+.slick-prev:hover,
+.slick-next:hover {
+  background: #f3f4f6 !important;
+}
+
+.slick-prev:before,
+.slick-next:before {
+  color: #585d69 !important;
+  font-size: 20px !important;
+}
+
+/* Position adjustments */
+.slick-prev {
+  left: -35px !important;
+}
+
+.slick-next {
+  right: -35px !important;
 }
