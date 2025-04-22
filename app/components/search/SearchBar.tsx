@@ -52,7 +52,7 @@ const SearchBar: React.FC = () => {
       <div
         className={`bg-white rounded-full transition-all duration-300 ${
           isExpanded ? 'rounded-lg' : ''
-        } shadow-lg hover:shadow-xl`}
+        } shadow-deep hover:shadow-xl`}
       >
         <div className="p-2 flex items-center gap-2">
           <AutoComplete

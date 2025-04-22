@@ -1,22 +1,21 @@
-"use client";
+'use client';
 
-import React from "react";
-import Slider from "react-slick";
-import { Button } from "antd";
-import { motion } from "framer-motion";
-import { useAppDispatch, useAppSelector } from "@/app/store/store";
-import { setSelectedCategory } from "@/app/store/slices/searchSlice";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
+import React from 'react';
+import Slider from 'react-slick';
+import { Button } from 'antd';
+import { motion } from 'framer-motion';
+import { useAppDispatch, useAppSelector } from '@/app/store/store';
+import { setSelectedCategory } from '@/app/store/slices/searchSlice';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
 
 const categories = [
-  { id: "offers", name: "Nearby Offers", icon: "🎁" },
-  { id: "atm", name: "ATM", icon: "🏧" },
-  { id: "restaurant", name: "Restaurants", icon: "🍽️" },
-  { id: "hospital", name: "Hospitals", icon: "🏥" },
-  { id: "pharmacy", name: "Pharmacy", icon: "💊" },
-  { id: "school", name: "Schools", icon: "🏫" },
-  { id: "shopping", name: "Shopping", icon: "🛍️" },
+  { id: 'atm', name: 'ATM', icon: '🏧' },
+  { id: 'restaurant', name: 'Restaurants', icon: '🍽️' },
+  { id: 'hospital', name: 'Hospitals', icon: '🏥' },
+  { id: 'pharmacy', name: 'Pharmacy', icon: '💊' },
+  { id: 'school', name: 'Schools', icon: '🏫' },
+  { id: 'shopping', name: 'Shopping', icon: '🛍️' },
 ];
 
 const NearbyCategories: React.FC = () => {
@@ -93,15 +92,15 @@ const NearbyCategories: React.FC = () => {
             initial={{ x: 100, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.3, delay: index * 0.1 }}
-            className="px-[2px] [&_.ant-btn]:!p-0"
+            className="px-[2px] [&_.ant-btn]:!p-0 !pb-4"
           >
             <Button
-              type={selectedCategory === category.id ? "primary" : "default"}
-              className={`!w-[130px] !h-[36px] !flex !items-center !justify-center !rounded-full !shadow-sm ${
-                category.id === "offers"
-                  ? "!bg-gradient-to-r !from-blue-500 !to-blue-600 !text-white hover:!from-blue-600 hover:!to-blue-700 !border-none"
-                  : "!bg-white hover:!bg-gray-50 !border !border-gray-200"
-              } !transition-all !duration-300`}
+              type={selectedCategory === category.id ? 'primary' : 'default'}
+              className={`!w-[130px] !h-[36px] !flex !items-center !justify-center !rounded-full !transition-all !duration-300 ${
+                selectedCategory === category.id
+                  ? '!shadow-custom'
+                  : '!shadow-deep'
+              }`}
               onClick={() => handleCategoryClick(category.id)}
             >
               <span className="!mr-1 !text-base">{category.icon}</span>
