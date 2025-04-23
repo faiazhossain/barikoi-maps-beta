@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import { Select } from 'antd';
-import { GlobalOutlined } from '@ant-design/icons';
-import { useAppDispatch } from '@/app/store/store';
-import { createAction } from '@reduxjs/toolkit';
+import React, { useEffect, useState } from "react";
+import { Select } from "antd";
+import { GlobalOutlined } from "@ant-design/icons";
+import { useAppDispatch } from "@/app/store/store";
+import { createAction } from "@reduxjs/toolkit";
 
 export const setSelectedCountry = createAction<{ code: string; name: string }>(
-  'map/setSelectedCountry'
+  "map/setSelectedCountry"
 );
 
 interface CountryOption {
@@ -25,33 +25,37 @@ interface CountrySelectProps {
 
 const CountrySelect: React.FC<CountrySelectProps> = ({
   onCountrySelect,
-  className = '!w-12 [&_.ant-select-selector]:!border-none',
-  dropdownWidth = '160px',
+  className = "!w-12 [&_.ant-select-selector]:!border-none",
+  dropdownWidth = "160px",
 }) => {
   const dispatch = useAppDispatch();
   const [countryOptions, setCountryOptions] = useState<CountryOption[]>([]);
   const [filteredOptions, setFilteredOptions] = useState<CountryOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   useEffect(() => {
     const fetchCountries = async () => {
       try {
-        const response = await fetch('/data/countries.geojson');
-        if (!response.ok) throw new Error('Failed to fetch countries');
+        const response = await fetch("/data/countries.geojson");
+        if (!response.ok) throw new Error("Failed to fetch countries");
 
         const geojson = await response.json();
 
         const options = geojson.features
-          .map((feature: any) => ({
-            value: feature.properties.ISO_A2, // Using ISO_A2 as value
-            name: feature.properties.ADMIN, // Country name from ADMIN
-            flag:
-              feature.properties.icon || // Use embedded icon if available
-              `https://flagcdn.com/w40/${feature.properties.ISO_A2.toLowerCase()}.png`,
-            label: feature.properties.ADMIN, // Display name
-          }))
+          .map(
+            (feature: {
+              properties: { ISO_A2: string; ADMIN: string; icon?: string };
+            }) => ({
+              value: feature.properties.ISO_A2, // Using ISO_A2 as value
+              name: feature.properties.ADMIN, // Country name from ADMIN
+              flag:
+                feature.properties.icon || // Use embedded icon if available
+                `https://flagcdn.com/w40/${feature.properties.ISO_A2.toLowerCase()}.png`,
+              label: feature.properties.ADMIN, // Display name
+            })
+          )
           .sort((a: CountryOption, b: CountryOption) =>
             a.name.localeCompare(b.name)
           ); // Sort alphabetically by name;
@@ -60,7 +64,7 @@ const CountrySelect: React.FC<CountrySelectProps> = ({
         setFilteredOptions(options);
         setLoading(false);
       } catch (err) {
-        console.error('Error fetching countries:', err);
+        console.error("Error fetching countries:", err);
         setError(true);
         setLoading(false);
       }

@@ -41,3 +41,7 @@
 .slick-next {
   right: -35px !important;
 }
+/* Hide default scrollbar for the virtual list */
+.rc-virtual-list-scrollbar {
+  display: none !important;
+}

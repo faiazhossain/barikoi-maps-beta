@@ -1,14 +1,15 @@
+/* Keep your existing dropdown animations */
 .dropdown-animation {
-  transform: translateY(-10px); /* Start 10px above */
-  opacity: 0; /* Start invisible */
-  transition: transform 0.3s ease, opacity 0.3s ease; /* Smooth animation */
+  transform: translateY(-10px);
+  opacity: 0;
+  transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
 .dropdown-animation.show {
-  transform: translateY(0); /* Move to the original position */
-  opacity: 1; /* Fade in */
+  transform: translateY(0);
+  opacity: 1;
 }
 
 .dropdown-animation:not(.show) {
-  transition-delay: 100ms; /* Add a 100ms delay when collapsing */
+  transition-delay: 100ms;
 }

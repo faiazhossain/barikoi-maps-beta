@@ -1,24 +1,24 @@
 // components/SearchBar/SearchBar.tsx
-'use client';
-import React, { useState, useEffect, useMemo } from 'react';
-import { AutoComplete, Button, Space } from 'antd';
-import { SearchOutlined, SwapOutlined } from '@ant-design/icons';
-import { useAppDispatch, useAppSelector } from '@/app/store/store';
-import styles from '../styles/SearchBar.module.css';
-import { MdCancel } from 'react-icons/md';
+"use client";
+import React, { useState, useEffect, useMemo } from "react";
+import { AutoComplete, Button, Space } from "antd";
+import { SearchOutlined, SwapOutlined } from "@ant-design/icons";
+import { useAppDispatch, useAppSelector } from "@/app/store/store";
+import styles from "../styles/SearchBar.module.css";
+import { MdCancel } from "react-icons/md";
 import {
   setSearchTerm,
   setSearchMode,
   clearDirections,
   setSuggestions,
-} from '@/app/store/slices/searchSlice';
-import { toggleDirections } from '@/app/store/slices/mapSlice';
-import CountrySelect from './CountrySelect';
-import debounce from 'lodash.debounce';
+} from "@/app/store/slices/searchSlice";
+import { toggleDirections } from "@/app/store/slices/mapSlice";
+import CountrySelect from "./CountrySelect";
+import debounce from "lodash.debounce";
 
-import { useSearchHandler } from '../hooks/SearchHandler';
-import { getSuggestionOptions } from '../hooks/SuggestionsOption';
-import { useDropdownStyles } from '../hooks/DropDownStyles';
+import { useSearchHandler } from "../hooks/SearchHandler";
+import { getSuggestionOptions } from "../hooks/SuggestionsOption";
+import { useDropdownStyles } from "../hooks/DropDownStyles";
 
 const SearchBar: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -29,7 +29,7 @@ const SearchBar: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false); // Secondary state for animation
   const dropdownStyle = useDropdownStyles();
-  const { handleSearch, loading, error } = useSearchHandler(dispatch);
+  const { handleSearch, error } = useSearchHandler(dispatch);
 
   const debouncedSearch = useMemo(
     () => debounce(handleSearch, 300),
@@ -68,10 +68,10 @@ const SearchBar: React.FC = () => {
   const handleDirectionsToggle = () => {
     dispatch(toggleDirections());
     if (!showDirections) {
-      dispatch(setSearchMode('directions'));
+      dispatch(setSearchMode("directions"));
     } else {
       dispatch(clearDirections());
-      dispatch(setSearchMode('location'));
+      dispatch(setSearchMode("location"));
     }
   };
 
@@ -80,11 +80,13 @@ const SearchBar: React.FC = () => {
   };
 
   return (
-    <div className="absolute top-2 left-0 w-screen sm:top-4 sm:left-4 z-10 sm:w-full sm:max-w-[400px]">
+    <div
+      className={`absolute top-2 left-0 w-screen sm:top-4 sm:left-4 z-10 sm:w-full sm:max-w-[400px]`}
+    >
       <div
         className={`bg-white rounded-full transition-all duration-100 ${
-          isExpanded ? 'rounded-b-md' : ''
-        } shadow-deep hover:shadow-custom`}
+          isExpanded ? "rounded-b-md" : ""
+        } shadow-deep`}
       >
         <div className="p-[2px] flex items-center gap-2">
           <div className="relative w-full">
@@ -114,16 +116,16 @@ const SearchBar: React.FC = () => {
               onChange={handleInputChange}
               onBlur={() => setIsExpanded(false)}
               placeholder={
-                searchMode === 'directions'
-                  ? 'Enter start location'
-                  : 'Search places...'
+                searchMode === "directions"
+                  ? "Enter start location"
+                  : "Search places..."
               }
               size="large"
               prefix={<SearchOutlined className="!text-gray-400" />}
               dropdownRender={(menu) => (
                 <div
-                  className={`${styles['dropdown-animation']} ${
-                    isExpanded || isAnimating ? styles['show'] : ''
+                  className={`${styles["dropdown-animation"]} ${
+                    isExpanded || isAnimating ? styles["show"] : ""
                   }`}
                 >
                   {menu}
@@ -139,7 +141,7 @@ const SearchBar: React.FC = () => {
               icon={<SwapOutlined />}
               onClick={handleDirectionsToggle}
               className={`!transition-colors ${
-                showDirections ? '!text-blue-500' : '!text-gray-500'
+                showDirections ? "!text-blue-500" : "!text-gray-500"
               } hover:!text-blue-600`}
             />
             <CountrySelect />
