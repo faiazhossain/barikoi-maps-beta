@@ -30,8 +30,10 @@ const CountrySelect: React.FC<CountrySelectProps> = ({
 }) => {
   const dispatch = useAppDispatch();
   const [countryOptions, setCountryOptions] = useState<CountryOption[]>([]);
+  const [filteredOptions, setFilteredOptions] = useState<CountryOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
   useEffect(() => {
     const fetchCountries = async () => {
@@ -55,6 +57,7 @@ const CountrySelect: React.FC<CountrySelectProps> = ({
           ); // Sort alphabetically by name;
 
         setCountryOptions(options);
+        setFilteredOptions(options);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching countries:', err);
@@ -91,26 +94,45 @@ const CountrySelect: React.FC<CountrySelectProps> = ({
       dropdownStyle={{ minWidth: dropdownWidth }}
       suffixIcon={null}
       optionLabelProp="label"
-      showSearch
-      filterOption={
-        (input, option) =>
-          (typeof option?.value === 'string'
-            ? option.value.toLowerCase()
-            : ''
-          ).includes(input.toLowerCase()) // Filter by label (name)
+      showSearch={false} // Disable default search behavior
+      value={
+        filteredOptions.find((country) => country.name === searchTerm)?.name
       }
+      title={
+        filteredOptions.find((country) => country.name === searchTerm)?.name
+      } // Show the name on hover
+      dropdownRender={(menu) => (
+        <div>
+          <div className="p-2">
+            <input
+              type="text"
+              placeholder="Search country..."
+              className="w-full p-[3px] border border-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-100"
+              onChange={(e) => {
+                const input = e.target.value.toLowerCase();
+                const filteredOptions = countryOptions.filter((country) =>
+                  country.name.toLowerCase().includes(input)
+                );
+                setFilteredOptions(filteredOptions); // Update filtered options
+                setSearchTerm(input);
+              }}
+            />
+          </div>
+          <div>{menu}</div>
+        </div>
+      )}
     >
-      {countryOptions.map((country) => (
+      {filteredOptions.map((country) => (
         <Select.Option
           key={country.name}
           value={country.name} // Use name as the value
           title={country.name} // Show popup with the country name on hover
           label={
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4">
               <img
                 src={country.flag}
                 alt={`${country.name} flag`}
-                className="w-5 h-3 object-cover"
+                className="w-5 h-5 object-cover"
               />
               <span>{country.name}</span>
             </div>
