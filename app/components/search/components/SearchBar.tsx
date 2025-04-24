@@ -1,11 +1,10 @@
 // components/SearchBar/SearchBar.tsx
 "use client";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { AutoComplete, Button, Space } from "antd";
 import { SearchOutlined, SwapOutlined } from "@ant-design/icons";
 import { useAppDispatch, useAppSelector } from "@/app/store/store";
 import styles from "../styles/SearchBar.module.css";
-import { MdCancel } from "react-icons/md";
 import {
   setSearchTerm,
   setSearchMode,
@@ -19,12 +18,14 @@ import debounce from "lodash.debounce";
 import { useSearchHandler } from "../hooks/SearchHandler";
 import { getSuggestionOptions } from "../hooks/SuggestionsOption";
 import { useDropdownStyles } from "../hooks/DropDownStyles";
+import { AiOutlineClose } from "react-icons/ai";
 
 const SearchBar: React.FC = () => {
   const dispatch = useAppDispatch();
   const { searchTerm, suggestions, searchMode } = useAppSelector(
     (state) => state.search
   );
+  const clearButtonRef = useRef<HTMLDivElement>(null);
   const { showDirections } = useAppSelector((state) => state.map);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false); // Secondary state for animation
@@ -91,7 +92,7 @@ const SearchBar: React.FC = () => {
         <div className="p-[2px] flex items-center gap-2">
           <div className="relative w-full">
             <AutoComplete
-              className="!w-full !ml-2
+              className="searchbar_autocomplete !w-full !ml-2
               [&_.ant-select-selector]:!border-none 
               [&_.ant-select-selector]:!shadow-none 
               [&_.ant-select-selector]:!rounded-[62px] 
@@ -108,7 +109,7 @@ const SearchBar: React.FC = () => {
               options={options}
               allowClear={{
                 clearIcon: (
-                  <MdCancel className="!text-black-500 !text-lg !bg-white !relative !top-0 !transform-none" />
+                  <div ref={clearButtonRef} className="hidden bg-none"></div>
                 ),
               }}
               onSearch={debouncedSearch}
@@ -133,9 +134,21 @@ const SearchBar: React.FC = () => {
               )}
               dropdownStyle={dropdownStyle}
             />
+            {searchTerm && (
+              <div
+                ref={clearButtonRef}
+                className="absolute -right-3 top-[7px] transform cursor-pointer !bg-white p-1"
+                onClick={() => {
+                  dispatch(setSearchTerm(""));
+                  dispatch(setSuggestions([]));
+                }}
+              >
+                <AiOutlineClose className="text-gray-500 text-lg " />
+              </div>
+            )}
             {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
           </div>
-          <Space className="!mr-2">
+          <Space size={0} className="!ml-2">
             <Button
               type="text"
               icon={<SwapOutlined />}
