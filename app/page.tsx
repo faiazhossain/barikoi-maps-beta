@@ -3,8 +3,8 @@
 import dynamic from 'next/dynamic';
 import { Provider } from 'react-redux';
 import { store } from './store/store';
-import SearchBar from './components/search/components/SearchBar';
-import NearbyCategories from './components/search/components/NearbyCategories';
+import SearchBar from './components/search/components/SearchBar/SearchBar';
+import NearbyCategories from './components/search/components/NearbyCategories/NearbyCategories';
 
 const MapContainer = dynamic(() => import('./components/map/MapContainer'), {
   ssr: false,

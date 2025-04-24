@@ -41,11 +41,3 @@
 .slick-next {
   right: -35px !important;
 }
-/* Hide default scrollbar for the virtual list */
-.rc-virtual-list-scrollbar {
-  display: none !important;
-}
-
-.searchbar_autocomplete > .ant-select-clear {
-  display: none !important;
-}

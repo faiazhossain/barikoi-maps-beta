@@ -1,30 +1,30 @@
-import type { Config } from "tailwindcss";
+import type { Config } from 'tailwindcss';
 
 const config: Config = {
   content: [
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    './pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
     extend: {
       colors: {
         primary: {
-          light: "#A7F3D0", // Light green
-          DEFAULT: "#10B981", // Base green
-          dark: "#047857", // Dark green
+          light: '#A7F3D0', // Light green
+          DEFAULT: '#09a129', // Base green
+          dark: '#307E6A', // Dark green
         },
         secondary: {
-          light: "#BFDBFE", // Light blue
-          DEFAULT: "#3B82F6", // Base blue
-          dark: "#1E40AF", // Dark blue
+          light: '#BFDBFE', // Light blue
+          DEFAULT: '#3B82F6', // Base blue
+          dark: '#1E40AF', // Dark blue
         },
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        background: 'var(--background)',
+        foreground: 'var(--foreground)',
       },
       boxShadow: {
-        custom: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
-        deep: "rgba(0, 0, 0, 0.25) 0px 4px 4px, rgba(0, 0, 0, 0.22) 1px 1px 1px",
+        custom: 'rgba(0, 0, 0, 0.35) 0px 5px 15px',
+        deep: 'rgba(0, 0, 0, 0.25) 0px 4px 4px, rgba(0, 0, 0, 0.22) 1px 1px 1px',
       },
     },
   },
