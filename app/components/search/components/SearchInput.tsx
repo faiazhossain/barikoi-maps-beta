@@ -4,9 +4,15 @@ import { SearchOutlined } from '@ant-design/icons';
 import styles from './SearchBar/SearchBar.module.css';
 import { useDropdownStyles } from '../hooks/useDropdownStyles';
 
+// Define the type for AutoComplete options
+interface AutoCompleteOption {
+  value: string; // The value of the option
+  label?: React.ReactNode; // Optional label for custom rendering
+}
+
 interface SearchInputProps {
   value: string;
-  options: any[];
+  options: AutoCompleteOption[]; // Use the defined type here
   placeholder: string;
   isExpanded: boolean;
   isAnimating: boolean;
