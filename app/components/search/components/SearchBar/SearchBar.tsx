@@ -1,14 +1,11 @@
 // components/SearchBar/SearchBar.tsx
 'use client';
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Space } from 'antd';
 import { useAppDispatch, useAppSelector } from '@/app/store/store';
 import './styles.css';
 import { setSearchTerm, setSuggestions } from '@/app/store/slices/searchSlice';
-import debounce from 'lodash.debounce';
-
 import { useSearchHandler } from '../../hooks/useSearchHandler';
-
 import ClearButton from '../ClearButton';
 import DirectionsToggle from '../DirectionToggle';
 import SearchInput from '../SearchInput';
@@ -22,16 +19,9 @@ const SearchBar: React.FC = () => {
   );
   const [isExpanded, setIsExpanded] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
-  const { handleSearch, error } = useSearchHandler(dispatch);
+  const { handleSearch } = useSearchHandler(dispatch);
 
-  const debouncedSearch = useMemo(
-    () => debounce(handleSearch, 300),
-    [handleSearch]
-  );
-  const options = useMemo(
-    () => getSuggestionOptions(suggestions),
-    [suggestions]
-  );
+  const options = getSuggestionOptions(suggestions);
 
   useEffect(() => {
     if (suggestions.length > 0) {
@@ -57,6 +47,7 @@ const SearchBar: React.FC = () => {
 
   const handleInputChange = (value: string) => {
     dispatch(setSearchTerm(value));
+    handleSearch(value); // Debounced search
   };
 
   return (
@@ -78,7 +69,7 @@ const SearchBar: React.FC = () => {
               }
               isExpanded={isExpanded}
               isAnimating={isAnimating}
-              onSearch={debouncedSearch}
+              onSearch={handleInputChange} // Changed this
               onSelect={handleSelect}
               onChange={handleInputChange}
               onBlur={() => setIsExpanded(false)}
@@ -91,7 +82,7 @@ const SearchBar: React.FC = () => {
               }}
             />
             <ClearButton searchTerm={searchTerm} />
-            {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
+            {/* {error && <div className="text-red-500 text-sm mt-2">{error}</div>} */}
           </div>
           <Space size={0} className="!ml-2">
             <DirectionsToggle />

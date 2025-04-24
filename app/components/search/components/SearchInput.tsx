@@ -1,4 +1,3 @@
-// components/SearchBar/SearchInput.tsx
 import React from 'react';
 import { AutoComplete } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
@@ -61,6 +60,9 @@ const SearchInput: React.FC<SearchInputProps> = ({
         </div>
       )}
       dropdownStyle={dropdownStyle}
+      defaultActiveFirstOption={false}
+      showSearch={true}
+      filterOption={false} // Important: disable local filtering
     />
   );
 };

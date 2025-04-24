@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Select } from 'antd';
+import { Select, Spin } from 'antd'; // Import Spin from Ant Design
 import { createAction } from '@reduxjs/toolkit';
 import { FaFlag } from 'react-icons/fa';
+import { LoadingOutlined } from '@ant-design/icons';
 
 export const setSelectedCountry = createAction<{ code: string; name: string }>(
   'map/setSelectedCountry'
@@ -73,12 +74,22 @@ const CountrySelect: React.FC<CountrySelectProps> = ({
 
   const handleCountrySelect = (name: string) => {
     setSelectedCountry(name);
-    // dispatch(setSelectedCountry({ code: value, name }));
-    // onCountrySelect?.(name);
   };
 
-  if (loading) return <Select placeholder="Loading.." disabled />;
-  if (error) return <Select placeholder="Error loading countries" disabled />;
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-10 !w-8 !mr-2">
+        <Spin
+          indicator={<LoadingOutlined spin className="!text-primary-dark" />}
+        />{' '}
+        {/* Ant Design loading spinner */}
+      </div>
+    );
+  }
+
+  if (error) {
+    return <Select placeholder="Error loading countries" disabled />;
+  }
 
   return (
     <div className="relative group">
