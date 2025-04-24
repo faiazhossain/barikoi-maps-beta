@@ -31,7 +31,6 @@ const CountrySelect: React.FC<CountrySelectProps> = ({
   const [filteredOptions, setFilteredOptions] = useState<CountryOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
 
   useEffect(() => {
@@ -116,7 +115,6 @@ const CountrySelect: React.FC<CountrySelectProps> = ({
                     country.name.toLowerCase().includes(input)
                   );
                   setFilteredOptions(filteredOptions);
-                  setSearchTerm(input);
                 }}
               />
             </div>

@@ -1,6 +1,6 @@
 // components/SearchBar/DirectionsToggle.tsx
 import React from 'react';
-import { Button, Space } from 'antd';
+import { Button } from 'antd';
 
 import { useAppDispatch, useAppSelector } from '@/app/store/store';
 import { toggleDirections } from '@/app/store/slices/mapSlice';

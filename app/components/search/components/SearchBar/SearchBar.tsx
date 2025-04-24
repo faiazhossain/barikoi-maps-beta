@@ -1,6 +1,6 @@
 // components/SearchBar/SearchBar.tsx
 'use client';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Space } from 'antd';
 import { useAppDispatch, useAppSelector } from '@/app/store/store';
 import './styles.css';
