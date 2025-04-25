@@ -67,14 +67,21 @@ const SearchInput: React.FC<SearchInputProps> = ({
             {menu}
           </div>
           {/* Footer */}
-          <div className="absolute bottom-0 right-0 flex items-center gap-1 text-gray-500 text-[10px] p-2">
-            <span>Powered by</span>
-            <Image
-              src="/images/barikoi-logo.svg" // Replace with the actual path to the Barikoi icon
-              alt="Barikoi"
-              width={34} // Adjust the width as needed
-              height={20} // Adjust the height as needed
-            />
+          <div className="absolute bottom-0 right-0 flex items-center gap-1 text-gray-500 text-[11px] p-2">
+            <a
+              href="https://docs.barikoi.com/api#tag/v2.0/operation/autocomplete_v2" // Link to Barikoi API documentation
+              target="_blank" // Open in a new tab
+              rel="noopener noreferrer" // Security best practice
+              className="flex items-center gap-1 text-gray-500 hover:text-primary transition-colors"
+            >
+              <span>Autocomplete by</span>
+              <Image
+                src="/images/barikoi-logo.svg" // Replace with the actual path to the Barikoi icon
+                alt="Barikoi"
+                width={34} // Adjust the width as needed
+                height={20} // Adjust the height as needed
+              />
+            </a>
           </div>
         </div>
       )}
