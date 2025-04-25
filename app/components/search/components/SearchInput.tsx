@@ -1,8 +1,9 @@
-import React from 'react';
-import { AutoComplete } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
-import styles from './SearchBar/SearchBar.module.css';
-import { useDropdownStyles } from '../hooks/useDropdownStyles';
+import React from "react";
+import { AutoComplete } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
+import styles from "./SearchBar/SearchBar.module.css";
+import { useDropdownStyles } from "../hooks/useDropdownStyles";
+import Image from "next/image";
 
 // Define the type for AutoComplete options
 interface AutoCompleteOption {
@@ -57,12 +58,24 @@ const SearchInput: React.FC<SearchInputProps> = ({
       size="large"
       prefix={<SearchOutlined className="!text-gray-400" />}
       dropdownRender={(menu) => (
-        <div
-          className={`${styles['dropdown-animation']} ${
-            isExpanded || isAnimating ? styles['show'] : ''
-          }`}
-        >
-          {menu}
+        <div className="relative pb-8">
+          <div
+            className={`${styles["dropdown-animation"]} ${
+              isExpanded || isAnimating ? styles["show"] : ""
+            }`}
+          >
+            {menu}
+          </div>
+          {/* Footer */}
+          <div className="absolute bottom-0 right-0 flex items-center gap-1 text-gray-500 text-[10px] p-2">
+            <span>Powered by</span>
+            <Image
+              src="/images/barikoi-logo.svg" // Replace with the actual path to the Barikoi icon
+              alt="Barikoi"
+              width={34} // Adjust the width as needed
+              height={20} // Adjust the height as needed
+            />
+          </div>
         </div>
       )}
       dropdownStyle={dropdownStyle}

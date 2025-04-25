@@ -64,7 +64,7 @@ export const getSuggestionOptions = (
             <div className="flex-1">
               <div className="flex items-start gap-2 w-full">
                 <div className="w-4 m-auto flex-shrink-0">
-                  <FaMapMarkerAlt className="text-gray-400  " />
+                  <FaMapMarkerAlt className="text-gray-400" />
                 </div>
                 <span className="text-gray-900 whitespace-normal break-words w-full">
                   {highlightMatch(item.address, inputValue)}
