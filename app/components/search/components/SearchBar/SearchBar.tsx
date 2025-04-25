@@ -1,16 +1,16 @@
 // components/SearchBar/SearchBar.tsx
-'use client';
-import React, { useState, useEffect } from 'react';
-import { Space } from 'antd';
-import { useAppDispatch, useAppSelector } from '@/app/store/store';
-import './styles.css';
-import { setSearchTerm, setSuggestions } from '@/app/store/slices/searchSlice';
-import { useSearchHandler } from '../../hooks/useSearchHandler';
-import ClearButton from '../ClearButton';
-import DirectionsToggle from '../DirectionToggle';
-import SearchInput from '../SearchInput';
-import CountrySelect from '../CountrySelect/CountrySelect';
-import { getSuggestionOptions } from '../../hooks/useSuggestionsOptions';
+"use client";
+import React, { useState, useEffect } from "react";
+import { Space } from "antd";
+import { useAppDispatch, useAppSelector } from "@/app/store/store";
+import "./styles.css";
+import { setSearchTerm, setSuggestions } from "@/app/store/slices/searchSlice";
+import { useSearchHandler } from "../../hooks/useSearchHandler";
+import ClearButton from "../ClearButton";
+import DirectionsToggle from "../DirectionToggle";
+import SearchInput from "../SearchInput";
+import CountrySelect from "../CountrySelect/CountrySelect";
+import { getSuggestionOptions } from "../../hooks/useSuggestionsOptions";
 
 const SearchBar: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -21,7 +21,8 @@ const SearchBar: React.FC = () => {
   const [isAnimating, setIsAnimating] = useState(false);
   const { handleSearch } = useSearchHandler(dispatch);
 
-  const options = getSuggestionOptions(suggestions);
+  // Pass searchTerm to getSuggestionOptions for highlighting
+  const options = getSuggestionOptions(suggestions, searchTerm);
 
   useEffect(() => {
     if (suggestions.length > 0) {
@@ -54,7 +55,7 @@ const SearchBar: React.FC = () => {
     <div className="absolute top-2 left-0 w-screen sm:top-4 sm:left-4 z-10 sm:w-full sm:max-w-[400px]">
       <div
         className={`bg-white transition-all duration-100 ${
-          isExpanded ? 'rounded-t-[20px]' : 'rounded-full'
+          isExpanded ? "rounded-t-[20px]" : "rounded-full"
         } shadow-deep`}
       >
         <div className="p-[2px] flex items-center gap-2">
@@ -63,13 +64,13 @@ const SearchBar: React.FC = () => {
               value={searchTerm}
               options={options}
               placeholder={
-                searchMode === 'directions'
-                  ? 'Enter start location'
-                  : 'Search places...'
+                searchMode === "directions"
+                  ? "Enter start location"
+                  : "Search places..."
               }
               isExpanded={isExpanded}
               isAnimating={isAnimating}
-              onSearch={handleInputChange} // Changed this
+              onSearch={handleInputChange}
               onSelect={handleSelect}
               onChange={handleInputChange}
               onBlur={() => setIsExpanded(false)}
@@ -82,7 +83,6 @@ const SearchBar: React.FC = () => {
               }}
             />
             <ClearButton searchTerm={searchTerm} />
-            {/* {error && <div className="text-red-500 text-sm mt-2">{error}</div>} */}
           </div>
           <Space size={0} className="!ml-2">
             <DirectionsToggle />

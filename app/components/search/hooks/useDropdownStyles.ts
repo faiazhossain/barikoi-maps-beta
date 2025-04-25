@@ -9,7 +9,7 @@ export const useDropdownStyles = () => {
     top: "60px",
     borderRadius: "0 0 20px 20px",
     boxShadow: "rgba(0, 0, 0, 0.35) 0px 3px 5px",
-    padding: "10px",
+    padding: "0px",
   });
 
   useEffect(() => {
@@ -21,7 +21,7 @@ export const useDropdownStyles = () => {
           top: "52px",
           borderRadius: "0 0 20px 20px",
           boxShadow: "rgba(0, 0, 0, 0.35) 0px 3px 5px",
-          padding: "10px",
+          padding: "0px",
         });
       } else {
         setDropdownStyle({
@@ -30,7 +30,7 @@ export const useDropdownStyles = () => {
           top: "60px",
           borderRadius: "0 0 20px 20px",
           boxShadow: "rgba(0, 0, 0, 0.35) 0px 3px 5px",
-          padding: "10px",
+          padding: "0px",
         });
       }
     };

@@ -8,6 +8,9 @@ interface SearchState {
     address: string;
     latitude: number;
     longitude: number;
+    city: string;
+    area: string;
+    pType: string;
   }>;
   isLoading: boolean;
   searchMode: "location" | "directions";
