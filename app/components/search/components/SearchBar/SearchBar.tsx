@@ -52,7 +52,7 @@ const SearchBar: React.FC = () => {
   };
 
   return (
-    <div className="absolute top-2 left-0 w-screen sm:top-4 sm:left-4 z-10 sm:w-full sm:max-w-[400px]">
+    <div className="top-2 relative left-0 w-screen min-w-[300px] sm:top-4 sm:left-4 z-10 sm:w-full sm:max-w-[400px]">
       <div
         className={`bg-white transition-all duration-100 ${
           isExpanded ? "rounded-t-[20px]" : "rounded-full"

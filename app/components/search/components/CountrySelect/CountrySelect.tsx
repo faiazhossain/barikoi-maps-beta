@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import { Select, Spin } from 'antd'; // Import Spin from Ant Design
-import { createAction } from '@reduxjs/toolkit';
-import { FaFlag } from 'react-icons/fa';
-import { LoadingOutlined } from '@ant-design/icons';
-
+import React, { useEffect, useState } from "react";
+import { Select, Spin } from "antd"; // Import Spin from Ant Design
+import { createAction } from "@reduxjs/toolkit";
+import { FaFlag } from "react-icons/fa";
+import { LoadingOutlined } from "@ant-design/icons";
+import Image from "next/image";
 export const setSelectedCountry = createAction<{ code: string; name: string }>(
-  'map/setSelectedCountry'
+  "map/setSelectedCountry"
 );
 
 interface CountryOption {
@@ -24,8 +24,8 @@ interface CountrySelectProps {
 }
 
 const CountrySelect: React.FC<CountrySelectProps> = ({
-  className = '!w-8 !mr-2 rounded-md [&_.ant-select-selector]:!border-none hover:!bg-gray-100 ',
-  dropdownWidth = '160px',
+  className = "!w-8 !mr-2 rounded-md [&_.ant-select-selector]:!border-none [&_.ant-select-selector]:!p-1 hover:!bg-gray-100 ",
+  dropdownWidth = "160px",
 }) => {
   const [countryOptions, setCountryOptions] = useState<CountryOption[]>([]);
   const [filteredOptions, setFilteredOptions] = useState<CountryOption[]>([]);
@@ -36,8 +36,8 @@ const CountrySelect: React.FC<CountrySelectProps> = ({
   useEffect(() => {
     const fetchCountries = async () => {
       try {
-        const response = await fetch('/data/countries.geojson');
-        if (!response.ok) throw new Error('Failed to fetch countries');
+        const response = await fetch("/data/countries.geojson");
+        if (!response.ok) throw new Error("Failed to fetch countries");
 
         const geojson = await response.json();
 
@@ -62,7 +62,7 @@ const CountrySelect: React.FC<CountrySelectProps> = ({
         setFilteredOptions(options);
         setLoading(false);
       } catch (err) {
-        console.error('Error fetching countries:', err);
+        console.error("Error fetching countries:", err);
         setError(true);
         setLoading(false);
       }
@@ -80,7 +80,7 @@ const CountrySelect: React.FC<CountrySelectProps> = ({
       <div className="flex justify-center items-center h-10 !w-8 !mr-2">
         <Spin
           indicator={<LoadingOutlined spin className="!text-primary-dark" />}
-        />{' '}
+        />{" "}
         {/* Ant Design loading spinner */}
       </div>
     );
@@ -93,7 +93,7 @@ const CountrySelect: React.FC<CountrySelectProps> = ({
   return (
     <div className="relative group">
       <Select
-        className={`${className}`}
+        className={`${className} !p-0`}
         variant="borderless"
         dropdownStyle={{ minWidth: dropdownWidth }}
         suffixIcon={null}
@@ -128,21 +128,23 @@ const CountrySelect: React.FC<CountrySelectProps> = ({
             value={country.name}
             title={country.name}
             label={
-              <div className="flex items-center gap-4">
-                <img
+              <div className="flex items-center gap-4 ">
+                <Image
                   src={country.flag}
                   alt={`${country.name} flag`}
-                  className="w-5 h-5 object-cover"
+                  width={40}
+                  height={12}
                 />
-                <span>{country.name}</span>
+                {/* <span>{country.name}</span> */}
               </div>
             }
           >
             <div className="flex items-center gap-2">
-              <img
+              <Image
+                width={20}
+                height={12}
                 src={country.flag}
                 alt={`${country.name} flag`}
-                className="w-5 h-3 object-cover"
               />
               <span className="truncate max-w-[100px]">{country.name}</span>
             </div>

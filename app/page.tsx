@@ -18,8 +18,10 @@ export default function Home() {
     <Provider store={store}>
       <main className="relative w-full h-screen">
         <MapContainer />
-        <SearchBar />
-        <NearbyCategories />
+        <div className="absolute top-0 left-0 w-full flex flex-row flex-wrap justify-center z-10 gap-6">
+          <SearchBar />
+          <NearbyCategories />
+        </div>
       </main>
     </Provider>
   );

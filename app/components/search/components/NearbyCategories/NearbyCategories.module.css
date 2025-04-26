@@ -1,3 +1,6 @@
 .prev-arrow {
-  left: -23px !important; /* Apply the left position with !important */
+  left: -35px !important; /* Apply the left position with !important */
+}
+.next-arrow {
+  right: -36px !important; /* Apply the left position with !important */
 }
