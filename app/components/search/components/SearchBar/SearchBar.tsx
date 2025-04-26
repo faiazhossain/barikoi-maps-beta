@@ -4,7 +4,12 @@ import React, { useState, useEffect } from "react";
 import { Space } from "antd";
 import { useAppDispatch, useAppSelector } from "@/app/store/store";
 import "./styles.css";
-import { setSearchTerm, setSuggestions } from "@/app/store/slices/searchSlice";
+import {
+  setSearchTerm,
+  setSuggestions,
+  setSelectedPlace,
+  fetchPlaceDetails,
+} from "@/app/store/slices/searchSlice";
 import { useSearchHandler } from "../../hooks/useSearchHandler";
 import ClearButton from "../ClearButton";
 import DirectionsToggle from "../DirectionToggle";
@@ -19,7 +24,7 @@ const SearchBar: React.FC = () => {
     (state) => state.search
   );
   const [isExpanded, setIsExpanded] = useState(false);
-  console.log("🚀 ~ isExpanded:", isExpanded);
+
   const [isAnimating, setIsAnimating] = useState(false);
   const { handleSearch } = useSearchHandler(dispatch);
   const isVisible = useAppSelector((state) => state.ui.isTopPanelVisible);
@@ -42,7 +47,17 @@ const SearchBar: React.FC = () => {
     }
   }, [isExpanded]);
 
-  const handleSelect = (value: string) => {
+  const handleSelect = (value: string, option: any) => {
+    const selectedData = option.rawData;
+
+    if (selectedData) {
+      dispatch(setSelectedPlace(selectedData));
+      // Fetch place details if uCode is available
+      if (selectedData.uCode) {
+        dispatch(fetchPlaceDetails(selectedData.uCode));
+      }
+    }
+
     dispatch(setSearchTerm(value));
     dispatch(setSuggestions([]));
     setIsExpanded(false);

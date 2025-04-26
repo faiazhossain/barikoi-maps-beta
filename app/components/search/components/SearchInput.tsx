@@ -18,7 +18,7 @@ interface SearchInputProps {
   isExpanded: boolean;
   isAnimating: boolean;
   onSearch: (value: string) => void;
-  onSelect: (value: string) => void;
+  onSelect: (value: string, option: any) => void; // Modified to include option parameter
   onChange: (value: string) => void;
   onBlur: () => void;
   onDropdownVisibleChange: (open: boolean) => void;
@@ -53,7 +53,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
         options={options}
         allowClear={{ clearIcon: <div className="hidden bg-none"></div> }}
         onSearch={onSearch}
-        onSelect={onSelect}
+        onSelect={(value, option) => onSelect(value, option)}
         onChange={onChange}
         onBlur={onBlur}
         placeholder={placeholder}
