@@ -5,10 +5,10 @@ import { useState, useEffect } from "react";
 export const useDropdownStyles = () => {
   const [dropdownStyle, setDropdownStyle] = useState({
     minWidth: "400px",
-    left: "17px",
     top: "60px",
     borderRadius: "0 0 20px 20px",
-    boxShadow: "rgba(0, 0, 0, 0.35) 0px 3px 5px",
+    boxShadow:
+      "rgba(0, 0, 0, 0.25) 0px 4px 4px, rgba(0, 0, 0, 0.22) 1px 1px 1px",
     padding: "0px",
   });
 
@@ -17,19 +17,19 @@ export const useDropdownStyles = () => {
       if (window.innerWidth < 640) {
         setDropdownStyle({
           minWidth: "100%",
-          left: "0px",
           top: "52px",
           borderRadius: "0 0 20px 20px",
-          boxShadow: "rgba(0, 0, 0, 0.35) 0px 3px 5px",
+          boxShadow:
+            "rgba(0, 0, 0, 0.25) 0px 4px 4px, rgba(0, 0, 0, 0.22) 1px 1px 1px",
           padding: "0px",
         });
       } else {
         setDropdownStyle({
           minWidth: "400px",
-          left: "16px",
           top: "60px",
           borderRadius: "0 0 20px 20px",
-          boxShadow: "rgba(0, 0, 0, 0.35) 0px 3px 5px",
+          boxShadow:
+            "rgba(0, 0, 0, 0.25) 0px 4px 4px, rgba(0, 0, 0, 0.22) 1px 1px 1px",
           padding: "0px",
         });
       }

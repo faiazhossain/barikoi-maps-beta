@@ -39,57 +39,61 @@ const SearchInput: React.FC<SearchInputProps> = ({
   const dropdownStyle = useDropdownStyles();
 
   return (
-    <AutoComplete
-      className="searchbar_autocomplete !w-full !ml-2
-        [&_.ant-select-selector]:!border-none 
-        [&_.ant-select-selector]:!shadow-none 
-        [&_.ant-select-selector]:!rounded-[62px] 
-        [&_.ant-select-selector]:!bg-transparent
-        [&_.ant-select-selection-search-input]:!p-0"
-      value={value}
-      onDropdownVisibleChange={onDropdownVisibleChange}
-      options={options}
-      allowClear={{ clearIcon: <div className="hidden bg-none"></div> }}
-      onSearch={onSearch}
-      onSelect={onSelect}
-      onChange={onChange}
-      onBlur={onBlur}
-      placeholder={placeholder}
-      size="large"
-      prefix={<SearchOutlined className="!text-gray-400" />}
-      dropdownRender={(menu) => (
-        <div className="relative pb-8">
-          <div
-            className={`${styles["dropdown-animation"]} ${
-              isExpanded || isAnimating ? styles["show"] : ""
-            }`}
-          >
-            {menu}
-          </div>
-          {/* Footer */}
-          <div className="absolute bottom-0 right-0 flex items-center gap-1 text-gray-500 text-[11px] p-2">
-            <a
-              href="https://docs.barikoi.com/api#tag/v2.0/operation/autocomplete_v2" // Link to Barikoi API documentation
-              target="_blank" // Open in a new tab
-              rel="noopener noreferrer" // Security best practice
-              className="flex items-center gap-1 text-gray-500 hover:text-primary transition-colors"
+    <div className="relative w-full">
+      <AutoComplete
+        className="searchbar_autocomplete !h-[44px] !w-full
+      [&_.ant-select-selector]:!border-none 
+      [&_.ant-select-selector]:!shadow-none 
+      [&_.ant-select-selector]:!rounded-[62px] 
+      [&_.ant-select-selector]:!bg-transparent
+      [&_.ant-select-selector]:!px-6
+      [&_.ant-select-selection-search-input]:!p-0"
+        value={value}
+        onDropdownVisibleChange={onDropdownVisibleChange}
+        options={options}
+        allowClear={{ clearIcon: <div className="hidden bg-none"></div> }}
+        onSearch={onSearch}
+        onSelect={onSelect}
+        onChange={onChange}
+        onBlur={onBlur}
+        placeholder={placeholder}
+        size="large"
+        prefix={<SearchOutlined className="!text-gray-400" />}
+        dropdownRender={(menu) => (
+          <div className="relative pb-8">
+            <div
+              className={`${styles["dropdown-animation"]} ${
+                isExpanded || isAnimating ? styles["show"] : ""
+              }`}
             >
-              <span>Autocomplete by</span>
-              <Image
-                src="/images/barikoi-logo.svg" // Replace with the actual path to the Barikoi icon
-                alt="Barikoi"
-                width={34} // Adjust the width as needed
-                height={20} // Adjust the height as needed
-              />
-            </a>
+              {menu}
+            </div>
+            {/* Footer */}
+            <div className="absolute bottom-0 right-0 flex items-center gap-1 text-gray-500 text-[11px] p-2">
+              <a
+                href="https://docs.barikoi.com/api#tag/v2.0/operation/autocomplete_v2" // Link to Barikoi API documentation
+                target="_blank" // Open in a new tab
+                rel="noopener noreferrer" // Security best practice
+                className="flex items-center gap-1 text-gray-500 hover:text-primary transition-colors"
+              >
+                <span>Autocomplete by</span>
+                <Image
+                  src="/images/barikoi-logo.svg" // Replace with the actual path to the Barikoi icon
+                  alt="Barikoi"
+                  width={34} // Adjust the width as needed
+                  height={20} // Adjust the height as needed
+                />
+              </a>
+            </div>
           </div>
-        </div>
-      )}
-      dropdownStyle={dropdownStyle}
-      defaultActiveFirstOption={false}
-      showSearch={true}
-      filterOption={false} // Important: disable local filtering
-    />
+        )}
+        dropdownStyle={dropdownStyle}
+        popupMatchSelectWidth={true} // Important: disable width matching
+        defaultActiveFirstOption={false}
+        showSearch={true}
+        filterOption={false} // Important: disable local filtering
+      />
+    </div>
   );
 };
 

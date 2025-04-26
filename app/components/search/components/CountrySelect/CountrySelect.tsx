@@ -24,7 +24,7 @@ interface CountrySelectProps {
 }
 
 const CountrySelect: React.FC<CountrySelectProps> = ({
-  className = "!w-8 !mr-2 rounded-md [&_.ant-select-selector]:!border-none [&_.ant-select-selector]:!p-1 hover:!bg-gray-100 ",
+  className = "!w-8 !mr-2 rounded-md [&_.ant-select-selector]:!border-none [&_.ant-select-selector]:!p-[6px] hover:!bg-gray-100 ",
   dropdownWidth = "160px",
 }) => {
   const [countryOptions, setCountryOptions] = useState<CountryOption[]>([]);
