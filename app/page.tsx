@@ -1,14 +1,17 @@
-'use client';
+"use client";
 
-import dynamic from 'next/dynamic';
-import { Provider } from 'react-redux';
-import { store } from './store/store';
-import SearchBar from './components/search/components/SearchBar/SearchBar';
-import NearbyCategories from './components/search/components/NearbyCategories/NearbyCategories';
+import dynamic from "next/dynamic";
+import { Provider } from "react-redux";
+import { store } from "./store/store";
+import SearchBar from "./components/search/components/SearchBar/SearchBar";
+import NearbyCategories from "./components/search/components/NearbyCategories/NearbyCategories";
 
-const MapContainer = dynamic(() => import('./components/map/MapContainer'), {
-  ssr: false,
-});
+const MapContainer = dynamic(
+  () => import("./components/map/MapContainer/MapContainer"),
+  {
+    ssr: false,
+  }
+);
 
 export default function Home() {
   return (

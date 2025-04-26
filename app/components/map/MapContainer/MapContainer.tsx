@@ -1,17 +1,16 @@
 "use client";
-import React, { useRef } from "react";
+import React from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-
-import Map, {
-  GeolocateControl,
-  NavigationControl,
-} from "react-map-gl/maplibre";
+import Map from "react-map-gl/maplibre";
+import useMapRef from "../hooks/useMapRef";
+import MapControls from "./MapControls";
+import BarikoiAttribution from "./BarikoiAttribution";
 
 const MapContainer: React.FC = () => {
   const NEXT_PUBLIC_MAP_API_ACCESS_TOKEN =
     process.env.NEXT_PUBLIC_MAP_API_ACCESS_TOKEN;
-  const mapRef = useRef(null);
+  const mapRef = useMapRef();
 
   return (
     <div className="w-screen h-screen relative">
@@ -25,9 +24,10 @@ const MapContainer: React.FC = () => {
         }}
         style={{ width: "100%", height: "100%" }}
         mapStyle={`https://map.barikoi.com/styles/osm-liberty-gp/style.json?key=${NEXT_PUBLIC_MAP_API_ACCESS_TOKEN}`}
+        attributionControl={false}
       >
-        <NavigationControl position="bottom-right" />
-        <GeolocateControl position="bottom-right" />
+        <MapControls />
+        <BarikoiAttribution />
       </Map>
     </div>
   );
