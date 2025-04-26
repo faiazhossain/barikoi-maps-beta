@@ -1,6 +1,7 @@
 import React from "react";
 import Slider from "react-slick";
-import { Tooltip } from "antd"; // Add this import
+import { Tooltip } from "antd";
+import { motion } from "framer-motion";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import styles from "./NearbyCategories.module.css";
@@ -115,9 +116,16 @@ const NearbyCategories = () => {
                     overlayClassName="!mt-2"
                     arrow={{ pointAtCenter: true }}
                   >
-                    <button className="w-[44px] h-[44px] flex items-center justify-center rounded-full hover:bg-gray-50 text-gray-500 hover:text-blue-500 transition-all duration-300">
+                    <motion.button
+                      className="w-[44px] h-[44px] flex items-center justify-center rounded-full hover:bg-gray-50 text-gray-500 hover:text-green-600 transition-colors duration-300"
+                      whileHover={{
+                        scale: 1.2,
+                        transition: { duration: 0.2 },
+                      }}
+                      whileTap={{ scale: 0.95 }}
+                    >
                       <span className="text-lg">{category.icon}</span>
-                    </button>
+                    </motion.button>
                   </Tooltip>
                 </div>
               </div>

@@ -11,6 +11,7 @@ import DirectionsToggle from "../DirectionToggle";
 import SearchInput from "../SearchInput";
 import CountrySelect from "../CountrySelect/CountrySelect";
 import { getSuggestionOptions } from "../../hooks/useSuggestionsOptions";
+import { AnimatePresence, motion } from "framer-motion";
 
 const SearchBar: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -18,9 +19,10 @@ const SearchBar: React.FC = () => {
     (state) => state.search
   );
   const [isExpanded, setIsExpanded] = useState(false);
+  console.log("🚀 ~ isExpanded:", isExpanded);
   const [isAnimating, setIsAnimating] = useState(false);
   const { handleSearch } = useSearchHandler(dispatch);
-
+  const isVisible = useAppSelector((state) => state.ui.isTopPanelVisible);
   // Pass searchTerm to getSuggestionOptions for highlighting
   const options = getSuggestionOptions(suggestions, searchTerm);
 
@@ -52,45 +54,65 @@ const SearchBar: React.FC = () => {
   };
 
   return (
-    <div className="top-2 relative left-0 w-screen min-w-[300px] sm:top-4 lg:left-4 z-10 sm:w-full sm:max-w-[400px]">
-      <div
-        className={`bg-white transition-all duration-100 ${
-          isExpanded ? "rounded-t-[20px]" : "rounded-full"
-        } shadow-deep`}
-      >
-        <div className="flex items-center gap-2">
-          <div className="relative w-full">
-            <SearchInput
-              value={searchTerm}
-              options={options}
-              placeholder={
-                searchMode === "directions"
-                  ? "Enter start location"
-                  : "Search places..."
-              }
-              isExpanded={isExpanded}
-              isAnimating={isAnimating}
-              onSearch={handleInputChange}
-              onSelect={handleSelect}
-              onChange={handleInputChange}
-              onBlur={() => setIsExpanded(false)}
-              onDropdownVisibleChange={(open) => {
-                if (open && suggestions.length > 0) {
-                  setIsExpanded(true);
-                } else {
-                  setIsExpanded(false);
+    <>
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-20 sm:hidden"
+            onClick={() => {
+              setIsExpanded(false);
+              // dispatch(setSuggestions([]));
+            }}
+          />
+        )}
+      </AnimatePresence>
+      <div className="relative left-0 w-screen min-w-[300px] sm:top-4 lg:left-4 z-30 sm:w-full sm:max-w-[400px]">
+        <div
+          className={`bg-white transition-all duration-100 ${
+            isExpanded
+              ? `${
+                  isVisible ? "rounded-none" : "rounded-t-[20px]"
+                } sm:rounded-t-[20px]`
+              : "rounded-none sm:rounded-full"
+          } shadow-deep`}
+        >
+          <div className="flex items-center gap-2">
+            <div className="relative w-full">
+              <SearchInput
+                value={searchTerm}
+                options={options}
+                placeholder={
+                  searchMode === "directions"
+                    ? "Enter start location"
+                    : "Search places..."
                 }
-              }}
-            />
-            <ClearButton searchTerm={searchTerm} />
+                isExpanded={isExpanded}
+                isAnimating={isAnimating}
+                onSearch={handleInputChange}
+                onSelect={handleSelect}
+                onChange={handleInputChange}
+                onBlur={() => setIsExpanded(false)}
+                onDropdownVisibleChange={(open) => {
+                  if (open && suggestions.length > 0) {
+                    setIsExpanded(true);
+                  } else {
+                    setIsExpanded(false);
+                  }
+                }}
+              />
+              <ClearButton searchTerm={searchTerm} />
+            </div>
+            <Space size={0} className="!ml-2">
+              <DirectionsToggle />
+              <CountrySelect />
+            </Space>
           </div>
-          <Space size={0} className="!ml-2">
-            <DirectionsToggle />
-            <CountrySelect />
-          </Space>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

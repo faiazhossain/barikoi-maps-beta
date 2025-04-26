@@ -5,11 +5,13 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 
 import mapReducer from "./slices/mapSlice";
 import searchReducer from "./slices/searchSlice";
+import uiReducer from "./slices/uiSlice";
 
 export const store = configureStore({
   reducer: {
     map: mapReducer,
     search: searchReducer,
+    ui: uiReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
