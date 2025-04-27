@@ -40,12 +40,12 @@ const MainContent = () => {
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100/80 backdrop-blur-md z-50">
           <div className="flex flex-col items-center">
             <video
-              src="/images/Loading/Rotating-Earth.webm"
+              src="/images/Loading/Spinning-Earth.webm"
               autoPlay
               loop
               muted
-              width={160}
-              height={160}
+              width={240}
+              height={240}
               className="mb-4 opacity-70"
             />
             <p className="text-lg font-semibold text-gray-700 mb-2">
