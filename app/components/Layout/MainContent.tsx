@@ -35,13 +35,14 @@ const MainContent = () => {
   }, [funFacts.length]);
 
   return (
-    <main className="relative w-full h-screen">
+    <main className="relative w-full h-[100dvh] overflow-hidden">
       {!isMapLoaded && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100/80 backdrop-blur-md z-50">
           <div className="flex flex-col items-center">
             <video
               src="/images/Loading/Spinning-Earth.webm"
               autoPlay
+              playsInline
               loop
               muted
               width={240}
@@ -78,7 +79,7 @@ const MainContent = () => {
         <div
           className={`absolute ${
             isVisible ? `top-[53px] sm:top-0` : `top-2`
-          } left-0 w-full flex flex-row flex-wrap justify-center z-10 gap-6`}
+          } left-0 w-full flex flex-row flex-wrap justify-center z-10 gap-2 sm:gap-6`}
         >
           <SearchBar />
           <NearbyCategories />

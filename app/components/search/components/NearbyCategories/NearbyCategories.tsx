@@ -101,7 +101,7 @@ const NearbyCategories = () => {
   ];
 
   return (
-    <div className="min-w-[300px] max-w-[400px] mx-auto lg:mr-auto lg:mx-0 mt-[16px] top-2 z-10 opacity-90 hover:opacity-100 transition-opacity">
+    <div className="min-w-[300px] max-w-[400px] mt-0 mx-auto lg:mr-auto lg:mx-0 sm:mt-[16px] sm:top-2 z-10 opacity-90 hover:opacity-100 transition-opacity">
       <div className="bg-white bg-opacity-90 rounded-full backdrop-blur-sm">
         <div className="w-3/4 mx-auto">
           <Slider {...settings}>

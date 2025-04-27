@@ -18,24 +18,22 @@ const MapContainer: React.FC = () => {
   };
 
   return (
-    <div className="w-screen h-screen relative">
-      <Map
-        ref={mapRef}
-        mapLib={maplibregl}
-        initialViewState={{
-          longitude: 90.3938,
-          latitude: 23.8103,
-          zoom: 12,
-        }}
-        style={{ width: '100%', height: '100%' }}
-        mapStyle="/map-styles/light-style.json" // Local style.json
-        attributionControl={false}
-        onLoad={handleMapLoad} // Trigger when the map is fully loaded
-      >
-        <MapControls />
-        <BarikoiAttribution />
-      </Map>
-    </div>
+    <Map
+      ref={mapRef}
+      mapLib={maplibregl}
+      initialViewState={{
+        longitude: 90.3938,
+        latitude: 23.8103,
+        zoom: 12,
+      }}
+      style={{ width: '100vw', height: '100dvh' }}
+      mapStyle="/map-styles/light-style.json" // Local style.json
+      attributionControl={false}
+      onLoad={handleMapLoad} // Trigger when the map is fully loaded
+    >
+      <MapControls />
+      <BarikoiAttribution />
+    </Map>
   );
 };
 
