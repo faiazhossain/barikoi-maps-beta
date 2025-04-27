@@ -1,10 +1,10 @@
-import React from "react";
-import Slider from "react-slick";
-import { Tooltip } from "antd";
-import { motion } from "framer-motion";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
-import styles from "./NearbyCategories.module.css";
+import React from 'react';
+import Slider from 'react-slick';
+import { Tooltip } from 'antd';
+import { motion } from 'framer-motion';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
+import styles from './NearbyCategories.module.css';
 import {
   FaUtensils,
   FaHotel,
@@ -14,7 +14,7 @@ import {
   FaHospital,
   FaSchool,
   FaParking,
-} from "react-icons/fa";
+} from 'react-icons/fa';
 
 interface ArrowProps {
   className?: string;
@@ -26,13 +26,13 @@ function SampleNextArrow(props: ArrowProps) {
   const { className, style, onClick } = props;
   return (
     <div
-      className={`${className} ${styles["next-arrow"]} !flex items-center justify-center opacity-70 hover:opacity-100`}
+      className={`${className} ${styles['next-arrow']} !flex items-center justify-center opacity-70 hover:opacity-100`}
       style={{
         ...style,
-        display: "block",
-        height: "100%",
-        top: "9px",
-        transform: "translateY(0)",
+        display: 'block',
+        height: '100%',
+        top: '9px',
+        transform: 'translateY(0)',
       }}
       onClick={onClick}
     />
@@ -43,13 +43,13 @@ function SamplePrevArrow(props: ArrowProps) {
   const { className, style, onClick } = props;
   return (
     <div
-      className={`${className} ${styles["prev-arrow"]} !flex items-center justify-center opacity-70 hover:opacity-100`}
+      className={`${className} ${styles['prev-arrow']} !flex items-center justify-center opacity-70 hover:opacity-100`}
       style={{
         ...style,
-        display: "block",
-        height: "100%",
-        top: "9px",
-        transform: "translateY(0)",
+        display: 'block',
+        height: '100%',
+        top: '9px',
+        transform: 'translateY(0)',
       }}
       onClick={onClick}
     />
@@ -90,14 +90,14 @@ const NearbyCategories = () => {
   };
 
   const categories = [
-    { icon: <FaUtensils />, name: "Restaurants" },
-    { icon: <FaHotel />, name: "Hotels" },
-    { icon: <FaCoffee />, name: "Cafés" },
-    { icon: <FaShoppingBag />, name: "Shopping" },
-    { icon: <FaGasPump />, name: "Gas Stations" },
-    { icon: <FaHospital />, name: "Hospitals" },
-    { icon: <FaSchool />, name: "Schools" },
-    { icon: <FaParking />, name: "Parking" },
+    { icon: <FaUtensils />, name: 'Restaurants' },
+    { icon: <FaHotel />, name: 'Hotels' },
+    { icon: <FaCoffee />, name: 'Cafés' },
+    { icon: <FaShoppingBag />, name: 'Shopping' },
+    { icon: <FaGasPump />, name: 'Gas Stations' },
+    { icon: <FaHospital />, name: 'Hospitals' },
+    { icon: <FaSchool />, name: 'Schools' },
+    { icon: <FaParking />, name: 'Parking' },
   ];
 
   return (
@@ -113,7 +113,7 @@ const NearbyCategories = () => {
                     placement="bottom"
                     mouseEnterDelay={0.1}
                     mouseLeaveDelay={0.1}
-                    overlayClassName="!mt-2"
+                    classNames={{ root: '!mt-2' }}
                     arrow={{ pointAtCenter: true }}
                   >
                     <motion.button
