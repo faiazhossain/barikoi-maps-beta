@@ -1,22 +1,22 @@
 // components/SearchBar/SearchBar.tsx
-"use client";
-import React, { useState, useEffect } from "react";
-import { Space } from "antd";
-import { useAppDispatch, useAppSelector } from "@/app/store/store";
-import "./styles.css";
+'use client';
+import React, { useState, useEffect } from 'react';
+import { Space } from 'antd';
+import { useAppDispatch, useAppSelector } from '@/app/store/store';
+import './styles.css';
 import {
   setSearchTerm,
   setSuggestions,
   setSelectedPlace,
   fetchPlaceDetails,
-} from "@/app/store/slices/searchSlice";
-import { useSearchHandler } from "../../hooks/useSearchHandler";
-import ClearButton from "../ClearButton";
-import DirectionsToggle from "../DirectionToggle";
-import SearchInput from "../SearchInput";
-import CountrySelect from "../CountrySelect/CountrySelect";
-import { getSuggestionOptions } from "../../hooks/useSuggestionsOptions";
-import { AnimatePresence, motion } from "framer-motion";
+} from '@/app/store/slices/searchSlice';
+import { useSearchHandler } from '../../hooks/useSearchHandler';
+import ClearButton from '../ClearButton';
+import DirectionsToggle from '../DirectionToggle';
+import SearchInput from '../SearchInput';
+import CountrySelect from '../CountrySelect/CountrySelect';
+import { getSuggestionOptions } from '../../hooks/useSuggestionsOptions';
+import { AnimatePresence, motion } from 'framer-motion';
 
 const SearchBar: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -89,9 +89,9 @@ const SearchBar: React.FC = () => {
           className={`bg-white transition-all duration-100 ${
             isExpanded
               ? `${
-                  isVisible ? "rounded-none" : "rounded-t-[20px]"
+                  isVisible ? 'rounded-none' : 'rounded-t-[20px]'
                 } sm:rounded-t-[20px]`
-              : "rounded-none sm:rounded-full"
+              : 'rounded-none sm:rounded-full'
           } shadow-deep`}
         >
           <div className="flex items-center gap-2">
@@ -100,9 +100,9 @@ const SearchBar: React.FC = () => {
                 value={searchTerm}
                 options={options}
                 placeholder={
-                  searchMode === "directions"
-                    ? "Enter start location"
-                    : "Search places..."
+                  searchMode === 'directions'
+                    ? 'Enter start location'
+                    : 'Search places...'
                 }
                 isExpanded={isExpanded}
                 isAnimating={isAnimating}

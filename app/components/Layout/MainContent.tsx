@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { TbBulb } from 'react-icons/tb';
+import LeftDrawer from '../LeftPanel/LeftDrawer';
 
 const MapContainer = dynamic(() => import('../map/MapContainer/MapContainer'), {
   ssr: false,
@@ -75,7 +76,9 @@ const MainContent = () => {
 
       <>
         {isMapLoaded && <MobileAppLink />}
+
         <MapContainer />
+        <LeftDrawer />
         <div
           className={`absolute ${
             isVisible ? `top-[53px] sm:top-0` : `top-2`
