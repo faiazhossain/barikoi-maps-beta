@@ -38,7 +38,7 @@ const MainContent = () => {
   return (
     <main className="relative w-full h-[100dvh] overflow-hidden">
       {!isMapLoaded && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100/80 backdrop-blur-md z-50">
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100/80 backdrop-blur-md z-50 opacity-90">
           <div className="flex flex-col items-center">
             <video
               src="/images/Loading/Spinning-Earth.webm"
@@ -63,7 +63,7 @@ const MainContent = () => {
             <p className="text-2xl font-semibold text-gray-700 mt-4">Maps!</p>
           </div>
           {/* Fun Facts Section */}
-          <div className="absolute bottom-8 text-center px-4">
+          <div className="mt-10 text-center px-4">
             <div className="inline-flex items-center bg-white px-4 py-2 rounded-lg shadow-md">
               <TbBulb className="text-amber-500 text-5xl" />
               <p className="text-lg font-semibold text-green-600 italic">
