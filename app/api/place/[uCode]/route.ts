@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 
 export async function GET(
-  // request: Request,
+  request: NextRequest,
   { params }: { params: { uCode: string } }
 ) {
+  console.log('🚀 ~ request:', request.nextUrl.searchParams);
   const { uCode } = params;
 
   try {

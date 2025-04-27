@@ -1,14 +1,13 @@
-import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 
 export const fetchPlaceDetails = createAsyncThunk(
-  "search/fetchPlaceDetails",
+  'search/fetchPlaceDetails',
   async (uCode: string) => {
     const response = await fetch(`/api/place/${uCode}`);
     if (!response.ok) {
-      throw new Error("Failed to fetch place details");
+      throw new Error('Failed to fetch place details');
     }
     const data = await response.json();
-    console.log("Place Details:", data);
     return data;
   }
 );
@@ -26,7 +25,7 @@ interface SearchState {
     pType: string;
   }>;
   isLoading: boolean;
-  searchMode: "location" | "directions";
+  searchMode: 'location' | 'directions';
   startLocation: {
     name: string;
     latitude: number;
@@ -69,10 +68,10 @@ interface SearchState {
 }
 
 const initialState: SearchState = {
-  searchTerm: "",
+  searchTerm: '',
   suggestions: [],
   isLoading: false,
-  searchMode: "location",
+  searchMode: 'location',
   startLocation: null,
   endLocation: null,
   selectedCategory: null,
@@ -84,12 +83,11 @@ const initialState: SearchState = {
 };
 
 const searchSlice = createSlice({
-  name: "search",
+  name: 'search',
   initialState,
   reducers: {
     setSearchTerm: (state, action: PayloadAction<string>) => {
       state.searchTerm = action.payload;
-      console.log("🚀 ~ action.payload:", action.payload);
     },
     setSuggestions: (
       state,
@@ -127,10 +125,10 @@ const searchSlice = createSlice({
     clearDirections: (state) => {
       state.startLocation = null;
       state.endLocation = null;
-      state.searchMode = "location";
+      state.searchMode = 'location';
     },
     clearSearch: (state) => {
-      state.searchTerm = "";
+      state.searchTerm = '';
       state.suggestions = [];
     },
     setSelectedPlace: (
@@ -153,7 +151,7 @@ const searchSlice = createSlice({
       .addCase(fetchPlaceDetails.rejected, (state, action) => {
         state.placeDetailsLoading = false;
         state.placeDetailsError =
-          action.error.message || "Failed to fetch details";
+          action.error.message || 'Failed to fetch details';
       });
   },
 });
