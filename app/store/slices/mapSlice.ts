@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface MapState {
   viewport: {
@@ -14,6 +14,7 @@ interface MapState {
   mapStyle: string;
   showDirections: boolean;
   selectedCountry: string | null;
+  isMapLoaded: boolean;
 }
 
 const initialState: MapState = {
@@ -24,13 +25,14 @@ const initialState: MapState = {
   },
   selectedLocation: null,
   mapStyle:
-    "https://api.maptiler.com/maps/streets/style.json?key=get_your_own_key",
+    'https://api.maptiler.com/maps/streets/style.json?key=get_your_own_key',
   showDirections: false,
   selectedCountry: null,
+  isMapLoaded: false,
 };
 
 const mapSlice = createSlice({
-  name: "map",
+  name: 'map',
   initialState,
   reducers: {
     setViewport: (state, action: PayloadAction<typeof state.viewport>) => {
@@ -51,6 +53,9 @@ const mapSlice = createSlice({
     setSelectedCountry: (state, action: PayloadAction<string | null>) => {
       state.selectedCountry = action.payload;
     },
+    setMapLoaded: (state, action: PayloadAction<boolean>) => {
+      state.isMapLoaded = action.payload;
+    },
   },
 });
 
@@ -60,6 +65,7 @@ export const {
   setMapStyle,
   toggleDirections,
   setSelectedCountry,
+  setMapLoaded,
 } = mapSlice.actions;
 
 export default mapSlice.reducer;
