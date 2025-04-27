@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
 
 export async function GET(
-  request: Request,
+  // request: Request,
   { params }: { params: { uCode: string } }
 ) {
   const { uCode } = params;
@@ -23,9 +23,9 @@ export async function GET(
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Error fetching place details:", error);
+    console.error('Error fetching place details:', error);
     return NextResponse.json(
-      { error: "Failed to fetch place details" },
+      { error: 'Failed to fetch place details' },
       { status: 500 }
     );
   }
