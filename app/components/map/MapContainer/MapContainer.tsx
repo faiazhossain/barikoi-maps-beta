@@ -8,6 +8,7 @@ import MapControls from './MapControls';
 import BarikoiAttribution from './BarikoiAttribution';
 import { useDispatch } from 'react-redux';
 import { setMapLoaded } from '@/app/store/slices/mapSlice';
+import LeftDrawer from '../../LeftPanel/LeftDrawer';
 
 const MapContainer: React.FC = () => {
   const mapRef = useMapRef();
@@ -33,6 +34,7 @@ const MapContainer: React.FC = () => {
     >
       <MapControls />
       <BarikoiAttribution />
+      <LeftDrawer />
     </Map>
   );
 };

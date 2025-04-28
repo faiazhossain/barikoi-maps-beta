@@ -17,6 +17,8 @@ import SearchInput from '../SearchInput';
 import CountrySelect from '../CountrySelect/CountrySelect';
 import { getSuggestionOptions } from '../../hooks/useSuggestionsOptions';
 import { AnimatePresence, motion } from 'framer-motion';
+import { closeDrawer } from '@/app/store/slices/drawerSlice';
+import useWindowSize from '@/app/hooks/useWindowSize';
 
 const SearchBar: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -24,10 +26,11 @@ const SearchBar: React.FC = () => {
     (state) => state.search
   );
   const [isExpanded, setIsExpanded] = useState(false);
-
   const [isAnimating, setIsAnimating] = useState(false);
   const { handleSearch } = useSearchHandler(dispatch);
   const isVisible = useAppSelector((state) => state.ui.isTopPanelVisible);
+  const windowSize = useWindowSize();
+  const isMobile = windowSize.width <= 640;
   // Pass searchTerm to getSuggestionOptions for highlighting
   const options = getSuggestionOptions(suggestions, searchTerm);
 
@@ -76,7 +79,7 @@ const SearchBar: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-20 sm:hidden"
+            className={`fixed inset-0 bg-gray-900/50 backdrop-blur-sm sm:hidden`}
             onClick={() => {
               setIsExpanded(false);
               // dispatch(setSuggestions([]));
@@ -84,7 +87,11 @@ const SearchBar: React.FC = () => {
           />
         )}
       </AnimatePresence>
-      <div className="relative left-0 w-screen min-w-[300px] sm:top-4 lg:left-4 z-30 sm:w-full sm:max-w-[400px]">
+      <div
+        className={`relative left-0 w-screen ${
+          isMobile ? 'z-10' : 'z-[2001]'
+        } min-w-[300px] sm:top-4 lg:left-4 sm:w-full sm:max-w-[400px]`}
+      >
         <div
           className={`bg-white transition-all duration-100 ${
             isExpanded
@@ -109,10 +116,13 @@ const SearchBar: React.FC = () => {
                 onSearch={handleInputChange}
                 onSelect={handleSelect}
                 onChange={handleInputChange}
-                onBlur={() => setIsExpanded(false)}
+                onBlur={() => {
+                  setIsExpanded(false);
+                }}
                 onDropdownVisibleChange={(open) => {
                   if (open && suggestions.length > 0) {
                     setIsExpanded(true);
+                    isMobile && dispatch(closeDrawer());
                   } else {
                     setIsExpanded(false);
                   }

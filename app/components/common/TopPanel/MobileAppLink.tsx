@@ -1,32 +1,32 @@
-import React from "react";
-import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { IoClose } from "react-icons/io5";
-import { useAppDispatch, useAppSelector } from "@/app/store/store";
-import { setTopPanelVisibility } from "@/app/store/slices/uiSlice";
+import React from 'react';
+import Image from 'next/image';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useMediaQuery } from '@/app/hooks/useMediaQuery';
+import { IoClose } from 'react-icons/io5';
+import { useAppDispatch, useAppSelector } from '@/app/store/store';
+import { setTopPanelVisibility } from '@/app/store/slices/uiSlice';
 
 const MobileAppLink: React.FC = () => {
-  const isMobile = useMediaQuery("(max-width: 640px)");
+  const isMobile = useMediaQuery('(max-width: 640px)');
   const dispatch = useAppDispatch();
   const isVisible = useAppSelector((state) => state.ui.isTopPanelVisible);
 
   const getStoreLink = () => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       // Check for iOS
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
       // Check for Android
       const isAndroid = /Android/.test(navigator.userAgent);
 
       if (isIOS) {
-        return "https://apps.apple.com/us/app/barikoi-maps/id6467561152";
+        return 'https://apps.apple.com/us/app/barikoi-maps/id6467561152';
       } else if (isAndroid) {
-        return "https://play.google.com/store/apps/details?id=com.barikoi.barikoi&pcampaignid=web_share";
+        return 'https://play.google.com/store/apps/details?id=com.barikoi.barikoi&pcampaignid=web_share';
       }
       // Return default store link if device type cannot be determined
-      return "https://barikoi.com/";
+      return 'https://barikoi.com/';
     }
-    return "#";
+    return '#';
   };
 
   if (!isMobile) return null;
@@ -38,7 +38,7 @@ const MobileAppLink: React.FC = () => {
           initial={{ y: -100 }}
           animate={{ y: 0 }}
           exit={{ y: -100 }}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           className="fixed top-0 left-0 w-full bg-white z-50 px-4 py-2 shadow-sm"
         >
           <div className="flex justify-between items-center relative px-4">

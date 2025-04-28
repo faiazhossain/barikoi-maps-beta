@@ -1,90 +1,39 @@
-import { useAppSelector } from "@/app/store/store";
-import SearchBar from "../search/components/SearchBar/SearchBar";
-import NearbyCategories from "../search/components/NearbyCategories/NearbyCategories";
-import MobileAppLink from "../common/TopPanel/MobileAppLink";
-import dynamic from "next/dynamic";
-import Image from "next/image";
-import { useState, useEffect } from "react";
-import { TbBulb } from "react-icons/tb";
-import LeftDrawer from "../LeftPanel/LeftDrawer";
+import { useAppSelector } from '@/app/store/store';
+import SearchBar from '../search/components/SearchBar/SearchBar';
+import NearbyCategories from '../search/components/NearbyCategories/NearbyCategories';
+import MobileAppLink from '../common/TopPanel/MobileAppLink';
+import dynamic from 'next/dynamic';
+import { useState, useEffect } from 'react';
+import LoadingPage from '../common/InitialLoadingPage/LoadingPage';
 
-const MapContainer = dynamic(() => import("../map/MapContainer/MapContainer"), {
+const MapContainer = dynamic(() => import('../map/MapContainer/MapContainer'), {
   ssr: false,
 });
 
 const MainContent = () => {
   const isVisible = useAppSelector((state) => state.ui.isTopPanelVisible);
-  const isMapLoaded = useAppSelector((state) => state.map.isMapLoaded); // Get map loaded state from Redux
-
-  // Fun facts array
-  const funFacts = [
-    "Did you know? Barikoi Maps powers over 1 million users worldwide!",
-    "Did you know? Barikoi supports over 50,000 businesses with location data.",
-    "Did you know? Barikoi Maps is optimized for fast and reliable navigation.",
-    "Did you know? Barikoi provides geolocation services for developers and enterprises.",
-    "Did you know? Barikoi Maps is trusted by leading companies for accurate mapping.",
-  ];
+  const isMapLoaded = useAppSelector((state) => state.map.isMapLoaded);
 
   const [currentFact, setCurrentFact] = useState(0);
 
   // Rotate fun facts every 3 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentFact((prev) => (prev + 1) % funFacts.length);
-    }, 3000); // Change fact every 3 seconds
+      setCurrentFact((prev) => (prev + 1) % 5); // 5 is the length of funFacts array
+    }, 3000);
     return () => clearInterval(interval);
-  }, [funFacts.length]);
+  }, []);
 
   return (
     <main className="relative w-full h-[100dvh] overflow-hidden">
-      {!isMapLoaded && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100/80 backdrop-blur-md z-50">
-          {/* Background Video */}
-          <video
-            src="/images/Loading/Rotating-Earth.webm"
-            autoPlay
-            playsInline
-            loop
-            muted
-            className="absolute inset-2 w-full h-full object-cover opacity-20"
-          />
-
-          {/* Content Overlay */}
-          <div className="relative z-10 flex flex-col items-center">
-            <p className="text-lg font-semibold text-gray-700 mb-2">
-              Hold tight, we are going to land on
-            </p>
-            <Image
-              src="/images/barikoi-logo.svg"
-              alt="Barikoi Logo"
-              width={150}
-              height={50}
-              priority
-            />
-            <p className="text-2xl font-semibold text-gray-700 mt-4">Maps!</p>
-          </div>
-
-          {/* Fun Facts Section */}
-          <div className="relative z-10 mt-10 text-center px-4">
-            <div className="inline-flex items-center bg-white/90 backdrop-blur-sm px-4 py-2 rounded-lg shadow-md">
-              <TbBulb className="text-amber-500 text-5xl" />
-              <p className="text-lg font-semibold text-green-600 italic">
-                {funFacts[currentFact]}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
+      {!isMapLoaded && <LoadingPage currentFact={currentFact} />}
       <>
         {isMapLoaded && <MobileAppLink />}
-
         <MapContainer />
-        <LeftDrawer />
         <div
           className={`absolute ${
             isVisible ? `top-[53px] sm:top-0` : `top-2`
-          } left-0 w-full flex flex-row flex-wrap justify-center z-10 gap-2 sm:gap-6`}
+          } left-0 w-full flex flex-row flex-wrap justify-center gap-2 sm:gap-6`}
         >
           <SearchBar />
           <NearbyCategories />

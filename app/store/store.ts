@@ -1,17 +1,19 @@
-"use client";
+'use client';
 
-import { configureStore } from "@reduxjs/toolkit";
-import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
+import { configureStore } from '@reduxjs/toolkit';
+import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 
-import mapReducer from "./slices/mapSlice";
-import searchReducer from "./slices/searchSlice";
-import uiReducer from "./slices/uiSlice";
+import mapReducer from './slices/mapSlice';
+import searchReducer from './slices/searchSlice';
+import uiReducer from './slices/uiSlice';
+import drawerReducer from './slices/drawerSlice';
 
 export const store = configureStore({
   reducer: {
     map: mapReducer,
     search: searchReducer,
     ui: uiReducer,
+    drawer: drawerReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
