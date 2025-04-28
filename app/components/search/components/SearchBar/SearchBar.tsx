@@ -89,7 +89,7 @@ const SearchBar: React.FC = () => {
       </AnimatePresence>
       <div
         className={`relative left-0 w-screen ${
-          isMobile ? 'z-10' : 'z-[2001]'
+          isMobile ? '!z-10' : '!z-[2001]'
         } min-w-[300px] sm:top-4 lg:left-4 sm:w-full sm:max-w-[400px]`}
       >
         <div
