@@ -1,21 +1,19 @@
-import { useAppSelector } from '@/app/store/store';
-import SearchBar from '../search/components/SearchBar/SearchBar';
-import NearbyCategories from '../search/components/NearbyCategories/NearbyCategories';
-import MobileAppLink from '../common/TopPanel/MobileAppLink';
-import dynamic from 'next/dynamic';
-import { useState, useEffect } from 'react';
-import LoadingPage from '../common/InitialLoadingPage/LoadingPage';
-import useWindowSize from '@/app/hooks/useWindowSize';
+import { useAppSelector } from "@/app/store/store";
+import SearchBar from "../search/components/SearchBar/SearchBar";
+import NearbyCategories from "../search/components/NearbyCategories/NearbyCategories";
+import MobileAppLink from "../common/TopPanel/MobileAppLink";
+import dynamic from "next/dynamic";
+import { useState, useEffect } from "react";
+import LoadingPage from "../common/InitialLoadingPage/LoadingPage";
 
-const MapContainer = dynamic(() => import('../map/MapContainer/MapContainer'), {
+const MapContainer = dynamic(() => import("../map/MapContainer/MapContainer"), {
   ssr: false,
 });
 
 const MainContent = () => {
   const isVisible = useAppSelector((state) => state.ui.isTopPanelVisible);
   const isMapLoaded = useAppSelector((state) => state.map.isMapLoaded);
-  const windowSize = useWindowSize();
-  const isMobile = windowSize.width <= 640;
+
   const [currentFact, setCurrentFact] = useState(0);
 
   // Rotate fun facts every 3 seconds
@@ -35,9 +33,7 @@ const MainContent = () => {
         <div
           className={`absolute ${
             isVisible ? `top-[53px] sm:top-0` : `top-2`
-          } left-0 w-full ${
-            isMobile ? '!z-10' : '!z-[2001]'
-          } flex flex-row flex-wrap justify-center gap-2 sm:gap-6`}
+          } left-0 w-full flex flex-row flex-wrap justify-center gap-2 sm:gap-6`}
         >
           <SearchBar />
           <NearbyCategories />

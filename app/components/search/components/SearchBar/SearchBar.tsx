@@ -1,27 +1,28 @@
 // components/SearchBar/SearchBar.tsx
-'use client';
-import React, { useState, useEffect } from 'react';
-import { Space } from 'antd';
-import { useAppDispatch, useAppSelector } from '@/app/store/store';
-import './styles.css';
+"use client";
+import React, { useState, useEffect } from "react";
+import { Space } from "antd";
+import { useAppDispatch, useAppSelector } from "@/app/store/store";
+import "./styles.css";
 import {
   setSearchTerm,
   setSuggestions,
   setSelectedPlace,
   fetchPlaceDetails,
-} from '@/app/store/slices/searchSlice';
-import { useSearchHandler } from '../../hooks/useSearchHandler';
-import ClearButton from '../ClearButton';
-import DirectionsToggle from '../DirectionToggle';
-import SearchInput from '../SearchInput';
-import CountrySelect from '../CountrySelect/CountrySelect';
-import { getSuggestionOptions } from '../../hooks/useSuggestionsOptions';
-import { AnimatePresence, motion } from 'framer-motion';
-import { closeDrawer } from '@/app/store/slices/drawerSlice';
-import useWindowSize from '@/app/hooks/useWindowSize';
+} from "@/app/store/slices/searchSlice";
+import { useSearchHandler } from "../../hooks/useSearchHandler";
+import ClearButton from "../ClearButton";
+import DirectionsToggle from "../DirectionToggle";
+import SearchInput from "../SearchInput";
+import CountrySelect from "../CountrySelect/CountrySelect";
+import { getSuggestionOptions } from "../../hooks/useSuggestionsOptions";
+import { AnimatePresence, motion } from "framer-motion";
+import { closeDrawer } from "@/app/store/slices/drawerSlice";
+import useWindowSize from "@/app/hooks/useWindowSize";
 
 const SearchBar: React.FC = () => {
   const dispatch = useAppDispatch();
+  const [isMounted, setIsMounted] = useState(false);
   const { searchTerm, suggestions, searchMode } = useAppSelector(
     (state) => state.search
   );
@@ -31,8 +32,13 @@ const SearchBar: React.FC = () => {
   const isVisible = useAppSelector((state) => state.ui.isTopPanelVisible);
   const windowSize = useWindowSize();
   const isMobile = windowSize.width <= 640;
+  console.log("isMobile", isMobile);
   // Pass searchTerm to getSuggestionOptions for highlighting
   const options = getSuggestionOptions(suggestions, searchTerm);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     if (suggestions.length > 0) {
@@ -49,6 +55,13 @@ const SearchBar: React.FC = () => {
       return () => clearTimeout(timeout);
     }
   }, [isExpanded]);
+
+  // Add debug logs to track state changes
+  useEffect(() => {
+    console.log("Window width:", windowSize.width);
+    console.log("isMobile:", isMobile);
+    console.log("isMounted:", isMounted);
+  }, [windowSize.width, isMobile, isMounted]);
 
   const handleSelect = (value: string, option: any) => {
     const selectedData = option.rawData;
@@ -89,16 +102,20 @@ const SearchBar: React.FC = () => {
       </AnimatePresence>
       <div
         className={`relative left-0 w-screen ${
-          isMobile ? '!z-10' : '!z-[2001]'
+          isMounted
+            ? windowSize.width > 640
+              ? "z-[2001]"
+              : "z-10"
+            : "z-[2001]"
         } min-w-[300px] sm:top-4 lg:left-4 sm:w-full sm:max-w-[400px]`}
       >
         <div
           className={`bg-white transition-all duration-100 ${
             isExpanded
               ? `${
-                  isVisible ? 'rounded-none' : 'rounded-t-[20px]'
+                  isVisible ? "rounded-none" : "rounded-t-[20px]"
                 } sm:rounded-t-[20px]`
-              : 'rounded-none sm:rounded-full'
+              : "rounded-none sm:rounded-full"
           } shadow-deep`}
         >
           <div className="flex items-center gap-2">
@@ -107,9 +124,9 @@ const SearchBar: React.FC = () => {
                 value={searchTerm}
                 options={options}
                 placeholder={
-                  searchMode === 'directions'
-                    ? 'Enter start location'
-                    : 'Search places...'
+                  searchMode === "directions"
+                    ? "Enter start location"
+                    : "Search places..."
                 }
                 isExpanded={isExpanded}
                 isAnimating={isAnimating}
