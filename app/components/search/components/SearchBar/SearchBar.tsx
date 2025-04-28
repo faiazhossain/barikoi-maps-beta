@@ -80,10 +80,7 @@ const SearchBar: React.FC = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className={`fixed inset-0 bg-gray-900/50 backdrop-blur-sm sm:hidden`}
-            onClick={() => {
-              setIsExpanded(false);
-              // dispatch(setSuggestions([]));
-            }}
+            onClick={() => setIsExpanded(false)}
           />
         )}
       </AnimatePresence>

@@ -92,7 +92,7 @@ const LeftDrawer: React.FC = () => {
     if (isMobile) {
       return {
         body: { padding: 0, height: '100%' },
-        wrapper: { position: 'absolute' as 'absolute' },
+        wrapper: { position: 'absolute' as const },
         content: {
           boxShadow: isVisible ? 'none' : '0 -2px 8px rgba(0,0,0,0.15)',
           height: height,
@@ -103,7 +103,7 @@ const LeftDrawer: React.FC = () => {
     }
     return {
       body: { padding: 0 },
-      wrapper: { position: 'absolute' as 'absolute' },
+      wrapper: { position: 'absolute' as const },
       content: {
         boxShadow: '2px 0 8px rgba(0,0,0,0.15)',
         height: '100dvh',
