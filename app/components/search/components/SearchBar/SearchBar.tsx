@@ -119,7 +119,9 @@ const SearchBar: React.FC = () => {
                 onDropdownVisibleChange={(open) => {
                   if (open && suggestions.length > 0) {
                     setIsExpanded(true);
-                    isMobile && dispatch(closeDrawer());
+                    if (isMobile) {
+                      dispatch(closeDrawer());
+                    }
                   } else {
                     setIsExpanded(false);
                   }
