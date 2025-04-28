@@ -1,14 +1,14 @@
-import { useAppSelector } from '@/app/store/store';
-import SearchBar from '../search/components/SearchBar/SearchBar';
-import NearbyCategories from '../search/components/NearbyCategories/NearbyCategories';
-import MobileAppLink from '../common/TopPanel/MobileAppLink';
-import dynamic from 'next/dynamic';
-import Image from 'next/image';
-import { useState, useEffect } from 'react';
-import { TbBulb } from 'react-icons/tb';
-import LeftDrawer from '../LeftPanel/LeftDrawer';
+import { useAppSelector } from "@/app/store/store";
+import SearchBar from "../search/components/SearchBar/SearchBar";
+import NearbyCategories from "../search/components/NearbyCategories/NearbyCategories";
+import MobileAppLink from "../common/TopPanel/MobileAppLink";
+import dynamic from "next/dynamic";
+import Image from "next/image";
+import { useState, useEffect } from "react";
+import { TbBulb } from "react-icons/tb";
+import LeftDrawer from "../LeftPanel/LeftDrawer";
 
-const MapContainer = dynamic(() => import('../map/MapContainer/MapContainer'), {
+const MapContainer = dynamic(() => import("../map/MapContainer/MapContainer"), {
   ssr: false,
 });
 
@@ -18,11 +18,11 @@ const MainContent = () => {
 
   // Fun facts array
   const funFacts = [
-    'Did you know? Barikoi Maps powers over 1 million users worldwide!',
-    'Did you know? Barikoi supports over 50,000 businesses with location data.',
-    'Did you know? Barikoi Maps is optimized for fast and reliable navigation.',
-    'Did you know? Barikoi provides geolocation services for developers and enterprises.',
-    'Did you know? Barikoi Maps is trusted by leading companies for accurate mapping.',
+    "Did you know? Barikoi Maps powers over 1 million users worldwide!",
+    "Did you know? Barikoi supports over 50,000 businesses with location data.",
+    "Did you know? Barikoi Maps is optimized for fast and reliable navigation.",
+    "Did you know? Barikoi provides geolocation services for developers and enterprises.",
+    "Did you know? Barikoi Maps is trusted by leading companies for accurate mapping.",
   ];
 
   const [currentFact, setCurrentFact] = useState(0);
@@ -38,18 +38,19 @@ const MainContent = () => {
   return (
     <main className="relative w-full h-[100dvh] overflow-hidden">
       {!isMapLoaded && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100/80 backdrop-blur-md z-50 opacity-90">
-          <div className="flex flex-col items-center">
-            <video
-              src="/images/Loading/Spinning-Earth.webm"
-              autoPlay
-              playsInline
-              loop
-              muted
-              width={240}
-              height={240}
-              className="mb-4 opacity-70"
-            />
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100/80 backdrop-blur-md z-50">
+          {/* Background Video */}
+          <video
+            src="/images/Loading/Rotating-Earth.webm"
+            autoPlay
+            playsInline
+            loop
+            muted
+            className="absolute inset-2 w-full h-full object-cover opacity-20"
+          />
+
+          {/* Content Overlay */}
+          <div className="relative z-10 flex flex-col items-center">
             <p className="text-lg font-semibold text-gray-700 mb-2">
               Hold tight, we are going to land on
             </p>
@@ -62,9 +63,10 @@ const MainContent = () => {
             />
             <p className="text-2xl font-semibold text-gray-700 mt-4">Maps!</p>
           </div>
+
           {/* Fun Facts Section */}
-          <div className="mt-10 text-center px-4">
-            <div className="inline-flex items-center bg-white px-4 py-2 rounded-lg shadow-md">
+          <div className="relative z-10 mt-10 text-center px-4">
+            <div className="inline-flex items-center bg-white/90 backdrop-blur-sm px-4 py-2 rounded-lg shadow-md">
               <TbBulb className="text-amber-500 text-5xl" />
               <p className="text-lg font-semibold text-green-600 italic">
                 {funFacts[currentFact]}
