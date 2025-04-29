@@ -1,0 +1,97 @@
+// DrawerContent.tsx
+import React from 'react';
+import { useAppSelector } from '@/app/store/store';
+
+import { PlaceHeader } from './components/PlaceHeader';
+import { ActionButtons } from './components/ActionButtons';
+import { AddressSection } from './components/AddressSection';
+import { ContactInfo } from './components/ContactInfo';
+import { AdditionalInfo } from './components/AdditionalInfo';
+import ImageCarousel from './components/ImageCarousel';
+
+interface ContactInfoData {
+  name: string | null;
+  email: string | null;
+  phone: string | null;
+  website: string | null;
+}
+
+const DrawerContent = ({ placeDetails }) => {
+  const isLoading = useAppSelector((state) => state.search.placeDetailsLoading);
+  const contact: ContactInfoData =
+    placeDetails?.places_additional_data?.[0]?.contact || {};
+
+  if (isLoading) {
+    return (
+      <div className='p-4 flex justify-center items-center h-full'>
+        <div className='animate-pulse text-gray-500'>
+          Loading place details...
+        </div>
+      </div>
+    );
+  }
+
+  if (!placeDetails) {
+    return (
+      <div className='p-4 flex justify-center items-center h-full text-gray-500'>
+        Select a place to view details
+      </div>
+    );
+  }
+
+  return (
+    <div className='flex flex-col gap-1 pb-4'>
+      {placeDetails.images && <ImageCarousel images={placeDetails.images} />}
+
+      <div className='px-4 pt-4'>
+        <PlaceHeader
+          name={placeDetails.business_name}
+          type={placeDetails.type}
+          subType={placeDetails.sub_type}
+        />
+      </div>
+
+      <div className='px-4'>
+        <ActionButtons />
+      </div>
+
+      <div className='px-4'>
+        <AddressSection
+          holdingNumber={placeDetails.holding_number}
+          roadNameNumber={placeDetails.road_name_number}
+          area={placeDetails.area}
+          city={placeDetails.city}
+          postcode={placeDetails.postcode}
+        />
+      </div>
+
+      {(contact.phone || contact.email || contact.website) && (
+        <div className='px-4'>
+          <ContactInfo
+            phone={contact.phone}
+            email={contact.email}
+            website={contact.website}
+          />
+        </div>
+      )}
+
+      <div className='px-4'>
+        <AdditionalInfo
+          district={placeDetails.district}
+          thana={placeDetails.thana}
+          area={placeDetails.area}
+          subArea={placeDetails.sub_area}
+        />
+      </div>
+
+      <div className='px-4 pt-2 text-xs text-gray-400'>
+        <p>
+          Location: {placeDetails.latitude}, {placeDetails.longitude}
+        </p>
+        <p>Place Code: {placeDetails.place_code}</p>
+      </div>
+    </div>
+  );
+};
+
+export default DrawerContent;

@@ -4,13 +4,13 @@ import { useImageUrls } from '@/app/hooks/useImageUrls';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import { Image as AntImage, Card } from 'antd';
+
 interface ImageCarouselProps {
   images: Array<{ key: string; url: string }>;
 }
 
 const ImageCarousel: React.FC<ImageCarouselProps> = ({ images }) => {
   const { imageUrls, isLoading, error } = useImageUrls(images);
-
   const settings = {
     dots: true,
     infinite: false,
@@ -30,7 +30,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images }) => {
         <ul style={{ margin: '0', padding: '0' }}>{dots}</ul>
       </div>
     ),
-    customPaging: (i: number) => (
+    customPaging: () => (
       <div
         style={{
           width: '8px',
@@ -46,20 +46,23 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images }) => {
 
   if (isLoading) {
     return (
-      <div className="w-full aspect-[4/3] bg-gray-100 animate-pulse rounded-lg" />
+      <div className='w-full aspect-[4/3] bg-gray-100 animate-pulse rounded-lg' />
     );
   }
 
-  if (error || !imageUrls?.length) {
+  console.log(imageUrls?.length === 0);
+  console.log(imageUrls);
+
+  if (error || imageUrls?.length === 0) {
     return (
-      <div className="relative w-full aspect-[4/3] rounded-lg overflow-hidden">
+      <div className='relative w-full aspect-[4/3] rounded-lg overflow-hidden'>
         <AntImage
-          src="/images/ifNoImage.png"
-          alt="No image found"
-          className="object-cover opacity-80 filter grayscale blur-[1px]"
+          src='/images/no_image_found.webp'
+          alt='No image found'
+          className='object-cover opacity-80 filter grayscale blur-[1px]'
           preview={false}
         />
-        <h3 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white font-semibold">
+        <h3 className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white font-semibold'>
           No Image Found!
         </h3>
       </div>
@@ -67,7 +70,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images }) => {
   }
 
   return (
-    <div className="relative w-full h-[300px]">
+    <div className='relative w-full h-[300px]'>
       <style jsx global>{`
         .slick-slider,
         .slick-list,
@@ -81,38 +84,50 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images }) => {
           transform: scale(1.4);
           border: 1px solid #367d53;
         }
-        /* Center the image container */
-        .image-container {
-          display: flex !important;
-          justify-content: center;
-          align-items: center;
+        .ant-card {
           height: 100%;
+        }
+        .ant-card-body {
+          padding: 0 !important;
+          height: 100%;
+        }
+        .full-height-image {
+          height: 100%;
+          width: 100%;
+        }
+        .full-height-image .ant-image-img {
+          height: 100%;
+          object-fit: cover;
+          width: 100%;
+        }
+        .preview-mask span {
+          transition: opacity 0.3s ease;
+        }
+        .preview-mask:hover span {
+          opacity: 1;
         }
       `}</style>
       <AntImage.PreviewGroup>
         <Slider {...settings}>
           {imageUrls.map((url, index) => (
-            <div key={index} className="h-full w-full p-2">
-              <Card className="h-full object-cover p-0 shadow-md rounded-lg overflow-hidden">
-                <div className="relative h-full">
+            <div key={index} className='h-full'>
+              <Card className='h-full w-full shadow-none border-none'>
+                <div className='relative h-full w-full group'>
                   <AntImage
                     src={url}
                     alt={`Place image ${index + 1}`}
-                    className="!h-[300px] !w-full"
-                    style={{
-                      objectFit: 'cover',
-                    }}
+                    rootClassName='full-height-image'
                     preview={{
                       mask: (
-                        <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-all flex items-center justify-center">
-                          <span className="text-white opacity-0 group-hover:opacity-100">
+                        <div className='preview-mask absolute inset-0 bg-black/0 hover:bg-black/20 transition-all flex items-center justify-center'>
+                          <span className='text-white opacity-0 group-hover:opacity-100'>
                             Click to preview
                           </span>
                         </div>
                       ),
                     }}
                   />
-                  <div className="absolute top-2 right-2 bg-black/50 text-white px-2 py-1 rounded-full text-sm z-10">
+                  <div className='absolute top-2 right-2 bg-black/50 text-white px-2 py-1 rounded-full text-sm z-10'>
                     {index + 1}/{imageUrls.length}
                   </div>
                 </div>
@@ -125,7 +140,6 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images }) => {
   );
 };
 
-// Custom arrow components (keep these the same)
 const NextArrow = (props: any) => {
   const { className, style, onClick } = props;
   return (

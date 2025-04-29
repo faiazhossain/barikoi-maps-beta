@@ -14,7 +14,7 @@ import {
   MdExpandMore,
   MdOutlineCloseFullscreen,
 } from 'react-icons/md';
-import DrawerContent from './DrawerContent';
+import DrawerContent from './DrawerContent/DrawerContent';
 
 // Constants for responsive breakpoints
 const MOBILE_BREAKPOINT = 823;
@@ -118,52 +118,32 @@ const LeftDrawer: React.FC = () => {
   const toggleButton = useMemo(() => {
     if (isMobile) {
       return isOpen ? (
-        <MdOutlineCloseFullscreen className="text-xl text-gray-600" />
+        <MdOutlineCloseFullscreen className='text-xl text-gray-600' />
       ) : (
-        <MdExpandLess className="text-xl text-gray-600" />
+        <MdExpandLess className='text-xl text-gray-600' />
       );
     }
     return isOpen ? (
-      <RiExpandLeftFill className="text-xl text-gray-600" />
+      <RiExpandLeftFill className='text-xl text-gray-600' />
     ) : (
-      <RiExpandRightFill className="text-xl text-gray-600" />
+      <RiExpandRightFill className='text-xl text-gray-600' />
     );
   }, [isMobile, isOpen]);
-
-  // Drawer title component
-  const drawerTitle = useMemo(
-    () => (
-      <div className="flex justify-between items-center">
-        <span>Map Data Panel</span>
-        {isMobile && (
-          <motion.button
-            onClick={handleToggle}
-            className="p-1"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            {toggleButton}
-          </motion.button>
-        )}
-      </div>
-    ),
-    [isMobile, handleToggle, toggleButton]
-  );
 
   // Mobile expand button (only visible on mobile)
   const mobileExpandButton = useMemo(() => {
     if (!isMobile) return null;
 
     return (
-      <div className="absolute top-0 w-8 h-8 mx-auto left-0 right-0 flex justify-center p-2 bg-none">
+      <div className='absolute top-0 w-8 h-8 mx-auto left-0 right-0 flex justify-center p-2 bg-none'>
         <button
           onClick={toggleExpand}
-          className="flex items-center justify-center w-full py-2"
+          className='flex items-center justify-center w-full py-2'
         >
           {isExpanded ? (
-            <MdExpandMore className="text-xl" />
+            <MdExpandMore className='text-xl' />
           ) : (
-            <MdExpandLess className="text-xl" />
+            <MdExpandLess className='text-xl' />
           )}
         </button>
       </div>
@@ -180,11 +160,11 @@ const LeftDrawer: React.FC = () => {
           initial={{ x: 0 }}
           animate={{ x: isOpen ? width : 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          className="fixed top-[50%] left-0 z-[1001] -translate-y-1/2"
+          className='fixed top-[50%] left-0 z-[1001] -translate-y-1/2'
         >
           <motion.button
             onClick={handleToggle}
-            className="flex items-center justify-center w-8 h-16 bg-white !border-none rounded-r-md focus:outline-none"
+            className='flex items-center justify-center w-8 h-16 bg-white !border-none rounded-r-md focus:outline-none'
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
@@ -202,7 +182,7 @@ const LeftDrawer: React.FC = () => {
     return (
       <motion.button
         onClick={handleToggle}
-        className="absolute bottom-0 left-0 right-0 flex justify-center p-2 bg-white"
+        className='absolute bottom-0 left-0 right-0 flex justify-center p-2 bg-white'
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >
@@ -243,7 +223,6 @@ const LeftDrawer: React.FC = () => {
       {desktopToggleButton}
 
       <Drawer
-        title={drawerTitle}
         placement={placement}
         closable={false}
         onClose={handleToggle}
@@ -254,7 +233,7 @@ const LeftDrawer: React.FC = () => {
         height={isMobile ? height : undefined}
         styles={drawerStyles}
       >
-        <div className="p-4 h-full overflow-y-auto">
+        <div className='h-full overflow-x-hidden leftbar-container'>
           <DrawerContent placeDetails={placeDetails} />
           {mobileExpandButton}
         </div>
