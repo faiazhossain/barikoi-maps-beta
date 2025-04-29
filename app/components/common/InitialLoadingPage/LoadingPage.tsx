@@ -1,13 +1,13 @@
 // components/common/LoadingPage/LoadingPage.tsx
-import Image from 'next/image';
-import { TbBulb } from 'react-icons/tb';
+import Image from "next/image";
+import { TbBulb } from "react-icons/tb";
 
 const funFacts = [
-  'Did you know? Barikoi Maps powers over 1 million users worldwide!',
-  'Did you know? Barikoi supports over 50,000 businesses with location data.',
-  'Did you know? Barikoi Maps is optimized for fast and reliable navigation.',
-  'Did you know? Barikoi provides geolocation services for developers and enterprises.',
-  'Did you know? Barikoi Maps is trusted by leading companies for accurate mapping.',
+  "Did you know? Barikoi Maps powers over 1 million users worldwide!",
+  "Did you know? Barikoi supports over 50,000 businesses with location data.",
+  "Did you know? Barikoi Maps is optimized for fast and reliable navigation.",
+  "Did you know? Barikoi provides geolocation services for developers and enterprises.",
+  "Did you know? Barikoi Maps is trusted by leading companies for accurate mapping.",
 ];
 
 interface LoadingPageProps {
@@ -16,7 +16,7 @@ interface LoadingPageProps {
 
 const LoadingPage = ({ currentFact }: LoadingPageProps) => {
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100/80 backdrop-blur-md z-50">
+    <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100/80 backdrop-blur-md z-[2002]">
       {/* Background Video */}
       <video
         src="/images/Loading/Rotating-Earth.webm"

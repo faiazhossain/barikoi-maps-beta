@@ -32,7 +32,6 @@ const SearchBar: React.FC = () => {
   const isVisible = useAppSelector((state) => state.ui.isTopPanelVisible);
   const windowSize = useWindowSize();
   const isMobile = windowSize.width <= 640;
-  console.log("isMobile", isMobile);
   // Pass searchTerm to getSuggestionOptions for highlighting
   const options = getSuggestionOptions(suggestions, searchTerm);
 
@@ -55,13 +54,6 @@ const SearchBar: React.FC = () => {
       return () => clearTimeout(timeout);
     }
   }, [isExpanded]);
-
-  // Add debug logs to track state changes
-  useEffect(() => {
-    console.log("Window width:", windowSize.width);
-    console.log("isMobile:", isMobile);
-    console.log("isMounted:", isMounted);
-  }, [windowSize.width, isMobile, isMounted]);
 
   const handleSelect = (value: string, option: any) => {
     const selectedData = option.rawData;
