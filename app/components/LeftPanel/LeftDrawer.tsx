@@ -1,32 +1,37 @@
-import React, { useEffect, useMemo, useCallback } from "react";
-import { Drawer } from "antd";
-import { RiExpandLeftFill, RiExpandRightFill } from "react-icons/ri";
-import { motion, AnimatePresence } from "framer-motion";
-import { useDispatch } from "react-redux";
+import React, { useEffect, useMemo, useCallback } from 'react';
+import { Drawer } from 'antd';
+import { RiExpandLeftFill, RiExpandRightFill } from 'react-icons/ri';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useDispatch } from 'react-redux';
 import {
   toggleDrawer,
   setDrawerDimensions,
-} from "@/app/store/slices/drawerSlice";
-import { useAppSelector } from "@/app/store/store";
-import useWindowSize from "@/app/hooks/useWindowSize";
+} from '@/app/store/slices/drawerSlice';
+import { useAppSelector } from '@/app/store/store';
+import useWindowSize from '@/app/hooks/useWindowSize';
 import {
   MdExpandLess,
   MdExpandMore,
   MdOutlineCloseFullscreen,
-} from "react-icons/md";
+} from 'react-icons/md';
+import DrawerContent from './DrawerContent';
 
+// Constants for responsive breakpoints
 const MOBILE_BREAKPOINT = 823;
 const TAB_BREAKPOINT = 1023;
 
 const LeftDrawer: React.FC = () => {
   const dispatch = useDispatch();
+
+  // Redux state selectors
   const { isOpen, placement, width, height, isExpanded } = useAppSelector(
     (state) => state.drawer
   );
+  const placeDetails = useAppSelector((state) => state.search.placeDetails);
   const isVisible = useAppSelector((state) => state.ui.isTopPanelVisible);
   const windowSize = useWindowSize();
 
-  // Memoize these values to prevent unnecessary recalculations
+  // ====================== Responsive Helpers ======================
   const isMobile = useMemo(
     () => windowSize.width <= MOBILE_BREAKPOINT,
     [windowSize.width]
@@ -36,13 +41,14 @@ const LeftDrawer: React.FC = () => {
     [windowSize.width]
   );
 
+  // ====================== Effects ======================
   // Handle initial dimensions and responsive changes
   useEffect(() => {
     if (isMobile) {
       dispatch(
         setDrawerDimensions({
-          placement: "bottom",
-          width: "100%",
+          placement: 'bottom',
+          width: '100%',
           height: 300,
           isExpanded: false,
         })
@@ -50,7 +56,7 @@ const LeftDrawer: React.FC = () => {
     } else if (isTab) {
       dispatch(
         setDrawerDimensions({
-          placement: "left",
+          placement: 'left',
           width: 400,
           isExpanded: false,
         })
@@ -58,15 +64,32 @@ const LeftDrawer: React.FC = () => {
     } else {
       dispatch(
         setDrawerDimensions({
-          placement: "left",
+          placement: 'left',
           width: 432,
-          height: "100%",
+          height: '100%',
           isExpanded: true,
         })
       );
     }
   }, [isMobile, isTab, dispatch]);
 
+  useEffect(() => {
+    if (placeDetails) {
+      dispatch(toggleDrawer());
+      if (isMobile) {
+        dispatch(
+          setDrawerDimensions({
+            placement: 'bottom',
+            width: '100%',
+            height: 300,
+            isExpanded: false,
+          })
+        );
+      }
+    }
+  }, [placeDetails, dispatch, isMobile]);
+
+  // ====================== Event Handlers ======================
   const handleToggle = useCallback(() => {
     if (isMobile && !isOpen) {
       dispatch(
@@ -83,14 +106,15 @@ const LeftDrawer: React.FC = () => {
     if (isMobile) {
       dispatch(
         setDrawerDimensions({
-          height: isExpanded ? 300 : "100dvh",
+          height: isExpanded ? 300 : '100dvh',
           isExpanded: !isExpanded,
         })
       );
     }
   }, [isMobile, isExpanded, dispatch]);
 
-  // Memoize the toggle button to prevent unnecessary re-renders
+  // ====================== UI Components ======================
+  // Toggle button based on device type and state
   const toggleButton = useMemo(() => {
     if (isMobile) {
       return isOpen ? (
@@ -106,32 +130,7 @@ const LeftDrawer: React.FC = () => {
     );
   }, [isMobile, isOpen]);
 
-  // Memoize drawer styles to prevent unnecessary recalculations
-  const drawerStyles = useMemo(() => {
-    if (isMobile) {
-      return {
-        body: { padding: 0, height: "100%" },
-        wrapper: { position: "absolute" as const },
-        content: {
-          boxShadow: isVisible ? "none" : "0 -2px 8px rgba(0,0,0,0.15)",
-          height: height,
-          overflow: "hidden",
-        },
-        header: { padding: "16px" },
-      };
-    }
-    return {
-      body: { padding: 0 },
-      wrapper: { position: "absolute" as const },
-      content: {
-        boxShadow: "2px 0 8px rgba(0,0,0,0.15)",
-        height: "100dvh",
-      },
-      header: { padding: "16px" },
-    };
-  }, [isMobile, isVisible, height]);
-
-  // Memoize the title component
+  // Drawer title component
   const drawerTitle = useMemo(
     () => (
       <div className="flex justify-between items-center">
@@ -151,7 +150,7 @@ const LeftDrawer: React.FC = () => {
     [isMobile, handleToggle, toggleButton]
   );
 
-  // Memoize the mobile expand button
+  // Mobile expand button (only visible on mobile)
   const mobileExpandButton = useMemo(() => {
     if (!isMobile) return null;
 
@@ -171,7 +170,7 @@ const LeftDrawer: React.FC = () => {
     );
   }, [isMobile, isExpanded, toggleExpand]);
 
-  // Memoize the desktop toggle button
+  // Desktop toggle button (only visible on desktop/tablet)
   const desktopToggleButton = useMemo(() => {
     if (isMobile) return null;
 
@@ -180,7 +179,7 @@ const LeftDrawer: React.FC = () => {
         <motion.div
           initial={{ x: 0 }}
           animate={{ x: isOpen ? width : 0 }}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           className="fixed top-[50%] left-0 z-[1001] -translate-y-1/2"
         >
           <motion.button
@@ -196,7 +195,7 @@ const LeftDrawer: React.FC = () => {
     );
   }, [isMobile, isOpen, width, handleToggle, toggleButton]);
 
-  // Memoize the mobile bottom toggle button
+  // Mobile bottom toggle button (only visible when drawer is closed on mobile)
   const mobileBottomToggleButton = useMemo(() => {
     if (!isMobile || isOpen) return null;
 
@@ -212,6 +211,33 @@ const LeftDrawer: React.FC = () => {
     );
   }, [isMobile, isOpen, handleToggle, toggleButton]);
 
+  // ====================== Styles ======================
+  // Drawer styles based on device type
+  const drawerStyles = useMemo(() => {
+    if (isMobile) {
+      return {
+        body: { padding: 0, height: '100%' },
+        wrapper: { position: 'absolute' as const },
+        content: {
+          boxShadow: isVisible ? 'none' : '0 -2px 8px rgba(0,0,0,0.15)',
+          height: height,
+          overflow: 'hidden',
+        },
+        header: { padding: '16px' },
+      };
+    }
+    return {
+      body: { padding: 0 },
+      wrapper: { position: 'absolute' as const },
+      content: {
+        boxShadow: '2px 0 8px rgba(0,0,0,0.15)',
+        height: '100dvh',
+      },
+      header: { padding: '16px' },
+    };
+  }, [isMobile, isVisible, height]);
+
+  // ====================== Main Render ======================
   return (
     <>
       {desktopToggleButton}
@@ -229,11 +255,7 @@ const LeftDrawer: React.FC = () => {
         styles={drawerStyles}
       >
         <div className="p-4 h-full overflow-y-auto">
-          {/* Your data content here */}
-          <p>Map data point 1</p>
-          <p>Map data point 2</p>
-          <p>Map data point 3</p>
-
+          <DrawerContent placeDetails={placeDetails} />
           {mobileExpandButton}
         </div>
       </Drawer>

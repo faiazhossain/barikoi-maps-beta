@@ -1,52 +1,74 @@
 // components/SearchBar/SearchBar.tsx
-"use client";
-import React, { useState, useEffect } from "react";
-import { Space } from "antd";
-import { useAppDispatch, useAppSelector } from "@/app/store/store";
-import "./styles.css";
+'use client';
+
+import React, { useState, useEffect, useMemo } from 'react';
+import { Space } from 'antd';
+import { useAppDispatch, useAppSelector } from '@/app/store/store';
+
+// Redux actions and selectors
 import {
   setSearchTerm,
   setSuggestions,
   setSelectedPlace,
-  fetchPlaceDetails,
-} from "@/app/store/slices/searchSlice";
-import { useSearchHandler } from "../../hooks/useSearchHandler";
-import ClearButton from "../ClearButton";
-import DirectionsToggle from "../DirectionToggle";
-import SearchInput from "../SearchInput";
-import CountrySelect from "../CountrySelect/CountrySelect";
-import { getSuggestionOptions } from "../../hooks/useSuggestionsOptions";
-import { AnimatePresence, motion } from "framer-motion";
-import { closeDrawer } from "@/app/store/slices/drawerSlice";
-import useWindowSize from "@/app/hooks/useWindowSize";
+} from '@/app/store/slices/searchSlice';
+import {
+  selectSearchTerm,
+  selectSuggestions,
+  selectSearchMode,
+} from '@/app/store/selectors/searchSelectors';
+import { closeDrawer } from '@/app/store/slices/drawerSlice';
+import { fetchPlaceDetails } from '@/app/store/thunks/searchThunks';
+
+// Custom hooks
+import { useSearchHandler } from '../../hooks/useSearchHandler';
+import { getSuggestionOptions } from '../../hooks/useSuggestionsOptions';
+import useWindowSize from '@/app/hooks/useWindowSize';
+
+// Components
+import ClearButton from '../ClearButton';
+import DirectionsToggle from '../DirectionToggle';
+import SearchInput from '../SearchInput';
+import CountrySelect from '../CountrySelect/CountrySelect';
+import { AnimatePresence, motion } from 'framer-motion';
+
+// Styles
+import './styles.css';
 
 const SearchBar: React.FC = () => {
+  // Redux hooks
   const dispatch = useAppDispatch();
+  const searchTerm = useAppSelector(selectSearchTerm);
+  const suggestions = useAppSelector(selectSuggestions);
+  const searchMode = useAppSelector(selectSearchMode);
+  const isVisible = useAppSelector((state) => state.ui.isTopPanelVisible);
+
+  // Local state
   const [isMounted, setIsMounted] = useState(false);
-  const { searchTerm, suggestions, searchMode } = useAppSelector(
-    (state) => state.search
-  );
   const [isExpanded, setIsExpanded] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+
+  // Custom hooks
   const { handleSearch } = useSearchHandler(dispatch);
-  const isVisible = useAppSelector((state) => state.ui.isTopPanelVisible);
   const windowSize = useWindowSize();
   const isMobile = windowSize.width <= 640;
-  // Pass searchTerm to getSuggestionOptions for highlighting
-  const options = getSuggestionOptions(suggestions, searchTerm);
 
+  // Memoized values
+  const options = useMemo(
+    () => getSuggestionOptions(suggestions, searchTerm),
+    [suggestions, searchTerm]
+  );
+
+  // Mount effect
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
+  // Handle suggestions visibility
   useEffect(() => {
-    if (suggestions.length > 0) {
-      setIsExpanded(true);
-    } else {
-      setIsExpanded(false);
-    }
+    setIsExpanded(suggestions.length > 0);
   }, [suggestions]);
 
+  // Handle animation states
   useEffect(() => {
     if (!isExpanded) {
       setIsAnimating(true);
@@ -55,12 +77,12 @@ const SearchBar: React.FC = () => {
     }
   }, [isExpanded]);
 
+  // Event handlers
   const handleSelect = (value: string, option: any) => {
     const selectedData = option.rawData;
 
     if (selectedData) {
       dispatch(setSelectedPlace(selectedData));
-      // Fetch place details if uCode is available
       if (selectedData.uCode) {
         dispatch(fetchPlaceDetails(selectedData.uCode));
       }
@@ -76,8 +98,20 @@ const SearchBar: React.FC = () => {
     handleSearch(value); // Debounced search
   };
 
+  const handleDropdownVisibility = (open: boolean) => {
+    if (open && suggestions.length > 0) {
+      setIsExpanded(true);
+      if (isMobile) {
+        dispatch(closeDrawer());
+      }
+    } else {
+      setIsExpanded(false);
+    }
+  };
+
   return (
     <>
+      {/* Backdrop overlay for mobile */}
       <AnimatePresence>
         {isExpanded && (
           <motion.div
@@ -92,55 +126,50 @@ const SearchBar: React.FC = () => {
           />
         )}
       </AnimatePresence>
+
+      {/* Main search container */}
       <div
         className={`relative left-0 w-screen ${
           isMounted
-            ? windowSize.width > 640
-              ? "z-[2001]"
-              : "z-10"
-            : "z-[2001]"
+            ? windowSize.width > 823
+              ? 'z-[2001]'
+              : 'z-10'
+            : 'z-[2001]'
         } min-w-[300px] sm:top-4 lg:left-4 sm:w-full sm:max-w-[400px]`}
       >
+        {/* Search box wrapper */}
         <div
           className={`bg-white transition-all duration-100 ${
             isExpanded
               ? `${
-                  isVisible ? "rounded-none" : "rounded-t-[20px]"
+                  isVisible ? 'rounded-none' : 'rounded-t-[20px]'
                 } sm:rounded-t-[20px]`
-              : "rounded-none sm:rounded-full"
+              : 'rounded-none sm:rounded-full'
           } shadow-deep`}
         >
           <div className="flex items-center gap-2">
+            {/* Search input and clear button */}
             <div className="relative w-full">
               <SearchInput
                 value={searchTerm}
                 options={options}
                 placeholder={
-                  searchMode === "directions"
-                    ? "Enter start location"
-                    : "Search places..."
+                  searchMode === 'directions'
+                    ? 'Enter start location'
+                    : 'Search places...'
                 }
                 isExpanded={isExpanded}
                 isAnimating={isAnimating}
                 onSearch={handleInputChange}
                 onSelect={handleSelect}
                 onChange={handleInputChange}
-                onBlur={() => {
-                  setIsExpanded(false);
-                }}
-                onDropdownVisibleChange={(open) => {
-                  if (open && suggestions.length > 0) {
-                    setIsExpanded(true);
-                    if (isMobile) {
-                      dispatch(closeDrawer());
-                    }
-                  } else {
-                    setIsExpanded(false);
-                  }
-                }}
+                onBlur={() => setIsExpanded(false)}
+                onDropdownVisibleChange={handleDropdownVisibility}
               />
               <ClearButton searchTerm={searchTerm} />
             </div>
+
+            {/* Additional controls */}
             <Space size={0} className="!ml-2">
               <DirectionsToggle />
               <CountrySelect />

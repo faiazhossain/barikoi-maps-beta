@@ -1,12 +1,12 @@
-import { useAppSelector } from "@/app/store/store";
-import SearchBar from "../search/components/SearchBar/SearchBar";
-import NearbyCategories from "../search/components/NearbyCategories/NearbyCategories";
-import MobileAppLink from "../common/TopPanel/MobileAppLink";
-import dynamic from "next/dynamic";
-import { useState, useEffect } from "react";
-import LoadingPage from "../common/InitialLoadingPage/LoadingPage";
+import { useAppSelector } from '@/app/store/store';
+import SearchBar from '../search/components/SearchBar/SearchBar';
+import NearbyCategories from '../search/components/NearbyCategories/NearbyCategories';
+import MobileAppLink from '../common/TopPanel/MobileAppLink';
+import dynamic from 'next/dynamic';
+import { useState, useEffect } from 'react';
+import LoadingPage from '../common/InitialLoadingPage/LoadingPage';
 
-const MapContainer = dynamic(() => import("../map/MapContainer/MapContainer"), {
+const MapContainer = dynamic(() => import('../map/MapContainer/MapContainer'), {
   ssr: false,
 });
 
@@ -26,7 +26,7 @@ const MainContent = () => {
 
   return (
     <main className="relative w-full h-[100dvh] overflow-hidden">
-      {!isMapLoaded && <LoadingPage currentFact={currentFact} />}
+      {/* {!isMapLoaded && <LoadingPage currentFact={currentFact} />} */}
       <>
         {isMapLoaded && <MobileAppLink />}
         <MapContainer />

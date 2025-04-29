@@ -1,71 +1,13 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-
-export const fetchPlaceDetails = createAsyncThunk(
-  'search/fetchPlaceDetails',
-  async (uCode: string) => {
-    const response = await fetch(`/api/place/${uCode}`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch place details');
-    }
-    const data = await response.json();
-    return data;
-  }
-);
-
-interface SearchState {
-  searchTerm: string;
-  suggestions: Array<{
-    id: string;
-    name: string;
-    address: string;
-    latitude: number;
-    longitude: number;
-    city: string;
-    area: string;
-    pType: string;
-  }>;
-  isLoading: boolean;
-  searchMode: 'location' | 'directions';
-  startLocation: {
-    name: string;
-    latitude: number;
-    longitude: number;
-  } | null;
-  endLocation: {
-    name: string;
-    latitude: number;
-    longitude: number;
-  } | null;
-  selectedCategory: string | null;
-  nearbyLocations: Array<{
-    id: string;
-    name: string;
-    category: string;
-    latitude: number;
-    longitude: number;
-  }>;
-  selectedPlace: {
-    id: string;
-    name: string;
-    address: string;
-    pType: string;
-    subType?: string;
-    postCode?: number;
-    popularity_ranking?: number;
-    country: string;
-    country_code: string;
-    latitude: number;
-    longitude: number;
-    distance_km?: number;
-    district: string;
-    area: string;
-    city: string;
-    uCode: string;
-  } | null;
-  placeDetails: any | null;
-  placeDetailsLoading: boolean;
-  placeDetailsError: string | null;
-}
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import {
+  SearchState,
+  SearchMode,
+  Location,
+  Place,
+  Suggestion,
+  NearbyLocation,
+} from '@/app/types/search';
+import { fetchPlaceDetails } from '../thunks/searchThunks';
 
 const initialState: SearchState = {
   searchTerm: '',
@@ -89,38 +31,29 @@ const searchSlice = createSlice({
     setSearchTerm: (state, action: PayloadAction<string>) => {
       state.searchTerm = action.payload;
     },
-    setSuggestions: (
-      state,
-      action: PayloadAction<typeof state.suggestions>
-    ) => {
+    setSuggestions: (state, action: PayloadAction<Suggestion[]>) => {
       state.suggestions = action.payload;
     },
     setIsLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
     },
-    setSearchMode: (state, action: PayloadAction<typeof state.searchMode>) => {
+    setSearchMode: (state, action: PayloadAction<SearchMode>) => {
       state.searchMode = action.payload;
     },
-    setStartLocation: (
-      state,
-      action: PayloadAction<typeof state.startLocation>
-    ) => {
+    setStartLocation: (state, action: PayloadAction<Location | null>) => {
       state.startLocation = action.payload;
     },
-    setEndLocation: (
-      state,
-      action: PayloadAction<typeof state.endLocation>
-    ) => {
+    setEndLocation: (state, action: PayloadAction<Location | null>) => {
       state.endLocation = action.payload;
     },
     setSelectedCategory: (state, action: PayloadAction<string | null>) => {
       state.selectedCategory = action.payload;
     },
-    setNearbyLocations: (
-      state,
-      action: PayloadAction<typeof state.nearbyLocations>
-    ) => {
+    setNearbyLocations: (state, action: PayloadAction<NearbyLocation[]>) => {
       state.nearbyLocations = action.payload;
+    },
+    setSelectedPlace: (state, action: PayloadAction<Place | null>) => {
+      state.selectedPlace = action.payload;
     },
     clearDirections: (state) => {
       state.startLocation = null;
@@ -130,12 +63,6 @@ const searchSlice = createSlice({
     clearSearch: (state) => {
       state.searchTerm = '';
       state.suggestions = [];
-    },
-    setSelectedPlace: (
-      state,
-      action: PayloadAction<typeof state.selectedPlace>
-    ) => {
-      state.selectedPlace = action.payload;
     },
   },
   extraReducers: (builder) => {
