@@ -21,6 +21,9 @@ const drawerSlice = createSlice({
   name: 'drawer',
   initialState,
   reducers: {
+    openDrawer: (state) => {
+      state.isOpen = true;
+    },
     toggleDrawer: (state) => {
       state.isOpen = !state.isOpen;
     },
@@ -63,6 +66,7 @@ const drawerSlice = createSlice({
 export const {
   toggleDrawer,
   closeDrawer,
+  openDrawer,
   setDrawerDimensions,
   toggleExpand,
   setDrawerWidth,

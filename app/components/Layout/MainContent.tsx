@@ -3,7 +3,7 @@ import SearchBar from '../search/components/SearchBar/SearchBar';
 import NearbyCategories from '../search/components/NearbyCategories/NearbyCategories';
 import MobileAppLink from '../common/TopPanel/MobileAppLink';
 import dynamic from 'next/dynamic';
-import { useState, useEffect } from 'react';
+// import { useState, useEffect } from 'react';
 
 const MapContainer = dynamic(() => import('../map/MapContainer/MapContainer'), {
   ssr: false,
@@ -13,16 +13,16 @@ const MainContent = () => {
   const isVisible = useAppSelector((state) => state.ui.isTopPanelVisible);
   const isMapLoaded = useAppSelector((state) => state.map.isMapLoaded);
 
-  const [currentFact, setCurrentFact] = useState(0);
-  console.log('🚀 ~ MainContent ~ currentFact:', currentFact);
+  // const [currentFact, setCurrentFact] = useState(0);
+  // console.log('🚀 ~ MainContent ~ currentFact:', currentFact);
 
-  // Rotate fun facts every 3 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentFact((prev) => (prev + 1) % 5); // 5 is the length of funFacts array
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
+  // // Rotate fun facts every 3 seconds
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     setCurrentFact((prev) => (prev + 1) % 5); // 5 is the length of funFacts array
+  //   }, 3000);
+  //   return () => clearInterval(interval);
+  // }, []);
 
   return (
     <main className='relative w-full h-[100dvh] overflow-hidden'>

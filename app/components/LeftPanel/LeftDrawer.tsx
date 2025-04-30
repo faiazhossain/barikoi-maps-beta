@@ -7,6 +7,7 @@ import {
   toggleDrawer,
   setDrawerDimensions,
   closeDrawer,
+  openDrawer,
 } from '@/app/store/slices/drawerSlice';
 import { useAppSelector } from '@/app/store/store';
 import useWindowSize from '@/app/hooks/useWindowSize';
@@ -30,7 +31,7 @@ const LeftDrawer: React.FC = () => {
   const { isOpen, placement, width, height, isExpanded } = useAppSelector(
     (state) => state.drawer
   );
-  console.log('🚀 ~ isExpanded:', isExpanded);
+
   const placeDetails = useAppSelector((state) => state.search.placeDetails);
   const isVisible = useAppSelector((state) => state.ui.isTopPanelVisible);
   const windowSize = useWindowSize();
@@ -79,7 +80,7 @@ const LeftDrawer: React.FC = () => {
 
   useEffect(() => {
     if (placeDetails) {
-      dispatch(toggleDrawer());
+      dispatch(openDrawer());
       if (isMobile) {
         dispatch(
           setDrawerDimensions({
@@ -118,7 +119,6 @@ const LeftDrawer: React.FC = () => {
   }, [isMobile, isExpanded, dispatch]);
 
   const toggleMinimize = useCallback(() => {
-    console.log(isMobile);
     if (isMobile && isOpen) {
       dispatch(closeDrawer());
     }
@@ -143,12 +143,12 @@ const LeftDrawer: React.FC = () => {
 
   // Mobile minimize button (only visible when expanded on mobile)
   const mobileMinimizeButton = useMemo(() => {
-    if (!isMobile && !isOpen) return null;
+    if (!isMobile || !isOpen) return null;
 
     return (
       <button
         onClick={toggleMinimize}
-        className='absolute top-0 right-4 z-10 p-2 bg-white '
+        className='absolute top-0 right-2 z-10 p-1'
         aria-label='Minimize drawer'
       >
         <TbMinimize className='text-xl text-gray-600 hover:text-green-600' />
@@ -208,7 +208,7 @@ const LeftDrawer: React.FC = () => {
     return (
       <motion.button
         onClick={handleToggle}
-        className='absolute bottom-0 left-0 right-0 flex justify-center p-2 bg-white'
+        className='absolute bottom-0 left-0 right-0 flex justify-center p-3 bg-white'
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >

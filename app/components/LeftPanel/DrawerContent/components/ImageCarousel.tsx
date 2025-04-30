@@ -11,6 +11,7 @@ interface ImageCarouselProps {
 
 const ImageCarousel: React.FC<ImageCarouselProps> = ({ images }) => {
   const { imageUrls, isLoading, error } = useImageUrls(images);
+
   const settings = {
     dots: true,
     infinite: false,
@@ -46,29 +47,25 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images }) => {
 
   if (isLoading) {
     return (
-      <div className='w-full aspect-[4/3] bg-gray-100 animate-pulse rounded-lg' />
-    );
-  }
-
-  console.log(imageUrls?.length === 0);
-  console.log(imageUrls);
-
-  if (error || imageUrls?.length === 0) {
-    return (
-      <div className='relative w-full aspect-[4/3] rounded-lg overflow-hidden'>
-        <AntImage
-          src='/images/no_image_found.webp'
-          alt='No image found'
-          className='object-cover opacity-80 filter grayscale blur-[1px]'
-          preview={false}
-        />
-        <h3 className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white font-semibold'>
-          No Image Found!
-        </h3>
+      <div className='w-full aspect-[4/3] bg-gray-100 animate-pulse rounded-lg flex items-center justify-center'>
+        <span className='text-gray-500'>Loading...</span>
       </div>
     );
   }
 
+  // After loading, check for errors or empty images
+  if (!isLoading && (error || !imageUrls || imageUrls.length === 0)) {
+    return (
+      <div className='relative w-full aspect-[4/3] overflow-hidden'>
+        <AntImage
+          src='/images/no_image_found.webp'
+          alt='No image found'
+          className='object-cover object-bottom h-full w-full opacity-80 filter' // Anchor to bottom
+          preview={false}
+        />
+      </div>
+    );
+  }
   return (
     <div className='relative w-full h-[300px]'>
       <style jsx global>{`

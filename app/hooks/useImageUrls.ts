@@ -32,15 +32,17 @@ export const useImageUrls = (images: ImageData[]) => {
           err instanceof Error ? err.message : 'Failed to fetch image URLs'
         );
       } finally {
-        setIsLoading(false);
+        setIsLoading(false); // Always set loading to false
       }
     };
 
     if (images?.length) {
       fetchImageUrls();
+    } else {
+      setIsLoading(false); // Fix: Handle empty images immediately
+      setImageUrls([]); // Clear URLs if no images provided
     }
 
-    // Refresh URLs every 45 minutes to prevent expiration
     const refreshInterval = setInterval(() => {
       if (images?.length) {
         fetchImageUrls();
