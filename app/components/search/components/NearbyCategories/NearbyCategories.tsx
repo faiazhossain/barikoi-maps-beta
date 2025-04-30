@@ -101,30 +101,30 @@ const NearbyCategories = () => {
   ];
 
   return (
-    <div className="min-w-[300px] max-w-[400px] mt-0 mx-auto lg:mr-auto lg:mx-0 sm:mt-[16px] sm:top-2 z-10 opacity-90 hover:opacity-100 transition-opacity">
-      <div className="bg-white bg-opacity-90 rounded-full backdrop-blur-sm">
-        <div className="w-3/4 mx-auto">
+    <div className='min-w-[300px] max-w-[400px] mt-0 mx-auto lg:mr-auto lg:mx-0 sm:mt-[16px] sm:top-2 z-10 opacity-90 hover:opacity-100 transition-opacity'>
+      <div className='bg-white bg-opacity-90 rounded-full backdrop-blur-sm'>
+        <div className='w-3/4 mx-auto'>
           <Slider {...settings}>
             {categories.map((category, index) => (
-              <div key={index} className="px-2">
-                <div className="flex flex-col items-center">
+              <div key={index} className='px-2'>
+                <div className='flex flex-col items-center'>
                   <Tooltip
                     title={category.name}
-                    placement="bottom"
+                    placement='bottom'
                     mouseEnterDelay={0.1}
                     mouseLeaveDelay={0.1}
                     classNames={{ root: '!mt-2' }}
                     arrow={{ pointAtCenter: true }}
                   >
                     <motion.button
-                      className="w-[44px] h-[44px] flex items-center justify-center rounded-full hover:bg-gray-50 text-gray-500 hover:text-green-600 transition-colors duration-300"
+                      className='w-[44px] h-[44px] flex items-center justify-center rounded-full hover:bg-gray-50 text-gray-500 hover:text-green-600 transition-colors duration-300'
                       whileHover={{
                         scale: 1.2,
                         transition: { duration: 0.2 },
                       }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      <span className="text-lg">{category.icon}</span>
+                      <span className='text-lg'>{category.icon}</span>
                     </motion.button>
                   </Tooltip>
                 </div>

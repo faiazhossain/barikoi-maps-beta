@@ -43,7 +43,7 @@ const DrawerContent = ({ placeDetails }) => {
     <div className='flex flex-col gap-1 pb-4'>
       {placeDetails.images && <ImageCarousel images={placeDetails.images} />}
 
-      <div className='px-4 pt-4'>
+      <div className=' flex align-middle px-4'>
         <PlaceHeader
           name={placeDetails.business_name}
           type={placeDetails.type}
@@ -57,6 +57,7 @@ const DrawerContent = ({ placeDetails }) => {
 
       <div className='px-4'>
         <AddressSection
+          address={placeDetails.address}
           holdingNumber={placeDetails.holding_number}
           roadNameNumber={placeDetails.road_name_number}
           area={placeDetails.area}

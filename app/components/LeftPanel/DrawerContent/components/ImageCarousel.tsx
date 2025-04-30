@@ -127,7 +127,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images }) => {
                       ),
                     }}
                   />
-                  <div className='absolute top-2 right-2 bg-black/50 text-white px-2 py-1 rounded-full text-sm z-10'>
+                  <div className='absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-black/60 text-white px-2 py-1 rounded-full text-[12px] z-10'>
                     {index + 1}/{imageUrls.length}
                   </div>
                 </div>

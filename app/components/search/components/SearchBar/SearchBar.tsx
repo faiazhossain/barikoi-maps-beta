@@ -132,9 +132,9 @@ const SearchBar: React.FC = () => {
         className={`relative left-0 w-screen ${
           isMounted
             ? windowSize.width > 823
-              ? 'z-[2001]'
+              ? 'z-[1001]'
               : 'z-10'
-            : 'z-[2001]'
+            : 'z-[1001]'
         } min-w-[300px] sm:top-4 lg:left-4 sm:w-full sm:max-w-[400px]`}
       >
         {/* Search box wrapper */}
@@ -147,9 +147,9 @@ const SearchBar: React.FC = () => {
               : 'rounded-none sm:rounded-full'
           } shadow-deep`}
         >
-          <div className="flex items-center gap-2">
+          <div className='flex items-center gap-2'>
             {/* Search input and clear button */}
-            <div className="relative w-full">
+            <div className='relative w-full'>
               <SearchInput
                 value={searchTerm}
                 options={options}
@@ -170,7 +170,7 @@ const SearchBar: React.FC = () => {
             </div>
 
             {/* Additional controls */}
-            <Space size={0} className="!ml-2">
+            <Space size={0} className='!ml-2'>
               <DirectionsToggle />
               <CountrySelect />
             </Space>
