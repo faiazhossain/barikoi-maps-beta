@@ -6,6 +6,7 @@ import { useDispatch } from 'react-redux';
 import {
   toggleDrawer,
   setDrawerDimensions,
+  closeDrawer,
 } from '@/app/store/slices/drawerSlice';
 import { useAppSelector } from '@/app/store/store';
 import useWindowSize from '@/app/hooks/useWindowSize';
@@ -15,6 +16,8 @@ import {
   MdOutlineCloseFullscreen,
 } from 'react-icons/md';
 import DrawerContent from './DrawerContent/DrawerContent';
+
+import { TbMinimize } from 'react-icons/tb';
 
 // Constants for responsive breakpoints
 const MOBILE_BREAKPOINT = 823;
@@ -27,6 +30,7 @@ const LeftDrawer: React.FC = () => {
   const { isOpen, placement, width, height, isExpanded } = useAppSelector(
     (state) => state.drawer
   );
+  console.log('🚀 ~ isExpanded:', isExpanded);
   const placeDetails = useAppSelector((state) => state.search.placeDetails);
   const isVisible = useAppSelector((state) => state.ui.isTopPanelVisible);
   const windowSize = useWindowSize();
@@ -113,6 +117,13 @@ const LeftDrawer: React.FC = () => {
     }
   }, [isMobile, isExpanded, dispatch]);
 
+  const toggleMinimize = useCallback(() => {
+    console.log(isMobile);
+    if (isMobile && isOpen) {
+      dispatch(closeDrawer());
+    }
+  }, [isMobile, isOpen, dispatch]);
+
   // ====================== UI Components ======================
   // Toggle button based on device type and state
   const toggleButton = useMemo(() => {
@@ -129,6 +140,21 @@ const LeftDrawer: React.FC = () => {
       <RiExpandRightFill className='text-xl text-gray-600' />
     );
   }, [isMobile, isOpen]);
+
+  // Mobile minimize button (only visible when expanded on mobile)
+  const mobileMinimizeButton = useMemo(() => {
+    if (!isMobile && !isOpen) return null;
+
+    return (
+      <button
+        onClick={toggleMinimize}
+        className='absolute top-0 right-4 z-10 p-2 bg-white '
+        aria-label='Minimize drawer'
+      >
+        <TbMinimize className='text-xl text-gray-600 hover:text-green-600' />
+      </button>
+    );
+  }, [isMobile, isOpen, toggleMinimize]);
 
   // Mobile expand button (only visible on mobile)
   const mobileExpandButton = useMemo(() => {
@@ -234,6 +260,7 @@ const LeftDrawer: React.FC = () => {
         styles={drawerStyles}
       >
         <div className='h-full overflow-x-hidden leftbar-container'>
+          {mobileMinimizeButton}
           <DrawerContent placeDetails={placeDetails} />
           {mobileExpandButton}
         </div>
