@@ -4,7 +4,6 @@ import NearbyCategories from '../search/components/NearbyCategories/NearbyCatego
 import MobileAppLink from '../common/TopPanel/MobileAppLink';
 import dynamic from 'next/dynamic';
 import { useState, useEffect } from 'react';
-import LoadingPage from '../common/InitialLoadingPage/LoadingPage';
 
 const MapContainer = dynamic(() => import('../map/MapContainer/MapContainer'), {
   ssr: false,
@@ -15,6 +14,7 @@ const MainContent = () => {
   const isMapLoaded = useAppSelector((state) => state.map.isMapLoaded);
 
   const [currentFact, setCurrentFact] = useState(0);
+  console.log('🚀 ~ MainContent ~ currentFact:', currentFact);
 
   // Rotate fun facts every 3 seconds
   useEffect(() => {
@@ -25,7 +25,7 @@ const MainContent = () => {
   }, []);
 
   return (
-    <main className="relative w-full h-[100dvh] overflow-hidden">
+    <main className='relative w-full h-[100dvh] overflow-hidden'>
       {/* {!isMapLoaded && <LoadingPage currentFact={currentFact} />} */}
       <>
         {isMapLoaded && <MobileAppLink />}
