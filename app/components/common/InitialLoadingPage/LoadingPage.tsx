@@ -1,6 +1,7 @@
 // components/common/LoadingPage/LoadingPage.tsx
 import Image from 'next/image';
-import { TbBulb } from 'react-icons/tb';
+import { TbBulb, TbCloudOff, TbWifiOff } from 'react-icons/tb';
+import { useEffect, useState } from 'react';
 
 const funFacts = [
   'Did you know? Barikoi Maps powers over 1 million users worldwide!',
@@ -15,6 +16,48 @@ interface LoadingPageProps {
 }
 
 const LoadingPage = ({ currentFact }: LoadingPageProps) => {
+  const [elapsedTime, setElapsedTime] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setElapsedTime((prev) => prev + 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const renderTimeoutMessage = () => {
+    if (elapsedTime >= 35) {
+      return (
+        <div className='mt-6 p-4 bg-red-100 rounded-lg flex items-center gap-3'>
+          <TbCloudOff className='text-red-500 text-2xl' />
+          <p className='text-red-700 font-medium'>
+            Might be the server is down. Please try again later.
+          </p>
+        </div>
+      );
+    } else if (elapsedTime >= 22) {
+      return (
+        <div className='mt-6 p-4 bg-orange-100 rounded-lg flex items-center gap-3'>
+          <TbCloudOff className='text-orange-500 text-2xl' />
+          <p className='text-orange-700 font-medium'>
+            Still loading... Server might be experiencing issues.
+          </p>
+        </div>
+      );
+    } else if (elapsedTime >= 10) {
+      return (
+        <div className='mt-6 p-4 bg-yellow-100 rounded-lg flex items-center gap-3'>
+          <TbWifiOff className='text-yellow-500 text-2xl' />
+          <p className='text-yellow-700 font-medium'>
+            Taking too long to load? Check your internet connection.
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className='absolute inset-0 flex flex-col items-center justify-center bg-gray-100/80 backdrop-blur-md z-[1002]'>
       {/* Background Video */}
@@ -51,6 +94,9 @@ const LoadingPage = ({ currentFact }: LoadingPageProps) => {
           </p>
         </div>
       </div>
+
+      {/* Timeout Messages */}
+      {renderTimeoutMessage()}
     </div>
   );
 };

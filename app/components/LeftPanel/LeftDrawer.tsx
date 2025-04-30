@@ -28,9 +28,8 @@ const LeftDrawer: React.FC = () => {
   const dispatch = useDispatch();
 
   // Redux state selectors
-  const { isOpen, placement, width, height, isExpanded } = useAppSelector(
-    (state) => state.drawer
-  );
+  const { isOpen, isLeftBarOpen, placement, width, height, isExpanded } =
+    useAppSelector((state) => state.drawer);
 
   const placeDetails = useAppSelector((state) => state.search.placeDetails);
   const isVisible = useAppSelector((state) => state.ui.isTopPanelVisible);
@@ -62,7 +61,7 @@ const LeftDrawer: React.FC = () => {
       dispatch(
         setDrawerDimensions({
           placement: 'left',
-          width: 400,
+          width: 404,
           isExpanded: false,
         })
       );
@@ -184,7 +183,7 @@ const LeftDrawer: React.FC = () => {
       <AnimatePresence>
         <motion.div
           initial={{ x: 0 }}
-          animate={{ x: isOpen ? width : 0 }}
+          animate={{ x: isLeftBarOpen ? width : 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           className='fixed top-[50%] left-0 z-[1001] -translate-y-1/2'
         >
@@ -252,7 +251,7 @@ const LeftDrawer: React.FC = () => {
         placement={placement}
         closable={false}
         onClose={handleToggle}
-        open={isOpen}
+        open={isLeftBarOpen}
         key={placement}
         mask={false}
         width={width}

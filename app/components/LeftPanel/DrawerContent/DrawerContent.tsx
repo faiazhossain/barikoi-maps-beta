@@ -9,6 +9,7 @@ import { ContactInfo } from './components/ContactInfo';
 import { AdditionalInfo } from './components/AdditionalInfo';
 import ImageCarousel from './components/ImageCarousel';
 import useWindowSize from '@/app/hooks/useWindowSize';
+import { Skeleton } from 'antd';
 
 interface ContactInfoData {
   name: string | null;
@@ -33,7 +34,7 @@ const DrawerContent = ({ placeDetails }) => {
     return (
       <div className='p-4 flex justify-center items-center h-full'>
         <div className='animate-pulse text-gray-500'>
-          Loading place details...
+          <Skeleton />
         </div>
       </div>
     );

@@ -3,6 +3,7 @@ import type { DrawerProps } from 'antd';
 
 interface DrawerState {
   isOpen: boolean;
+  isLeftBarOpen: boolean;
   placement: DrawerProps['placement'];
   width: number | string; // Changed to support string values like '100%'
   height: number | string; // New property for mobile height
@@ -11,6 +12,7 @@ interface DrawerState {
 
 const initialState: DrawerState = {
   isOpen: false,
+  isLeftBarOpen: false,
   placement: 'left',
   width: 400, // Default width for desktop
   height: '100%', // Default height for desktop
@@ -24,11 +26,17 @@ const drawerSlice = createSlice({
     openDrawer: (state) => {
       state.isOpen = true;
     },
+    openLeftBar: (state) => {
+      state.isLeftBarOpen = true;
+    },
     toggleDrawer: (state) => {
       state.isOpen = !state.isOpen;
     },
     closeDrawer: (state) => {
       state.isOpen = false;
+    },
+    closeLeftBar: (state) => {
+      state.isLeftBarOpen = false;
     },
     setDrawerDimensions: (
       state,
@@ -67,6 +75,8 @@ export const {
   toggleDrawer,
   closeDrawer,
   openDrawer,
+  openLeftBar,
+  closeLeftBar,
   setDrawerDimensions,
   toggleExpand,
   setDrawerWidth,

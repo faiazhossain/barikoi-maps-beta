@@ -16,7 +16,7 @@ import {
   selectSuggestions,
   selectSearchMode,
 } from '@/app/store/selectors/searchSelectors';
-import { closeDrawer } from '@/app/store/slices/drawerSlice';
+import { closeDrawer, openLeftBar } from '@/app/store/slices/drawerSlice';
 import { fetchPlaceDetails } from '@/app/store/thunks/searchThunks';
 
 // Custom hooks
@@ -80,9 +80,9 @@ const SearchBar: React.FC = () => {
   // Event handlers
   const handleSelect = (value: string, option: any) => {
     const selectedData = option.rawData;
-
     if (selectedData) {
       dispatch(setSelectedPlace(selectedData));
+      dispatch(openLeftBar());
       if (selectedData.uCode) {
         dispatch(fetchPlaceDetails(selectedData.uCode));
       }

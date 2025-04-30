@@ -9,6 +9,7 @@ import BarikoiAttribution from './BarikoiAttribution';
 import { useDispatch } from 'react-redux';
 import { setMapLoaded } from '@/app/store/slices/mapSlice';
 import LeftDrawer from '../../LeftPanel/LeftDrawer';
+import { useAppSelector } from '@/app/store/store';
 
 const MapContainer: React.FC = () => {
   const mapRef = useMapRef();
@@ -17,7 +18,7 @@ const MapContainer: React.FC = () => {
   const handleMapLoad = () => {
     dispatch(setMapLoaded(true)); // Dispatch map loaded state
   };
-
+  const { isLeftBarOpen } = useAppSelector((state) => state.drawer);
   return (
     <Map
       ref={mapRef}
@@ -28,13 +29,13 @@ const MapContainer: React.FC = () => {
         zoom: 12,
       }}
       style={{ width: '100vw', height: '100dvh' }}
-      mapStyle="/map-styles/light-style.json" // Local style.json
+      mapStyle='/map-styles/light-style.json' // Local style.json
       attributionControl={false}
       onLoad={handleMapLoad} // Trigger when the map is fully loaded
     >
       <MapControls />
       <BarikoiAttribution />
-      <LeftDrawer />
+      {isLeftBarOpen && <LeftDrawer />}
     </Map>
   );
 };
