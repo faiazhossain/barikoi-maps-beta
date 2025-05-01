@@ -34,7 +34,7 @@ const MainContent = () => {
         <div
           className={`absolute ${
             isVisible ? `top-[53px] sm:top-0` : `top-2`
-          } left-0 w-full flex flex-row flex-wrap justify-center gap-2 sm:gap-6`}
+          } left-0 w-full flex flex-row flex-wrap justify-center gap-2 sm:gap-6 md:gap-11`}
         >
           <SearchBar />
           <NearbyCategories />
