@@ -4,7 +4,7 @@ import NearbyCategories from '../search/components/NearbyCategories/NearbyCatego
 import MobileAppLink from '../common/TopPanel/MobileAppLink';
 import dynamic from 'next/dynamic';
 import { useState, useEffect } from 'react';
-import LoadingPage from '../common/InitialLoadingPage/LoadingPage';
+import LoadingPage from '../common/LoadingPage/LoadingPage';
 // import { useState, useEffect } from 'react';
 
 const MapContainer = dynamic(() => import('../map/MapContainer/MapContainer'), {

@@ -137,38 +137,18 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images }) => {
   );
 };
 
-const NextArrow = (props: any) => {
-  const { className, style, onClick } = props;
-  return (
-    <div
-      className={className}
-      style={{
-        ...style,
-        right: '10px',
-        zIndex: 1,
-        width: '30px',
-        height: '30px',
-      }}
-      onClick={onClick}
-    />
-  );
-};
+const NextArrow = ({ className, onClick }: any) => (
+  <div
+    className={`${className} !right-[2px] !z-[1] !w-[30px] !h-[30px] bg-red-600`}
+    onClick={onClick}
+  />
+);
 
-const PrevArrow = (props: any) => {
-  const { className, style, onClick } = props;
-  return (
-    <div
-      className={className}
-      style={{
-        ...style,
-        left: '10px',
-        zIndex: 1,
-        width: '30px',
-        height: '30px',
-      }}
-      onClick={onClick}
-    />
-  );
-};
+const PrevArrow = ({ className, onClick }: any) => (
+  <div
+    className={`${className} !left-[8px] !z-[1] !w-[30px] !h-[30px]`}
+    onClick={onClick}
+  />
+);
 
 export default ImageCarousel;

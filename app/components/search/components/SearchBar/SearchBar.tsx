@@ -29,7 +29,7 @@ import ClearButton from '../ClearButton';
 import DirectionsToggle from '../DirectionToggle';
 import SearchInput from '../SearchInput';
 import CountrySelect from '../CountrySelect/CountrySelect';
-import { AnimatePresence, motion } from 'framer-motion';
+// import { AnimatePresence, motion } from 'framer-motion';
 
 // Styles
 import './styles.css';
@@ -112,7 +112,7 @@ const SearchBar: React.FC = () => {
   return (
     <>
       {/* Backdrop overlay for mobile */}
-      <AnimatePresence>
+      {/* <AnimatePresence>
         {isExpanded && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -125,7 +125,7 @@ const SearchBar: React.FC = () => {
             }}
           />
         )}
-      </AnimatePresence>
+      </AnimatePresence> */}
 
       {/* Main search container */}
       <div

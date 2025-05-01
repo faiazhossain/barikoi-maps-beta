@@ -8,17 +8,19 @@ import MapControls from './MapControls';
 import BarikoiAttribution from './BarikoiAttribution';
 import { useDispatch } from 'react-redux';
 import { setMapLoaded } from '@/app/store/slices/mapSlice';
-import LeftDrawer from '../../LeftPanel/LeftDrawer';
+// import LeftDrawer from '../../LeftPanel/LeftDrawer';
 import { useAppSelector } from '@/app/store/store';
+import MapLoader from '../../common/LoadingPage/MapLoader';
+import ResponsiveDrawer from '../../LeftPanel/ResponsiveDrawer';
 
 const MapContainer: React.FC = () => {
   const mapRef = useMapRef();
   const dispatch = useDispatch();
-
+  const isLoading = useAppSelector((state) => state.search.placeDetailsLoading);
   const handleMapLoad = () => {
     dispatch(setMapLoaded(true)); // Dispatch map loaded state
   };
-  const { isLeftBarOpen } = useAppSelector((state) => state.drawer);
+  // const { isLeftBarOpen } = useAppSelector((state) => state.drawer);
   return (
     <Map
       ref={mapRef}
@@ -35,7 +37,9 @@ const MapContainer: React.FC = () => {
     >
       <MapControls />
       <BarikoiAttribution />
-      {isLeftBarOpen && <LeftDrawer />}
+      {/* {isLeftBarOpen && <LeftDrawer />} */}
+      <ResponsiveDrawer />
+      {isLoading && <MapLoader />}
     </Map>
   );
 };

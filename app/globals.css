@@ -23,34 +23,6 @@ div {
   backdrop-filter: blur(4px);
 }
 
-/* Slick arrow button styles */
-.slick-prev,
-.slick-next {
-  width: 30px !important;
-  height: 30px !important;
-  border-radius: 50% !important;
-}
-
-.slick-prev:hover,
-.slick-next:hover {
-  background: #f3f4f6 !important;
-}
-
-.slick-prev:before,
-.slick-next:before {
-  color: #585d69 !important;
-  font-size: 20px !important;
-}
-
-/* Position adjustments */
-.slick-prev {
-  left: -35px !important;
-}
-
-.slick-next {
-  right: -35px !important;
-}
-
 /* width */
 ::-webkit-scrollbar {
   width: 3px;
