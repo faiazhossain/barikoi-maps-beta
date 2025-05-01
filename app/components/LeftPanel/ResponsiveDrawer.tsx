@@ -22,6 +22,7 @@ const DRAWER_WIDTH_TABLET = 400;
 const DRAWER_WIDTH_DESKTOP = 432;
 const BUTTON_HEIGHT = 48;
 const PADDING = 48;
+const INITIAL_DRAWER_HEIGHT = 300;
 
 const ResponsiveDrawer: React.FC<ResponsiveDrawerProps> = ({
   defaultOpen = true,
@@ -30,7 +31,7 @@ const ResponsiveDrawer: React.FC<ResponsiveDrawerProps> = ({
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const controls = useAnimation();
   const drawerRef = useRef<HTMLDivElement>(null);
-  const [drawerHeight, setDrawerHeight] = useState(300);
+  const [drawerHeight, setDrawerHeight] = useState(INITIAL_DRAWER_HEIGHT);
   const resizeTimeoutRef = useRef<NodeJS.Timeout>();
   const placeDetails = useAppSelector((state) => state.search.placeDetails);
 
@@ -43,7 +44,7 @@ const ResponsiveDrawer: React.FC<ResponsiveDrawerProps> = ({
   );
 
   const contentHeight = useMemo(
-    () => (isMobile ? drawerHeight - PADDING : height - PADDING),
+    () => (isMobile ? drawerHeight - PADDING : height),
     [isMobile, drawerHeight, height]
   );
 
@@ -73,12 +74,20 @@ const ResponsiveDrawer: React.FC<ResponsiveDrawerProps> = ({
     [drawerWidth, height, drawerHeight]
   );
 
+  // Reset drawer height when switching between mobile and desktop
   useEffect(() => {
-    if (isMobile) {
-      controls.start(isOpen ? 'open' : 'closed');
+    if (!isMobile) {
+      setDrawerHeight(height); // Reset to full height when not mobile
     } else {
-      controls.start(isOpen ? 'open' : 'closed');
+      // When switching to mobile, use either the previous mobile height or initial height
+      setDrawerHeight((prev) =>
+        prev === height ? INITIAL_DRAWER_HEIGHT : prev
+      );
     }
+  }, [isMobile, height]);
+
+  useEffect(() => {
+    controls.start(isOpen ? 'open' : 'closed');
   }, [isMobile, isOpen, controls]);
 
   useEffect(() => {
@@ -88,11 +97,7 @@ const ResponsiveDrawer: React.FC<ResponsiveDrawerProps> = ({
       }
 
       resizeTimeoutRef.current = setTimeout(() => {
-        if (isMobile) {
-          controls.start(isOpen ? 'open' : 'closed');
-        } else {
-          controls.start(isOpen ? 'open' : 'closed');
-        }
+        controls.start(isOpen ? 'open' : 'closed');
       }, 100);
     };
 
@@ -192,6 +197,7 @@ const ResponsiveDrawer: React.FC<ResponsiveDrawerProps> = ({
             left: 0,
             top: 0,
             width: drawerWidth,
+            height: '100%', // Ensure full height in desktop mode
           }),
         }}
       >

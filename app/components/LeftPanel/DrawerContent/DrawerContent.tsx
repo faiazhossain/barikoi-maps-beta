@@ -8,6 +8,7 @@ import { ContactInfo } from './components/ContactInfo';
 import { AdditionalInfo } from './components/AdditionalInfo';
 import ImageCarousel from './components/ImageCarousel';
 import useWindowSize from '@/app/hooks/useWindowSize';
+import LocationMeta from './components/LocationMeta';
 
 interface ContactInfoData {
   name: string | null;
@@ -42,7 +43,7 @@ const DrawerContent = ({ placeDetails }) => {
 
       <div className=' flex align-middle px-4'>
         <PlaceHeader
-          name={placeDetails.business_name}
+          name={placeDetails.business_name || placeDetails.place_name}
           type={placeDetails.type}
           subType={placeDetails.sub_type}
         />
@@ -81,12 +82,8 @@ const DrawerContent = ({ placeDetails }) => {
           subArea={placeDetails.sub_area}
         />
       </div>
-
-      <div className='px-4 pt-2 text-xs text-gray-400'>
-        <p>
-          Location: {placeDetails.latitude}, {placeDetails.longitude}
-        </p>
-        <p>Place Code: {placeDetails.place_code}</p>
+      <div className='px-4'>
+        <LocationMeta placeDetails={placeDetails} />
       </div>
     </div>
   );
