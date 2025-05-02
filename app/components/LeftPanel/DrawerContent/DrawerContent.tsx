@@ -44,11 +44,6 @@ const itemVariants = {
 };
 
 const DrawerContent = ({ placeDetails, placeDetailsLoading }) => {
-  console.log(
-    '🚀 ~ DrawerContent ~  placeDetails, placeDetailsLoading:',
-    placeDetails,
-    placeDetailsLoading
-  );
   const windowSize = useWindowSize();
   const isMobile = useMemo(
     () => windowSize.width <= MOBILE_BREAKPOINT,
