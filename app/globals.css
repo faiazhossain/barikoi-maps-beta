@@ -40,3 +40,48 @@ div {
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
+
+/* Share Modal Styles */
+.share-modal .ant-modal-content {
+  @apply rounded-xl sm:rounded-2xl mx-2;
+}
+
+.share-modal .ant-modal-header {
+  @apply rounded-t-xl sm:rounded-t-2xl;
+}
+
+.share-tabs .ant-tabs-nav {
+  @apply mb-2 sm:mb-4;
+}
+
+.share-tabs .ant-tabs-nav::before {
+  @apply border-0;
+}
+
+.share-tabs .ant-tabs-tab {
+  @apply rounded-lg !important;
+  @apply m-0 mx-1 sm:mx-2 !important;
+  @apply py-1 px-2 sm:py-2 sm:px-4 !important;
+}
+
+.share-tabs .ant-tabs-tab-active {
+  @apply bg-green-50 !important;
+}
+
+.share-tabs .ant-tabs-ink-bar {
+  @apply bg-green-500;
+}
+
+@media (max-width: 640px) {
+  .share-modal .ant-modal-content {
+    @apply p-3;
+  }
+
+  .share-modal .ant-modal-body {
+    @apply p-0;
+  }
+
+  .share-tabs .ant-tabs-nav {
+    @apply px-1;
+  }
+}

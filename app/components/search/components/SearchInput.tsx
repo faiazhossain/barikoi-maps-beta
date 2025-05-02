@@ -41,138 +41,92 @@ const SearchInput: React.FC<SearchInputProps> = ({
   const dropdownStyle = useDropdownStyles();
   const [processedOptions, setProcessedOptions] =
     useState<AutoCompleteOption[]>(options);
+  const [isCoordinate, setIsCoordinate] = useState(false);
 
-  const isCoordinateSearch = (input: string): boolean => {
-    if (!input) return false;
-
+  // Move coordinate check to a separate function
+  const validateCoordinates = (input: string) => {
     const parts = input.split(',');
-    if (parts.length !== 2) return false;
+    if (parts.length !== 2) return null;
 
     const [first, second] = parts.map((coord) => coord?.trim());
-    if (!first || !second) return false;
-
-    const coordRegex = /^-?\d{1,3}\.\d+$/;
-    if (!coordRegex.test(first) || !coordRegex.test(second)) return false;
+    if (!first || !second) return null;
 
     const firstNum = parseFloat(first);
     const secondNum = parseFloat(second);
 
+    if (isNaN(firstNum) || isNaN(secondNum)) return null;
+
     // Check both possible orders: lat,lng and lng,lat
-    const isLatLngOrder =
+    if (
       firstNum >= -90 &&
-      firstNum <= 90 && // Valid latitude
+      firstNum <= 90 &&
       secondNum >= -180 &&
-      secondNum <= 180; // Valid longitude
-
-    const isLngLatOrder =
-      firstNum >= -180 &&
-      firstNum <= 180 && // Valid longitude
-      secondNum >= -90 &&
-      secondNum <= 90; // Valid latitude
-
-    return isLatLngOrder || isLngLatOrder;
-  };
-  // Update the coordinate processing in your useEffect
-  useEffect(() => {
-    if (value && isCoordinateSearch(value)) {
-      const parts = value.split(',');
-      if (parts.length === 2) {
-        const [first, second] = parts.map((coord) => coord?.trim());
-
-        if (first && second) {
-          const firstNum = parseFloat(first);
-          const secondNum = parseFloat(second);
-
-          if (!isNaN(firstNum) && !isNaN(secondNum)) {
-            // Determine the correct order
-            let latNum, lngNum;
-
-            if (
-              firstNum >= -90 &&
-              firstNum <= 90 &&
-              secondNum >= -180 &&
-              secondNum <= 180
-            ) {
-              // First is latitude, second is longitude
-              latNum = firstNum;
-              lngNum = secondNum;
-            } else {
-              // First is longitude, second is latitude
-              latNum = secondNum;
-              lngNum = firstNum;
-            }
-
-            const coordinateOption = {
-              value: value,
-              label: (
-                <div className='flex flex-col'>
-                  <span>
-                    Coordinates: {latNum}, {lngNum}
-                  </span>
-                  <span className='text-xs text-gray-500'>
-                    Go to this location
-                  </span>
-                </div>
-              ),
-              rawData: {
-                type: 'coordinates',
-                lat: latNum,
-                lng: lngNum,
-                originalInput: value,
-              },
-            };
-            // Only show the coordinate option when coordinates are detected
-            setProcessedOptions([coordinateOption]);
-            return;
-          }
-        }
-      }
+      secondNum <= 180
+    ) {
+      return { lat: firstNum, lng: secondNum };
     }
-    // Show regular options when not a coordinate search
-    setProcessedOptions(options);
+
+    if (
+      firstNum >= -180 &&
+      firstNum <= 180 &&
+      secondNum >= -90 &&
+      secondNum <= 90
+    ) {
+      return { lat: secondNum, lng: firstNum };
+    }
+
+    return null;
+  };
+
+  useEffect(() => {
+    if (!value) {
+      setIsCoordinate(false);
+      setProcessedOptions([]);
+      return;
+    }
+
+    const coords = validateCoordinates(value);
+    if (coords) {
+      setIsCoordinate(true);
+      const coordinateOption = {
+        value: value,
+        label: (
+          <div className='flex flex-col'>
+            <span>
+              Coordinates: {coords.lat}, {coords.lng}
+            </span>
+            <span className='text-xs text-gray-500'>Go to this location</span>
+          </div>
+        ),
+        rawData: {
+          type: 'coordinates',
+          lat: coords.lat,
+          lng: coords.lng,
+          originalInput: value,
+        },
+      };
+      setProcessedOptions([coordinateOption]);
+    } else {
+      setIsCoordinate(false);
+      setProcessedOptions(options);
+    }
   }, [value, options]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      if (value && isCoordinateSearch(value)) {
-        const parts = value.split(',');
-        if (parts.length === 2) {
-          const [first, second] = parts.map((coord) => coord?.trim());
-          if (first && second) {
-            const firstNum = parseFloat(first);
-            const secondNum = parseFloat(second);
-
-            if (!isNaN(firstNum) && !isNaN(secondNum)) {
-              // Determine the correct order
-              let latNum, lngNum;
-
-              if (
-                firstNum >= -90 &&
-                firstNum <= 90 &&
-                secondNum >= -180 &&
-                secondNum <= 180
-              ) {
-                latNum = firstNum;
-                lngNum = secondNum;
-              } else {
-                latNum = secondNum;
-                lngNum = firstNum;
-              }
-
-              const coordinateOption = {
-                value: `${latNum}, ${lngNum}`,
-                rawData: {
-                  type: 'coordinates',
-                  lat: latNum,
-                  lng: lngNum,
-                  originalInput: value,
-                },
-              };
-              onSelect(`${latNum}, ${lngNum}`, coordinateOption);
-              return;
-            }
-          }
-        }
+      const coords = validateCoordinates(value);
+      if (coords) {
+        const coordinateOption = {
+          value: `${coords.lat}, ${coords.lng}`,
+          rawData: {
+            type: 'coordinates',
+            lat: coords.lat,
+            lng: coords.lng,
+            originalInput: value,
+          },
+        };
+        onSelect(`${coords.lat}, ${coords.lng}`, coordinateOption);
+        return;
       }
 
       if (onDirectSearch && value) {
@@ -193,7 +147,14 @@ const SearchInput: React.FC<SearchInputProps> = ({
         [&_.ant-select-selector]:!px-6
         [&_.ant-select-selection-search-input]:!p-0'
         value={value}
-        onDropdownVisibleChange={onDropdownVisibleChange}
+        onDropdownVisibleChange={(open) => {
+          // Only show dropdown if we have options or it's a coordinate
+          if (!open || (!processedOptions.length && !isCoordinate)) {
+            onDropdownVisibleChange(false);
+          } else {
+            onDropdownVisibleChange(true);
+          }
+        }}
         options={processedOptions}
         allowClear={{ clearIcon: <div className='hidden bg-none'></div> }}
         onSearch={onSearch}

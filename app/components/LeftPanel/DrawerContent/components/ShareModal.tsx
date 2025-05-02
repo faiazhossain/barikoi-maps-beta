@@ -1,15 +1,15 @@
 import React, { useRef } from 'react';
 import { Modal, Button, Tabs, QRCode, message, Divider, Card } from 'antd';
-import { FaQrcode, FaLink, FaSave, FaShareAlt } from 'react-icons/fa';
-import html2canvas from 'html2canvas';
 import {
-  FacebookMessengerShareButton,
-  WhatsappShareButton,
-  TwitterShareButton,
-  FacebookMessengerIcon,
-  WhatsappIcon,
-  TwitterIcon,
-} from 'react-share';
+  FaQrcode,
+  FaLink,
+  FaSave,
+  FaShareAlt,
+  FaFacebookMessenger,
+  FaWhatsapp,
+  FaTwitter,
+} from 'react-icons/fa';
+import html2canvas from 'html2canvas';
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -30,7 +30,6 @@ const getShareUrl = (placeInfo) => {
   const baseUrl = window.location.origin;
   const currentPath = window.location.pathname;
   const currentHash = window.location.hash;
-
   return `${baseUrl}${currentPath}?place=${placeInfo.uCode}${currentHash}`;
 };
 
@@ -42,8 +41,13 @@ const ShareModal: React.FC<ShareModalProps> = ({
   const qrCodeRef = useRef<HTMLDivElement>(null);
   const shareUrl = getShareUrl(placeInfo);
   const shareText = `Check out ${placeInfo.name} on Barikoi Maps!`;
-  const FACEBOOK_APP_ID =
-    process.env.REACT_APP_FACEBOOK_APP_ID || 'YOUR_APP_ID';
+
+  const handleMessengerShare = () => {
+    const messengerUrl = `fb-messenger://share?link=${encodeURIComponent(
+      shareUrl
+    )}&app_id=${process.env.NEXT_PUBLIC_FACEBOOK_APP_ID}`;
+    window.open(messengerUrl, '_blank');
+  };
 
   const handleCopyLink = async () => {
     try {
@@ -95,93 +99,133 @@ const ShareModal: React.FC<ShareModalProps> = ({
       open={isOpen}
       onCancel={onClose}
       title={
-        <div className='flex items-center gap-3'>
-          <FaShareAlt className='text-green-500 text-xl' />
-          <span className='text-xl font-semibold'>Share Location</span>
+        <div className='flex items-center gap-2 p-2 sm:p-3'>
+          <FaShareAlt className='text-green-500 text-xl sm:text-2xl' />
+          <span className='text-lg sm:text-2xl font-semibold text-gray-800'>
+            Share Location
+          </span>
         </div>
       }
       footer={null}
-      width={480}
+      width='95%'
+      style={{ maxWidth: '500px' }}
       className='share-modal'
       centered
     >
-      <Card bordered={false} className='shadow-none' bodyStyle={{ padding: 0 }}>
+      <Card
+        bordered={false}
+        className='shadow-none'
+        bodyStyle={{ padding: '16px 0 24px' }}
+      >
         <Tabs
-          tabBarStyle={{ marginBottom: 24 }}
+          type='card'
+          className='share-tabs'
           items={[
             {
               key: '1',
               label: (
-                <span className='flex items-center gap-2 font-medium'>
-                  <FaShareAlt className='text-green-500' /> Share
+                <span className='flex items-center gap-1 sm:gap-2 px-2 py-1'>
+                  <FaShareAlt className='text-green-500' />
+                  <span className='font-medium text-sm sm:text-base'>
+                    Share
+                  </span>
                 </span>
               ),
               children: (
-                <div className='flex flex-col gap-6'>
+                <div className='flex flex-col gap-4 sm:gap-6 p-3 sm:p-4'>
                   {typeof navigator.share === 'function' && (
                     <>
                       <Button
                         type='primary'
                         icon={<FaShareAlt />}
                         onClick={handleNativeShare}
-                        className='bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 h-12 text-lg font-medium shadow-md'
+                        className='bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 
+                          h-10 sm:h-14 text-base sm:text-lg font-medium shadow-lg rounded-xl transition-all duration-300 
+                          hover:shadow-green-200 hover:shadow-xl'
                         block
                       >
                         Share Location
                       </Button>
-                      <Divider className='text-gray-400 before:border-t after:border-t'>
+                      <Divider className='text-gray-400 text-sm sm:text-base'>
                         or share via
                       </Divider>
                     </>
                   )}
 
-                  <div className='grid grid-cols-3 gap-4'>
-                    <WhatsappShareButton
-                      url={shareUrl}
-                      title={shareText}
-                      className='flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#128C7E] text-white h-12 font-medium shadow-md rounded-md overflow-hidden'
-                    >
-                      <WhatsappIcon size={32} round />
-                      <span className='hidden sm:inline'>WhatsApp</span>
-                    </WhatsappShareButton>
-
-                    <FacebookMessengerShareButton
-                      url={shareUrl}
-                      appId={FACEBOOK_APP_ID}
-                      className='flex items-center justify-center gap-2 bg-[#1877F2] hover:bg-[#166FE5] text-white h-12 font-medium shadow-md rounded-md overflow-hidden'
-                    >
-                      <FacebookMessengerIcon size={32} round />
-                      <span className='hidden sm:inline'>Messenger</span>
-                    </FacebookMessengerShareButton>
-
-                    <TwitterShareButton
-                      url={shareUrl}
-                      title={shareText}
-                      className='flex items-center justify-center gap-2 bg-[#1DA1F2] hover:bg-[#1A91DA] text-white h-12 font-medium shadow-md rounded-md overflow-hidden'
-                    >
-                      <TwitterIcon size={32} round />
-                      <span className='hidden sm:inline'>Twitter</span>
-                    </TwitterShareButton>
+                  <div className='grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4'>
+                    {[
+                      {
+                        icon: (
+                          <FaWhatsapp className='text-[#25D366] text-2xl sm:text-3xl' />
+                        ),
+                        label: 'WhatsApp',
+                        onClick: () =>
+                          window.open(
+                            `https://wa.me/?text=${encodeURIComponent(
+                              shareText + '\n' + shareUrl
+                            )}`,
+                            '_blank'
+                          ),
+                      },
+                      {
+                        icon: (
+                          <FaFacebookMessenger className='text-[#00B2FF] text-2xl sm:text-3xl' />
+                        ),
+                        label: 'Messenger',
+                        onClick: handleMessengerShare,
+                      },
+                      {
+                        icon: (
+                          <FaTwitter className='text-[#1DA1F2] text-2xl sm:text-3xl' />
+                        ),
+                        label: 'Twitter',
+                        onClick: () =>
+                          window.open(
+                            `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+                              shareText
+                            )}&url=${encodeURIComponent(shareUrl)}`,
+                            '_blank'
+                          ),
+                      },
+                    ].map((item, index) => (
+                      <button
+                        key={index}
+                        onClick={item.onClick}
+                        className={`flex flex-col items-center justify-center gap-2 p-3 sm:p-4 bg-white 
+                          border border-gray-200 rounded-xl hover:shadow-lg hover:border-green-300 
+                          transition-all duration-300 ${
+                            index === 2 ? 'col-span-2 sm:col-span-1' : ''
+                          }`}
+                      >
+                        {item.icon}
+                        <span className='text-xs sm:text-sm font-medium text-gray-600'>
+                          {item.label}
+                        </span>
+                      </button>
+                    ))}
                   </div>
 
-                  <Divider className='text-gray-400 before:border-t after:border-t'>
+                  <Divider className='text-gray-400 text-sm sm:text-base'>
                     or copy link
                   </Divider>
 
-                  <div className='flex items-center gap-3'>
+                  <div className='flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 p-2 bg-gray-50 rounded-xl'>
                     <input
                       type='text'
                       value={shareUrl}
                       readOnly
-                      className='flex-1 p-3 border border-gray-300 rounded-lg text-sm text-gray-700 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent'
+                      className='w-full flex-1 p-2 sm:p-3 border border-gray-200 rounded-lg text-xs sm:text-sm 
+                        text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-green-500 
+                        focus:border-transparent'
                     />
                     <Button
                       type='primary'
                       icon={<FaLink />}
                       onClick={handleCopyLink}
-                      className='bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 h-12 px-6 font-medium shadow-md'
+                      className='bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 
+                        h-10 sm:h-12 px-4 sm:px-6 font-medium shadow-md rounded-lg whitespace-nowrap'
                     >
-                      Copy
+                      Copy Link
                     </Button>
                   </div>
                 </div>
@@ -190,24 +234,36 @@ const ShareModal: React.FC<ShareModalProps> = ({
             {
               key: '2',
               label: (
-                <span className='flex items-center gap-2 font-medium'>
-                  <FaQrcode className='text-green-500' /> QR Code
+                <span className='flex items-center gap-1 sm:gap-2 px-2 py-1'>
+                  <FaQrcode className='text-green-500' />
+                  <span className='font-medium text-sm sm:text-base'>
+                    QR Code
+                  </span>
                 </span>
               ),
               children: (
-                <div className='flex flex-col items-center gap-6'>
+                <div className='flex flex-col items-center gap-4 sm:gap-6 p-4 sm:p-6'>
                   <div
                     ref={qrCodeRef}
-                    className='p-6 bg-white rounded-xl shadow-md border border-gray-200'
+                    className='p-4 sm:p-8 bg-white rounded-2xl shadow-lg border border-gray-100 
+                      hover:shadow-xl transition-all duration-300 w-full max-w-[280px] sm:max-w-[320px]'
                   >
                     <QRCode
                       value={shareUrl}
                       color='#28C76F'
-                      size={220}
+                      size={200}
                       bordered={false}
-                      iconSize={40}
+                      style={{
+                        margin: '0 auto',
+                        width: '100%',
+                        height: 'auto',
+                        maxWidth: '240px',
+                      }}
                     />
-                    <div className='mt-4 text-center text-sm font-medium text-gray-600'>
+                    <div
+                      className='mt-3 sm:mt-4 text-center font-medium text-gray-700 text-sm sm:text-base 
+                      break-words'
+                    >
                       {placeInfo.name}
                     </div>
                   </div>
@@ -215,7 +271,9 @@ const ShareModal: React.FC<ShareModalProps> = ({
                     type='primary'
                     icon={<FaSave />}
                     onClick={handleDownloadQR}
-                    className='bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 h-12 px-8 text-lg font-medium shadow-md'
+                    className='bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 
+                      h-10 sm:h-12 px-6 sm:px-8 text-base sm:text-lg font-medium shadow-lg rounded-xl 
+                      hover:shadow-green-200 hover:shadow-xl transition-all duration-300'
                   >
                     Download QR Code
                   </Button>
