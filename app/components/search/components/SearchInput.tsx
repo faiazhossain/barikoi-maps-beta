@@ -176,7 +176,6 @@ const SearchInput: React.FC<SearchInputProps> = ({
       }
 
       if (onDirectSearch && value) {
-        console.log('Direct search triggered for:', value);
         onDirectSearch(value);
         onDropdownVisibleChange(false);
       }

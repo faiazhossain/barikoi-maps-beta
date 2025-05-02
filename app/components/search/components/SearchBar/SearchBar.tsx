@@ -109,6 +109,38 @@ const SearchBar: React.FC = () => {
     }
   };
 
+  const handleDirectSearch = async (value: string) => {
+    try {
+      // 1. Create FormData exactly like in the working project
+      const formData = new FormData();
+      formData.append('q', value);
+
+      // 2. Make the request with the same parameters
+      const response = await fetch('/api/rupantor', {
+        method: 'POST',
+        body: formData, // No headers needed for FormData
+      });
+
+      if (!response.ok) {
+        throw new Error(`Request failed with status: ${response.status}`);
+      }
+
+      const responseData = await response.json();
+
+      // 3. Get the uCode from response
+      const uCode = responseData.geocoded_address?.uCode;
+      if (!uCode) throw new Error('No uCode found in response');
+
+      if (uCode) {
+        dispatch(fetchPlaceDetails(uCode));
+        dispatch(openLeftBar());
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+      throw error; // Re-throw to handle in component
+    }
+  };
+
   return (
     <>
       {/* Main search container */}
@@ -149,6 +181,7 @@ const SearchBar: React.FC = () => {
                 onChange={handleInputChange}
                 onBlur={() => setIsExpanded(false)}
                 onDropdownVisibleChange={handleDropdownVisibility}
+                onDirectSearch={handleDirectSearch}
               />
               <ClearButton searchTerm={searchTerm} />
             </div>

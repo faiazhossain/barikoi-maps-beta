@@ -109,6 +109,22 @@ const ResponsiveDrawer: React.FC<ResponsiveDrawerProps> = ({
       }
     };
   }, [isMobile, isOpen, controls]);
+  // Add this useEffect hook to your component
+  useEffect(() => {
+    // Open the drawer whenever placeDetails changes
+    if (placeDetails) {
+      setIsOpen(true);
+      controls.start(isMobile ? 'open' : 'open'); // Use the appropriate variant
+    }
+  }, [placeDetails, isMobile, controls]);
+
+  // Also modify your existing useEffect for initial state
+  useEffect(() => {
+    // Only set initial closed state if there's no placeDetails
+    if (!placeDetails) {
+      controls.start(isOpen ? 'open' : 'closed');
+    }
+  }, [isMobile, isOpen, controls, placeDetails]);
 
   const toggleDrawer = useCallback(() => {
     if (isMobile) {
