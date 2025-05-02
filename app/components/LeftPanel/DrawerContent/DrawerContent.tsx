@@ -9,6 +9,7 @@ import { AdditionalInfo } from './components/AdditionalInfo';
 import ImageCarousel from './components/ImageCarousel';
 import useWindowSize from '@/app/hooks/useWindowSize';
 import LocationMeta from './components/LocationMeta';
+import MapLoader from '../../common/LoadingPage/MapLoader';
 
 interface ContactInfoData {
   name: string | null;
@@ -19,7 +20,6 @@ interface ContactInfoData {
 const MOBILE_BREAKPOINT = 823;
 const DrawerContent = ({ placeDetails }) => {
   const windowSize = useWindowSize();
-
   // ====================== Responsive Helpers ======================
   const isMobile = useMemo(
     () => windowSize.width <= MOBILE_BREAKPOINT,
@@ -31,8 +31,8 @@ const DrawerContent = ({ placeDetails }) => {
 
   if (!placeDetails) {
     return (
-      <div className='p-4 flex justify-center items-center h-full text-gray-500'>
-        Select a place to view details
+      <div className='absolute inset-0 flex items-center justify-center'>
+        <MapLoader />
       </div>
     );
   }
@@ -40,7 +40,6 @@ const DrawerContent = ({ placeDetails }) => {
   return (
     <div className={`flex flex-col gap-1 pb-4 ${isMobile ? 'mt-8' : 'mt-0'}`}>
       {placeDetails.images && <ImageCarousel images={placeDetails.images} />}
-
       <div className=' flex align-middle px-4'>
         <PlaceHeader
           name={placeDetails.business_name || placeDetails.place_name}

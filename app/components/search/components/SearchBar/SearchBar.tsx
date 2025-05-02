@@ -111,22 +111,6 @@ const SearchBar: React.FC = () => {
 
   return (
     <>
-      {/* Backdrop overlay for mobile */}
-      {/* <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className={`fixed inset-0 bg-gray-900/50 backdrop-blur-sm sm:hidden`}
-            onClick={() => {
-              setIsExpanded(false);
-              dispatch(closeDrawer());
-            }}
-          />
-        )}
-      </AnimatePresence> */}
-
       {/* Main search container */}
       <div
         className={`relative left-0 w-screen ${

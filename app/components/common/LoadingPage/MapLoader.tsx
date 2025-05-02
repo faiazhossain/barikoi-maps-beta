@@ -1,92 +1,140 @@
 'use client';
-import React from 'react';
 
-const MapLoader = () => {
+import React, { useState, useEffect } from 'react';
+import { TbCloudOff, TbWifiOff } from 'react-icons/tb';
+
+interface MapLoaderProps {
+  width?: number; // Optional width in pixels
+  height?: number; // Optional height in pixels
+  spinnerSize?: number; // Optional size for the spinner (defaults to 100)
+  className?: string; // Optional additional className
+  style?: React.CSSProperties; // Optional additional styles
+}
+
+const MapLoader: React.FC<MapLoaderProps> = ({
+  width = 200,
+  height = 230,
+  spinnerSize = 180,
+  className = '',
+  style = {},
+}) => {
+  const [elapsedTime, setElapsedTime] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setElapsedTime((prev) => prev + 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const renderTimeoutMessage = () => {
+    if (elapsedTime >= 35) {
+      return (
+        <div className='bg-red-100 rounded-lg flex items-center gap-3 p-2 mt-2'>
+          <TbCloudOff className='text-red-500 text-xl' />
+          <p className='text-red-700 font-medium text-xs'>
+            Server might be down
+          </p>
+        </div>
+      );
+    } else if (elapsedTime >= 22) {
+      return (
+        <div className='bg-orange-100 rounded-lg flex items-center gap-3 p-2 mt-2'>
+          <TbCloudOff className='text-orange-500 text-xl' />
+          <p className='text-orange-700 font-medium text-xs'>
+            Server experiencing issues
+          </p>
+        </div>
+      );
+    } else if (elapsedTime >= 10) {
+      return (
+        <div className='bg-yellow-100 rounded-lg flex items-center gap-3 p-2 mt-2'>
+          <TbWifiOff className='text-yellow-500 text-xl' />
+          <p className='text-yellow-700 font-medium text-xs'>
+            Check your connection
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div
+      className={`relative ${className}`}
       style={{
-        position: 'fixed',
+        position: 'absolute',
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
         zIndex: 9999,
+        width: `${width}px`,
+        height: `${height}px`,
         textAlign: 'center',
+        display: 'flex',
+        alignItems: 'flex-end',
+        justifyContent: 'center',
+        ...style,
       }}
     >
-      <div
+      {/* Background Video */}
+      <video
+        src='/images/Loading/Spinning-Earth.webm'
+        autoPlay
+        playsInline
+        loop
+        muted
+        className='absolute inset-0 w-full h-full object-cover opacity-30'
         style={{
-          width: '60px',
-          height: '60px',
-          margin: '0 auto 12px',
-          animation: 'rotate 3s linear infinite',
+          width: `${spinnerSize}px`,
+          height: `${spinnerSize}px`,
+          margin: '0 auto',
         }}
-      >
-        <svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'>
-          <circle cx='50' cy='50' r='45' fill='#42a5f5' />
-          <path
-            d='M50 5A45 45 0 0 1 95 50'
-            stroke='#fff'
-            strokeWidth='2'
-            fill='none'
-          />
-          <path
-            d='M50 95A45 45 0 0 1 5 50'
-            stroke='#fff'
-            strokeWidth='2'
-            fill='none'
-          />
-          <path
-            d='M50 15A35 35 0 0 1 85 50'
-            stroke='#66bb6a'
-            strokeWidth='2'
-            fill='none'
-          />
-          <path
-            d='M50 85A35 35 0 0 1 15 50'
-            stroke='#66bb6a'
-            strokeWidth='2'
-            fill='none'
-          />
-          <circle
-            cx='50'
-            cy='50'
-            r='35'
-            fill='none'
-            stroke='#fff'
-            strokeWidth='1'
-          />
-        </svg>
+      />
+
+      {/* Content Overlay */}
+      <div className='relative z-10 flex flex-col items-center w-full'>
+        {/* Loading Text with Dots */}
+        <p
+          style={{
+            color: '#333',
+            fontSize: '14px',
+            fontWeight: '500',
+            margin: 0,
+            marginBottom: '8px',
+          }}
+        >
+          Loading<span className='dot one'>.</span>
+          <span className='dot two'>.</span>
+          <span className='dot three'>.</span>
+        </p>
+        {renderTimeoutMessage()}
       </div>
-      <p
-        style={{
-          color: '#333',
-          fontSize: '14px',
-          fontWeight: '500',
-          margin: 0,
-          animation: 'pulse 1.5s ease-in-out infinite',
-        }}
-      >
-        Loading map...
-      </p>
 
       <style jsx>{`
-        @keyframes rotate {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
+        .dot {
+          opacity: 0;
+          animation: blink 1.4s infinite;
         }
-        @keyframes pulse {
+        .dot.one {
+          animation-delay: 0s;
+        }
+        .dot.two {
+          animation-delay: 0.2s;
+        }
+        .dot.three {
+          animation-delay: 0.4s;
+        }
+
+        @keyframes blink {
           0% {
-            opacity: 1;
+            opacity: 0;
           }
           50% {
-            opacity: 0.6;
+            opacity: 1;
           }
           100% {
-            opacity: 1;
+            opacity: 0;
           }
         }
       `}</style>

@@ -4,6 +4,7 @@ import { useImageUrls } from '@/app/hooks/useImageUrls';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import { Image as AntImage, Card } from 'antd';
+import ImageLoader from '@/app/components/common/LoadingPage/ImageLoader';
 
 interface ImageCarouselProps {
   images: Array<{ key: string; url: string }>;
@@ -47,8 +48,8 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images }) => {
 
   if (isLoading) {
     return (
-      <div className='w-full aspect-[4/3] bg-gray-100 animate-pulse rounded-lg flex items-center justify-center'>
-        <span className='text-gray-500'>Loading...</span>
+      <div className='w-full relative aspect-[4/3] rounded-lg'>
+        <ImageLoader />
       </div>
     );
   }

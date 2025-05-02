@@ -9,13 +9,12 @@ import BarikoiAttribution from './BarikoiAttribution';
 import { useDispatch } from 'react-redux';
 import { setMapLoaded } from '@/app/store/slices/mapSlice';
 import { useAppSelector } from '@/app/store/store';
-import MapLoader from '../../common/LoadingPage/MapLoader';
 import ResponsiveDrawer from '../../LeftPanel/ResponsiveDrawer';
 
 const MapContainer: React.FC = () => {
   const mapRef = useMapRef();
   const dispatch = useDispatch();
-  const isLoading = useAppSelector((state) => state.search.placeDetailsLoading);
+
   const handleMapLoad = () => {
     dispatch(setMapLoaded(true)); // Dispatch map loaded state
   };
@@ -38,7 +37,6 @@ const MapContainer: React.FC = () => {
       <BarikoiAttribution />
       {/* {isLeftBarOpen && <LeftDrawer />} */}
       {isLeftBarOpen && <ResponsiveDrawer />}
-      {isLoading && <MapLoader />}
     </Map>
   );
 };
