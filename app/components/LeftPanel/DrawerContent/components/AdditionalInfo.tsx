@@ -36,49 +36,54 @@ export const AdditionalInfo = ({
     </motion.h3>
 
     <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-      <motion.div
-        variants={infoItem}
-        className='p-3 bg-gray-50 rounded-lg  transition-colors'
-      >
-        <div className='flex items-center gap-2 text-gray-500 mb-1'>
-          <FaMapMarkedAlt className='text-green-400' />
-          <span className='text-sm font-medium'>District</span>
-        </div>
-        <p className='text-gray-800 font-medium'>{district}</p>
-      </motion.div>
-
-      <motion.div
-        variants={infoItem}
-        className='p-3 bg-gray-50 rounded-lg  transition-colors'
-      >
-        <div className='flex items-center gap-2 text-gray-500 mb-1'>
-          <FaMapMarkedAlt className='text-green-400' />
-          <span className='text-sm font-medium'>Thana</span>
-        </div>
-        <p className='text-gray-800 font-medium'>{thana}</p>
-      </motion.div>
-
-      <motion.div
-        variants={infoItem}
-        className='p-3 bg-gray-50 rounded-lg  transition-colors'
-      >
-        <div className='flex items-center gap-2 text-gray-500 mb-1'>
-          <FaMapMarkedAlt className='text-green-400' />
-          <span className='text-sm font-medium'>Area</span>
-        </div>
-        <p className='text-gray-800 font-medium'>{area}</p>
-      </motion.div>
-
-      <motion.div
-        variants={infoItem}
-        className='p-3 bg-gray-50 rounded-lg  transition-colors'
-      >
-        <div className='flex items-center gap-2 text-gray-500 mb-1'>
-          <FaMapMarkedAlt className='text-green-400' />
-          <span className='text-sm font-medium'>Sub Area</span>
-        </div>
-        <p className='text-gray-800 font-medium'>{subArea}</p>
-      </motion.div>
+      {subArea && (
+        <motion.div
+          variants={infoItem}
+          className='p-3 bg-gray-50 rounded-lg  transition-colors'
+        >
+          <div className='flex items-center gap-2 text-gray-500 mb-1'>
+            <FaMapMarkedAlt className='text-green-400' />
+            <span className='text-sm font-medium'>Sub Area</span>
+          </div>
+          <p className='text-gray-800 font-medium'>{subArea}</p>
+        </motion.div>
+      )}{' '}
+      {area && (
+        <motion.div
+          variants={infoItem}
+          className='p-3 bg-gray-50 rounded-lg  transition-colors'
+        >
+          <div className='flex items-center gap-2 text-gray-500 mb-1'>
+            <FaMapMarkedAlt className='text-green-400' />
+            <span className='text-sm font-medium'>Area</span>
+          </div>
+          <p className='text-gray-800 font-medium'>{area}</p>
+        </motion.div>
+      )}
+      {thana && (
+        <motion.div
+          variants={infoItem}
+          className='p-3 bg-gray-50 rounded-lg  transition-colors'
+        >
+          <div className='flex items-center gap-2 text-gray-500 mb-1'>
+            <FaMapMarkedAlt className='text-green-400' />
+            <span className='text-sm font-medium'>Thana</span>
+          </div>
+          <p className='text-gray-800 font-medium'>{thana}</p>
+        </motion.div>
+      )}
+      {district && (
+        <motion.div
+          variants={infoItem}
+          className='p-3 bg-gray-50 rounded-lg  transition-colors'
+        >
+          <div className='flex items-center gap-2 text-gray-500 mb-1'>
+            <FaMapMarkedAlt className='text-green-400' />
+            <span className='text-sm font-medium'>District</span>
+          </div>
+          <p className='text-gray-800 font-medium'>{district}</p>
+        </motion.div>
+      )}
     </div>
   </motion.div>
 );

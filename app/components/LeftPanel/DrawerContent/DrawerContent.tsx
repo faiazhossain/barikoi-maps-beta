@@ -1,6 +1,6 @@
 // DrawerContent.tsx
 import React, { useMemo } from 'react';
-
+import { motion } from 'framer-motion';
 import { PlaceHeader } from './components/PlaceHeader';
 import { ActionButtons } from './components/ActionButtons';
 import { AddressSection } from './components/AddressSection';
@@ -17,10 +17,39 @@ interface ContactInfoData {
   phone: string | null;
   website: string | null;
 }
+
 const MOBILE_BREAKPOINT = 823;
-const DrawerContent = ({ placeDetails }) => {
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: 'easeOut',
+    },
+  },
+};
+
+const DrawerContent = ({ placeDetails, placeDetailsLoading }) => {
+  console.log(
+    '🚀 ~ DrawerContent ~  placeDetails, placeDetailsLoading:',
+    placeDetails,
+    placeDetailsLoading
+  );
   const windowSize = useWindowSize();
-  // ====================== Responsive Helpers ======================
   const isMobile = useMemo(
     () => windowSize.width <= MOBILE_BREAKPOINT,
     [windowSize.width]
@@ -29,7 +58,7 @@ const DrawerContent = ({ placeDetails }) => {
   const contact: ContactInfoData =
     placeDetails?.places_additional_data?.[0]?.contact || {};
 
-  if (!placeDetails) {
+  if (placeDetailsLoading || !placeDetails) {
     return (
       <div className='absolute inset-0 flex items-center justify-center'>
         <MapLoader />
@@ -38,21 +67,31 @@ const DrawerContent = ({ placeDetails }) => {
   }
 
   return (
-    <div className={`flex flex-col gap-1 pb-4 ${isMobile ? 'mt-8' : 'mt-0'}`}>
-      {placeDetails.images && <ImageCarousel images={placeDetails.images} />}
-      <div className=' flex align-middle px-4'>
+    <motion.div
+      className={`flex flex-col gap-1 pb-4 ${isMobile ? 'mt-8' : 'mt-0'}`}
+      initial='hidden'
+      animate='visible'
+      variants={containerVariants}
+    >
+      {placeDetails.images && (
+        <motion.div variants={itemVariants}>
+          <ImageCarousel images={placeDetails.images} />
+        </motion.div>
+      )}
+
+      <motion.div className='flex align-middle px-4' variants={itemVariants}>
         <PlaceHeader
           name={placeDetails.business_name || placeDetails.place_name}
           type={placeDetails.type}
           subType={placeDetails.sub_type}
         />
-      </div>
+      </motion.div>
 
-      <div className='px-4'>
+      <motion.div className='px-4' variants={itemVariants}>
         <ActionButtons />
-      </div>
+      </motion.div>
 
-      <div className='px-4'>
+      <motion.div className='px-4' variants={itemVariants}>
         <AddressSection
           address={placeDetails.address}
           holdingNumber={placeDetails.holding_number}
@@ -61,30 +100,31 @@ const DrawerContent = ({ placeDetails }) => {
           city={placeDetails.city}
           postcode={placeDetails.postcode}
         />
-      </div>
+      </motion.div>
 
       {(contact.phone || contact.email || contact.website) && (
-        <div className='px-4'>
+        <motion.div className='px-4' variants={itemVariants}>
           <ContactInfo
             phone={contact.phone}
             email={contact.email}
             website={contact.website}
           />
-        </div>
+        </motion.div>
       )}
 
-      <div className='px-4'>
+      <motion.div className='px-4' variants={itemVariants}>
         <AdditionalInfo
           district={placeDetails.district}
           thana={placeDetails.thana}
           area={placeDetails.area}
           subArea={placeDetails.sub_area}
         />
-      </div>
-      <div className='px-4'>
+      </motion.div>
+
+      <motion.div className='px-4' variants={itemVariants}>
         <LocationMeta placeDetails={placeDetails} />
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

@@ -80,11 +80,23 @@ const SearchBar: React.FC = () => {
   // Event handlers
   const handleSelect = (value: string, option: any) => {
     const selectedData = option.rawData;
+
     if (selectedData) {
       dispatch(setSelectedPlace(selectedData));
       dispatch(openLeftBar());
-      if (selectedData.uCode) {
-        dispatch(fetchPlaceDetails(selectedData.uCode));
+
+      // Only update URL if we have a valid place code
+      if (selectedData.uCode || selectedData.place_code) {
+        dispatch(
+          fetchPlaceDetails(selectedData.uCode || selectedData.place_code)
+        );
+
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.set(
+          'place',
+          selectedData.uCode || selectedData.place_code
+        );
+        window.history.replaceState({}, '', currentUrl.toString());
       }
     }
 

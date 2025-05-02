@@ -2,7 +2,7 @@ import { FaLocationDot, FaHashtag, FaCopy, FaCheck } from 'react-icons/fa6';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 
-const LocationMeta = ({ placeDetails }) => {
+const LocationMeta = ({ placeDetails }: any) => {
   const [copiedItem, setCopiedItem] = useState<string | null>(null);
 
   const copyToClipboard = (text: string, item: string) => {

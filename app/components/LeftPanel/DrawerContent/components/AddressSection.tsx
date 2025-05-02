@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { FaCopy, FaMapMarkerAlt, FaCheck } from 'react-icons/fa';
 import { motion } from 'framer-motion';
+import { BsMailbox2Flag } from 'react-icons/bs';
+import { Tooltip } from 'antd';
 
 interface AddressSectionProps {
   address: string;
@@ -80,10 +82,19 @@ export const AddressSection = ({ address, postcode }: AddressSectionProps) => {
       <div className='space-y-2'>
         <p className='text-gray-700 text-[16px] leading-relaxed'>{address}</p>
         <div className='flex items-center gap-2'>
-          <span className='text-sm font-medium text-gray-600 bg-green-50 rounded-full px-3 py-1 inline-flex items-center'>
-            <span className='w-2 h-2 bg-green-500 rounded-full mr-2'></span>
-            {postcode}
-          </span>
+          <Tooltip
+            title='Postal/Zip Code'
+            placement='top'
+            color='#2f855a'
+            className='text-xs'
+          >
+            <div className='inline-flex items-center bg-green-50 rounded-full px-3 py-1 border border-green-100 shadow-sm hover:bg-green-100 transition-colors'>
+              <BsMailbox2Flag className='text-sm text-green-600 mr-2' />
+              <span className='text-xs font-bold text-green-800'>
+                {postcode}
+              </span>
+            </div>
+          </Tooltip>
         </div>
       </div>
     </motion.div>

@@ -1,8 +1,7 @@
-import { useRef } from "react";
+// hooks/useMapRef.ts
+import { useRef } from 'react';
+import type { Map } from 'maplibre-gl';
 
-const useMapRef = () => {
-  const mapRef = useRef(null);
-  return mapRef;
+export const useMapRef = () => {
+  return useRef<Map | null>(null);
 };
-
-export default useMapRef;

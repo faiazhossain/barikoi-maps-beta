@@ -61,8 +61,19 @@ const searchSlice = createSlice({
       state.searchMode = 'location';
     },
     clearSearch: (state) => {
+      // Reset all search related states to initial values
       state.searchTerm = '';
       state.suggestions = [];
+      state.selectedPlace = null;
+      state.placeDetails = null;
+      state.placeDetailsLoading = false;
+      state.placeDetailsError = null;
+      state.isLoading = false;
+      state.searchMode = 'location';
+      state.startLocation = null;
+      state.endLocation = null;
+      state.selectedCategory = null;
+      state.nearbyLocations = [];
     },
   },
   extraReducers: (builder) => {
