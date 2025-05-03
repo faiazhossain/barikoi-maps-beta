@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import MapGL, { MapRef, Source, Layer } from 'react-map-gl/maplibre';
+import MapGL, { MapRef } from 'react-map-gl/maplibre';
 import { useMapRef } from '../hooks/useMapRef';
 import { useRouteFromUrl } from '../hooks/useRouteFromUrl';
 import MapControls from './MapControls';
@@ -17,7 +17,6 @@ import { useUrlParams } from '@/app/hooks/useUrlParams';
 import AnimatedMarker from '../Markers/AnimatedMarker';
 import { fetchPlaceDetails } from '@/app/store/thunks/searchThunks';
 import { closeLeftBar, openLeftBar } from '@/app/store/slices/drawerSlice';
-import { clearSearch } from '@/app/store/slices/searchSlice';
 
 const MapContainer: React.FC = () => {
   const mapRef = useMapRef();
