@@ -5,7 +5,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { uCode: string } }
 ) {
-  // console.log('🚀 ~ request:', request.nextUrl.searchParams);
+  console.log('🚀 ~ request:', request.nextUrl.searchParams);
   const { uCode } = params;
 
   try {
