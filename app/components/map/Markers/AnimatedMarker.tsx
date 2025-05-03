@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Marker } from 'react-map-gl/maplibre';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
@@ -6,32 +6,24 @@ import Image from 'next/image';
 interface AnimatedMarkerProps {
   latitude: number;
   longitude: number;
-  pulseDelay?: number; // Make delay configurable
+  properties?: {
+    place_code?: string;
+    name_en?: string;
+    name_bn?: string;
+    type?: string;
+    subtype?: string;
+  };
+  pulseDelay?: number;
 }
 
 const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
   latitude,
   longitude,
-  pulseDelay = 5000, // Default to 5 seconds
+  pulseDelay = 5000,
 }) => {
+  console.log('🚀 ~ longitude:', longitude);
+  console.log('🚀 ~ latitude:', latitude);
   const [shouldPulse, setShouldPulse] = useState(false);
-
-  // Memoize the animation variants to prevent unnecessary recalculations
-  const pulseAnimation = useCallback(
-    () => ({
-      scale: shouldPulse ? [1, 1.2, 1] : 1,
-      opacity: shouldPulse ? [0.4, 0.3, 0.4] : 0.4,
-    }),
-    [shouldPulse]
-  );
-
-  const rippleAnimation = useCallback(
-    () => ({
-      scale: shouldPulse ? [1, 1.4, 1] : 1.5,
-      opacity: shouldPulse ? [0.5, 0, 0.5] : 0,
-    }),
-    [shouldPulse]
-  );
 
   const transition = {
     duration: 1,
@@ -53,9 +45,23 @@ const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
       <div className='relative'>
         {/* Enhanced Shadow Element */}
         <motion.div
-          className='absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-3 bg-black/40 rounded-full blur-md'
+          className='absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-3 bg-black/60 rounded-full blur-md'
           initial={{ scale: 0, opacity: 0 }}
-          animate={pulseAnimation()}
+          animate={{
+            scale: shouldPulse ? [1, 1.2, 1] : 1,
+            opacity: shouldPulse ? [0.4, 0.3, 0.4] : 0.4,
+          }}
+          transition={transition}
+        />
+
+        {/* New Tail Shadow */}
+        <motion.div
+          className='absolute -bottom-1 left-[33%] -translate-x-1/2 w-4 h-4 bg-black/80 rounded-full'
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{
+            scale: shouldPulse ? [1, 1.2, 1] : 1,
+            opacity: shouldPulse ? [0.6, 0.3, 0.6] : 0.6,
+          }}
           transition={transition}
         />
 
@@ -66,9 +72,7 @@ const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
             scale: shouldPulse ? [1, 1.4, 1] : 1,
             y: 0,
           }}
-          style={{
-            filter: 'drop-shadow(rgba(0, 0, 0, 0.3) 1px 3px 4px)',
-          }}
+          transition={transition}
           className='relative w-12 h-12'
         >
           <Image
@@ -77,22 +81,8 @@ const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
             width={48}
             height={48}
             className='w-full h-full object-contain'
-            priority // If this is above-the-fold content
+            priority
           />
-          <motion.div
-            className='absolute inset-0 z-[-1]'
-            initial={{ scale: 1, opacity: 0.5 }}
-            animate={rippleAnimation()}
-            transition={transition}
-          >
-            <Image
-              src='/images/barikoi-marker.svg'
-              alt='Marker Effect'
-              width={48}
-              height={48}
-              className='w-full h-full object-contain opacity-25'
-            />
-          </motion.div>
         </motion.div>
       </div>
     </Marker>
