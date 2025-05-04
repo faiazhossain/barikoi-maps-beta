@@ -55,6 +55,10 @@ const searchSlice = createSlice({
     setSelectedPlace: (state, action: PayloadAction<Place | null>) => {
       state.selectedPlace = action.payload;
     },
+    setPlaceDetails: (state, action) => {
+      state.placeDetails = action.payload;
+      state.isLoading = false;
+    },
     clearDirections: (state) => {
       state.startLocation = null;
       state.endLocation = null;
@@ -106,6 +110,7 @@ export const {
   clearDirections,
   clearSearch,
   setSelectedPlace,
+  setPlaceDetails,
 } = searchSlice.actions;
 
 export default searchSlice.reducer;

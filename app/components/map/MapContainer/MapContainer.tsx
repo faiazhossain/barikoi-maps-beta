@@ -15,7 +15,10 @@ import { useAppDispatch, useAppSelector } from '@/app/store/store';
 import ResponsiveDrawer from '../../LeftPanel/ResponsiveDrawer';
 import { useUrlParams } from '@/app/hooks/useUrlParams';
 import AnimatedMarker from '../Markers/AnimatedMarker';
-import { fetchPlaceDetails } from '@/app/store/thunks/searchThunks';
+import {
+  fetchPlaceDetails,
+  fetchReverseGeocode,
+} from '@/app/store/thunks/searchThunks';
 import { closeLeftBar, openLeftBar } from '@/app/store/slices/drawerSlice';
 import { clearSearch } from '@/app/store/slices/searchSlice';
 
@@ -159,6 +162,36 @@ const MapContainer: React.FC = () => {
     setHoveredFeatureId(null);
   };
 
+  const handleMapDoubleClick = React.useCallback(
+    (event) => {
+      const clickedLngLat = event.lngLat;
+
+      if (clickedLngLat) {
+        // Get the precise coordinates of the click
+        const latitude = clickedLngLat.lat;
+        const longitude = clickedLngLat.lng;
+
+        // Set marker at clicked location immediately for better UX
+        setMarkerCoords({
+          latitude,
+          longitude,
+        });
+
+        // Dispatch the reverse geocode action
+        dispatch(fetchReverseGeocode({ latitude, longitude }))
+          .unwrap()
+          .then(() => {
+            // If we got a valid place with a place_code
+            dispatch(openLeftBar());
+          })
+          .catch((error) => {
+            console.error('Reverse geocode error:', error);
+          });
+      }
+    },
+    [dispatch]
+  );
+
   return (
     <>
       <MapGL
@@ -171,11 +204,13 @@ const MapContainer: React.FC = () => {
         }}
         style={{ width: '100vw', height: '100dvh' }}
         mapStyle='/map-styles/light-style.json'
+        np
         attributionControl={false}
         onLoad={handleMapLoad}
         onClick={handleMapClick}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        onDblClick={handleMapDoubleClick}
         interactiveLayerIds={[
           'recreation',
           'commercial',

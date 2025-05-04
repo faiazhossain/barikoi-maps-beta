@@ -42,7 +42,6 @@ const SearchBar: React.FC = () => {
   const searchMode = useAppSelector(selectSearchMode);
   const isVisible = useAppSelector((state) => state.ui.isTopPanelVisible);
   const placeDetails = useAppSelector((state) => state.search.placeDetails);
-  console.log('🚀 ~ placeDetails:', placeDetails);
 
   // Local state
   const [isMounted, setIsMounted] = useState(false);

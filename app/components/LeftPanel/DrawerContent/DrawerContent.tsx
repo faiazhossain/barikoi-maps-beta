@@ -10,6 +10,7 @@ import ImageCarousel from './components/ImageCarousel';
 import useWindowSize from '@/app/hooks/useWindowSize';
 import LocationMeta from './components/LocationMeta';
 import MapLoader from '../../common/LoadingPage/MapLoader';
+import { useAppSelector } from '@/app/store/store';
 
 interface ContactInfoData {
   name: string | null;
@@ -43,7 +44,8 @@ const itemVariants = {
   },
 };
 
-const DrawerContent = ({ placeDetails, placeDetailsLoading }) => {
+const DrawerContent = ({ placeDetailsLoading }) => {
+  const placeDetails = useAppSelector((state) => state.search.placeDetails);
   const windowSize = useWindowSize();
   const isMobile = useMemo(
     () => windowSize.width <= MOBILE_BREAKPOINT,
@@ -119,6 +121,79 @@ const DrawerContent = ({ placeDetails, placeDetailsLoading }) => {
       <motion.div className='px-4' variants={itemVariants}>
         <LocationMeta placeDetails={placeDetails} />
       </motion.div>
+
+      {placeDetails && (
+        <div className='px-4 py-3'>
+          {placeDetails.business_name && (
+            <h2 className='text-xl font-bold text-gray-800'>
+              {placeDetails.business_name}
+            </h2>
+          )}
+
+          {placeDetails.place_name && (
+            <h3 className='text-lg font-semibold text-gray-700'>
+              {placeDetails.place_name}
+            </h3>
+          )}
+
+          {placeDetails.address && (
+            <p className='mt-2 text-gray-600'>{placeDetails.address}</p>
+          )}
+
+          <div className='mt-4 grid grid-cols-2 gap-3 text-sm'>
+            {placeDetails.type && (
+              <div>
+                <span className='text-gray-500'>Type</span>
+                <p className='font-medium'>{placeDetails.type}</p>
+              </div>
+            )}
+
+            {placeDetails.sub_type && (
+              <div>
+                <span className='text-gray-500'>Sub Type</span>
+                <p className='font-medium'>{placeDetails.sub_type}</p>
+              </div>
+            )}
+
+            {placeDetails.area && (
+              <div>
+                <span className='text-gray-500'>Area</span>
+                <p className='font-medium'>{placeDetails.area}</p>
+              </div>
+            )}
+
+            {placeDetails.city && (
+              <div>
+                <span className='text-gray-500'>City</span>
+                <p className='font-medium'>{placeDetails.city}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Display images if available */}
+          {placeDetails.images && placeDetails.images.length > 0 && (
+            <div className='mt-4'>
+              <h4 className='font-medium text-gray-700 mb-2'>Images</h4>
+              <div className='grid grid-cols-2 gap-2'>
+                {placeDetails.images.map((image) => (
+                  <div
+                    key={image.id}
+                    className='aspect-video rounded overflow-hidden'
+                  >
+                    <img
+                      src={image.url}
+                      alt={
+                        placeDetails.business_name || placeDetails.place_name
+                      }
+                      className='w-full h-full object-cover'
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </motion.div>
   );
 };
