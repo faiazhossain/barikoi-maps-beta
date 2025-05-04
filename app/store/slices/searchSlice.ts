@@ -7,7 +7,7 @@ import {
   Suggestion,
   NearbyLocation,
 } from '@/app/types/search';
-import { fetchPlaceDetails } from '../thunks/searchThunks';
+import { fetchPlaceDetails, fetchReverseGeocode } from '../thunks/searchThunks';
 
 const initialState: SearchState = {
   searchTerm: '',
@@ -22,6 +22,8 @@ const initialState: SearchState = {
   placeDetails: null,
   placeDetailsLoading: false,
   placeDetailsError: null,
+  reverseGeocodeLoading: false,
+  reverseGeocodeError: null,
 };
 
 const searchSlice = createSlice({
@@ -72,6 +74,8 @@ const searchSlice = createSlice({
       state.placeDetails = null;
       state.placeDetailsLoading = false;
       state.placeDetailsError = null;
+      state.reverseGeocodeLoading = false;
+      state.reverseGeocodeError = null;
       state.isLoading = false;
       state.searchMode = 'location';
       state.startLocation = null;
@@ -82,6 +86,7 @@ const searchSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // fetchPlaceDetails cases
       .addCase(fetchPlaceDetails.pending, (state) => {
         state.placeDetailsLoading = true;
         state.placeDetailsError = null;
@@ -94,6 +99,21 @@ const searchSlice = createSlice({
         state.placeDetailsLoading = false;
         state.placeDetailsError =
           action.error.message || 'Failed to fetch details';
+      })
+
+      // fetchReverseGeocode cases
+      .addCase(fetchReverseGeocode.pending, (state) => {
+        state.reverseGeocodeLoading = true;
+        state.reverseGeocodeError = null;
+      })
+      .addCase(fetchReverseGeocode.fulfilled, (state) => {
+        state.reverseGeocodeLoading = false;
+        // Note: we don't set placeDetails here since it's done via the setPlaceDetails action
+      })
+      .addCase(fetchReverseGeocode.rejected, (state, action) => {
+        state.reverseGeocodeLoading = false;
+        state.reverseGeocodeError =
+          action.error.message || 'Failed to fetch reverse geocode';
       });
   },
 });

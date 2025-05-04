@@ -57,4 +57,6 @@ export interface SearchState {
   placeDetails: any | null;
   placeDetailsLoading: boolean;
   placeDetailsError: string | null;
+  reverseGeocodeLoading: boolean;
+  reverseGeocodeError: string | null;
 }

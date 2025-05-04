@@ -44,18 +44,27 @@ const itemVariants = {
   },
 };
 
-const DrawerContent = ({ placeDetailsLoading }) => {
+const DrawerContent = () => {
   const placeDetails = useAppSelector((state) => state.search.placeDetails);
+  const placeDetailsLoading = useAppSelector(
+    (state) => state.search.placeDetailsLoading
+  );
+  const reverseGeocodeLoading = useAppSelector(
+    (state) => state.search.reverseGeocodeLoading
+  );
   const windowSize = useWindowSize();
   const isMobile = useMemo(
     () => windowSize.width <= MOBILE_BREAKPOINT,
     [windowSize.width]
   );
 
+  // Show loading state when either place details or reverse geocode is loading
+  const isLoading = placeDetailsLoading || reverseGeocodeLoading;
+
   const contact: ContactInfoData =
     placeDetails?.places_additional_data?.[0]?.contact || {};
 
-  if (placeDetailsLoading || !placeDetails) {
+  if (isLoading || !placeDetails) {
     return (
       <div className='absolute inset-0 flex items-center justify-center'>
         <MapLoader />

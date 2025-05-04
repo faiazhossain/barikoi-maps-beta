@@ -17,6 +17,8 @@ import { useAppDispatch, useAppSelector } from '@/app/store/store';
 import ResponsiveDrawer from '../../LeftPanel/ResponsiveDrawer';
 import { useUrlParams } from '@/app/hooks/useUrlParams';
 import AnimatedMarker from '../Markers/AnimatedMarker';
+import MapContextMenu from '../ContextMenu/MapContextMenu';
+import ContextMarker from '../Markers/ContextMarker';
 
 const MapContainer: React.FC = () => {
   const mapRef = useMapRef();
@@ -34,6 +36,9 @@ const MapContainer: React.FC = () => {
     handleMouseEnter,
     handleMouseLeave,
     handleMapDoubleClick,
+    handleContextMenu,
+    contextMenu,
+    closeContextMenu,
   } = useMapEventHandlers();
 
   // Add URL params hook
@@ -53,54 +58,81 @@ const MapContainer: React.FC = () => {
     dispatch(setMapLoaded(true));
   };
 
+  // Add event handler to close the context menu when clicking outside
+  const handleMapContainerClick = React.useCallback(() => {
+    if (contextMenu.visible) {
+      closeContextMenu();
+    }
+  }, [contextMenu.visible, closeContextMenu]);
+
   return (
     <>
-      <MapGL
-        ref={mapRef as unknown as React.RefObject<MapRef>}
-        mapLib={maplibregl}
-        initialViewState={{
-          longitude: 90.3938,
-          latitude: 23.8103,
-          zoom: 12,
-        }}
-        style={{ width: '100vw', height: '100dvh' }}
-        mapStyle='/map-styles/light-style.json'
-        attributionControl={false}
-        onLoad={handleMapLoad}
-        onClick={handleMapClick}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        onDblClick={handleMapDoubleClick}
-        interactiveLayerIds={[
-          'recreation',
-          'commercial',
-          'residential',
-          'education',
-          'health',
-          'government',
-          'religious',
-        ]}
-        cursor={hoveredFeatureId ? 'pointer' : 'default'}
-        hash={true}
-      >
-        <MapControls />
-        <BarikoiAttribution />
-        {isLeftBarOpen && <ResponsiveDrawer />}
+      <div onClick={handleMapContainerClick}>
+        <MapGL
+          ref={mapRef as unknown as React.RefObject<MapRef>}
+          mapLib={maplibregl}
+          initialViewState={{
+            longitude: 90.3938,
+            latitude: 23.8103,
+            zoom: 12,
+          }}
+          style={{ width: '100vw', height: '100dvh' }}
+          mapStyle='/map-styles/light-style.json'
+          attributionControl={false}
+          onLoad={handleMapLoad}
+          onClick={handleMapClick}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          onDblClick={handleMapDoubleClick}
+          onContextMenu={handleContextMenu}
+          interactiveLayerIds={[
+            'recreation',
+            'commercial',
+            'residential',
+            'education',
+            'health',
+            'government',
+            'religious',
+          ]}
+          cursor={hoveredFeatureId ? 'pointer' : 'default'}
+          hash={true}
+        >
+          <MapControls />
+          <BarikoiAttribution />
+          {isLeftBarOpen && <ResponsiveDrawer />}
 
-        {markerCoords && (
-          <AnimatedMarker
-            latitude={markerCoords.latitude}
-            longitude={markerCoords.longitude}
-            properties={markerCoords.properties}
-          />
-        )}
-      </MapGL>
+          {/* Display regular marker if we have coordinates */}
+          {markerCoords && (
+            <AnimatedMarker
+              latitude={markerCoords.latitude}
+              longitude={markerCoords.longitude}
+              properties={markerCoords.properties}
+            />
+          )}
 
-      <AnimatePresence>
-        {selectedFeature && !selectedFeature.properties?.place_code && (
-          <InfoCard feature={selectedFeature} />
-        )}
-      </AnimatePresence>
+          {/* Context menu marker and popup */}
+          {contextMenu.visible && contextMenu.lngLat && (
+            <>
+              <ContextMarker
+                longitude={contextMenu.lngLat.lng}
+                latitude={contextMenu.lngLat.lat}
+              />
+              <MapContextMenu
+                longitude={contextMenu.lngLat.lng}
+                latitude={contextMenu.lngLat.lat}
+                onClose={closeContextMenu}
+                setMarkerCoords={setMarkerCoords}
+              />
+            </>
+          )}
+        </MapGL>
+
+        <AnimatePresence>
+          {selectedFeature && !selectedFeature.properties?.place_code && (
+            <InfoCard feature={selectedFeature} />
+          )}
+        </AnimatePresence>
+      </div>
     </>
   );
 };

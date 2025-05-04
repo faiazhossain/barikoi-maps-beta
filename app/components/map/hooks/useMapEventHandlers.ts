@@ -16,7 +16,18 @@ export interface MarkerCoords {
     name_bn?: string;
     type?: string;
     subtype?: string;
+    source?: string;
   };
+}
+
+export interface ContextMenuState {
+  visible: boolean;
+  x: number;
+  y: number;
+  lngLat: {
+    lng: number;
+    lat: number;
+  } | null;
 }
 
 export const useMapEventHandlers = () => {
@@ -24,9 +35,25 @@ export const useMapEventHandlers = () => {
   const [markerCoords, setMarkerCoords] = useState<MarkerCoords | null>(null);
   const [hoveredFeatureId, setHoveredFeatureId] = useState<string | null>(null);
   const [selectedFeature, setSelectedFeature] = useState<any>(null);
+  const [contextMenu, setContextMenu] = useState<ContextMenuState>({
+    visible: false,
+    x: 0,
+    y: 0,
+    lngLat: null,
+  });
+
+  const closeContextMenu = useCallback(() => {
+    setContextMenu((prev) => ({ ...prev, visible: false }));
+  }, []);
 
   const handleMapClick = useCallback(
     (event: any) => {
+      // Close context menu if it's open
+      if (contextMenu.visible) {
+        closeContextMenu();
+        return;
+      }
+
       const feature = event.target.queryRenderedFeatures(event.point)[0];
 
       if (feature) {
@@ -51,6 +78,7 @@ export const useMapEventHandlers = () => {
                 name_bn: properties['name:bn'],
                 type: properties.type,
                 subtype: properties.subtype,
+                source: 'mapLayer',
               },
             };
           });
@@ -60,6 +88,9 @@ export const useMapEventHandlers = () => {
           setMarkerCoords({
             latitude: clickedLngLat.lat,
             longitude: clickedLngLat.lng,
+            properties: {
+              source: 'mapClick',
+            },
           });
           setSelectedFeature((prev: any) => {
             if (prev?.id === feature.id) return prev;
@@ -81,8 +112,28 @@ export const useMapEventHandlers = () => {
         dispatch(closeLeftBar());
       }
     },
-    [dispatch]
+    [dispatch, contextMenu.visible, closeContextMenu]
   );
+
+  // Handle right-click to show context menu
+  const handleContextMenu = useCallback((event: any) => {
+    // Prevent default context menu
+    event.preventDefault();
+
+    const clickedLngLat = event.lngLat;
+
+    if (clickedLngLat) {
+      setContextMenu({
+        visible: true,
+        x: event.point.x,
+        y: event.point.y,
+        lngLat: {
+          lng: clickedLngLat.lng,
+          lat: clickedLngLat.lat,
+        },
+      });
+    }
+  }, []);
 
   const handleMouseEnter = useCallback((event: any) => {
     const feature = event.features?.[0];
@@ -112,21 +163,23 @@ export const useMapEventHandlers = () => {
         setMarkerCoords({
           latitude,
           longitude,
+          properties: {
+            source: 'doubleClick',
+          },
         });
+
+        // Open the left bar immediately instead of waiting for API response
+        dispatch(openLeftBar());
 
         // Dispatch the reverse geocode action
         dispatch(fetchReverseGeocode({ latitude, longitude }))
           .unwrap()
-          .then(() => {
-            // If we got a valid place with a place_code
-            dispatch(openLeftBar());
-          })
           .catch((error) => {
             console.error('Reverse geocode error:', error);
           });
       }
     },
-    [dispatch]
+    [dispatch, setMarkerCoords]
   );
 
   const handleMapLoad = useCallback(() => {
@@ -144,6 +197,9 @@ export const useMapEventHandlers = () => {
     handleMouseEnter,
     handleMouseLeave,
     handleMapDoubleClick,
+    handleContextMenu,
+    contextMenu,
+    closeContextMenu,
     handleMapLoad,
   };
 };
