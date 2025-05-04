@@ -17,6 +17,7 @@ import { useUrlParams } from '@/app/hooks/useUrlParams';
 import AnimatedMarker from '../Markers/AnimatedMarker';
 import { fetchPlaceDetails } from '@/app/store/thunks/searchThunks';
 import { closeLeftBar, openLeftBar } from '@/app/store/slices/drawerSlice';
+import { clearSearch } from '@/app/store/slices/searchSlice';
 
 const MapContainer: React.FC = () => {
   const mapRef = useMapRef();
@@ -129,10 +130,12 @@ const MapContainer: React.FC = () => {
             };
           });
           dispatch(closeLeftBar());
+          dispatch(clearSearch());
         }
       } else {
         setMarkerCoords(null);
         setSelectedFeature(null);
+        dispatch(clearSearch());
         dispatch(closeLeftBar());
       }
     },

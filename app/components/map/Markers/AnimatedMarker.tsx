@@ -21,8 +21,6 @@ const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
   longitude,
   pulseDelay = 5000,
 }) => {
-  console.log('🚀 ~ longitude:', longitude);
-  console.log('🚀 ~ latitude:', latitude);
   const [shouldPulse, setShouldPulse] = useState(false);
 
   const transition = {

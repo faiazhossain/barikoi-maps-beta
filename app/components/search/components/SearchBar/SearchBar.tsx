@@ -41,6 +41,8 @@ const SearchBar: React.FC = () => {
   const suggestions = useAppSelector(selectSuggestions);
   const searchMode = useAppSelector(selectSearchMode);
   const isVisible = useAppSelector((state) => state.ui.isTopPanelVisible);
+  const placeDetails = useAppSelector((state) => state.search.placeDetails);
+  console.log('🚀 ~ placeDetails:', placeDetails);
 
   // Local state
   const [isMounted, setIsMounted] = useState(false);
@@ -76,6 +78,17 @@ const SearchBar: React.FC = () => {
       return () => clearTimeout(timeout);
     }
   }, [isExpanded]);
+
+  // Add effect to update search term based on placeDetails
+  useEffect(() => {
+    if (placeDetails) {
+      const displayText =
+        placeDetails.business_name || placeDetails.address || '';
+      if (displayText) {
+        dispatch(setSearchTerm(displayText));
+      }
+    }
+  }, [placeDetails, dispatch]);
 
   // Event handlers
   const handleSelect = (value: string, option: any) => {

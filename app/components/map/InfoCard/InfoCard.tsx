@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { twMerge } from 'tailwind-merge';
+import { FaClipboardCheck, FaCopy } from 'react-icons/fa';
 
 interface InfoCardProps {
   feature: {
@@ -25,15 +26,32 @@ interface InfoCardProps {
 
 const InfoCard: React.FC<InfoCardProps> = ({ feature }) => {
   const isOpenMapTiles = feature.source === 'openmaptiles';
+  const [copied, setCopied] = React.useState(false);
 
   const themeColors = {
-    bg: isOpenMapTiles ? 'bg-red-50/95' : 'bg-green-50/95',
-    text: isOpenMapTiles ? 'text-red-800' : 'text-green-800',
+    bg: isOpenMapTiles
+      ? 'bg-slate-800/90 border-red-500/20'
+      : 'bg-slate-800/90 border-green-500/20',
+    text: isOpenMapTiles ? 'text-red-200' : 'text-green-200',
     badge: isOpenMapTiles
-      ? 'bg-red-100 text-red-700'
-      : 'bg-green-100 text-green-700',
-    border: isOpenMapTiles ? 'border-red-100' : 'border-green-100',
-    label: isOpenMapTiles ? 'text-red-500' : 'text-green-500',
+      ? 'bg-red-900/50 text-red-200 border border-red-500/30'
+      : 'bg-green-900/50 text-green-200 border border-green-500/30',
+    border: isOpenMapTiles ? 'border-red-500/20' : 'border-green-500/20',
+    label: isOpenMapTiles ? 'text-red-400' : 'text-green-400',
+  };
+
+  const coordinates = feature.geometry.coordinates
+    ? `${feature.geometry.coordinates[1]?.toFixed(
+        4
+      )}, ${feature.geometry.coordinates[0]?.toFixed(4)}`
+    : 'N/A';
+
+  const copyCoordinates = () => {
+    if (feature.geometry.coordinates) {
+      navigator.clipboard.writeText(coordinates);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   return (
@@ -43,7 +61,8 @@ const InfoCard: React.FC<InfoCardProps> = ({ feature }) => {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 50, opacity: 0 }}
         className={twMerge(
-          'backdrop-blur-sm rounded-2xl shadow-lg p-2.5 max-w-[280px] w-full pointer-events-auto',
+          'backdrop-blur-md rounded-2xl shadow-2xl p-2.5 max-w-[280px] w-full pointer-events-auto',
+          'border ring-1 ring-white/10',
           themeColors.bg
         )}
       >
@@ -57,7 +76,7 @@ const InfoCard: React.FC<InfoCardProps> = ({ feature }) => {
             >
               {feature.properties.subclass ||
                 feature.properties.class ||
-                'Unknown'}
+                'BARIKOI DATA'}
             </h3>
             <span
               className={twMerge(
@@ -72,10 +91,29 @@ const InfoCard: React.FC<InfoCardProps> = ({ feature }) => {
           <div className='grid grid-cols-2 gap-1.5 text-[10px]'>
             <div>
               <p className={themeColors.label}>Coordinates</p>
-              <p className={twMerge('font-medium truncate', themeColors.text)}>
-                {feature.geometry.coordinates?.[1]?.toFixed(4) ?? 'N/A'},
-                {feature.geometry.coordinates?.[0]?.toFixed(4) ?? 'N/A'}
-              </p>
+              <div className='flex items-center justify-start'>
+                <p
+                  className={twMerge('font-medium truncate', themeColors.text)}
+                >
+                  {coordinates}
+                </p>
+                <button
+                  onClick={copyCoordinates}
+                  disabled={!feature.geometry.coordinates}
+                  className={twMerge(
+                    'p-0.5 rounded hover:bg-white/10 transition-colors',
+                    'disabled:opacity-50 disabled:cursor-not-allowed ml-2',
+                    themeColors.text
+                  )}
+                  title='Copy coordinates'
+                >
+                  {copied ? (
+                    <FaClipboardCheck className='w-3 h-3' />
+                  ) : (
+                    <FaCopy className='w-3 h-3' />
+                  )}
+                </button>
+              </div>
             </div>
             <div>
               <p className={themeColors.label}>Layer</p>
