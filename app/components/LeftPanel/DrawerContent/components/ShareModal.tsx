@@ -30,7 +30,23 @@ const getShareUrl = (placeInfo) => {
   const baseUrl = window.location.origin;
   const currentPath = window.location.pathname;
   const currentHash = window.location.hash;
-  return `${baseUrl}${currentPath}?place=${placeInfo.uCode}${currentHash}`;
+
+  // If uCode exists and is valid, use place parameter
+  if (placeInfo.uCode && placeInfo.uCode !== 'null') {
+    return `${baseUrl}${currentPath}?place=${placeInfo.uCode}${currentHash}`;
+  }
+  // If no uCode, use coordinates with rev parameter
+  else if (
+    placeInfo.coordinates &&
+    placeInfo.coordinates.latitude &&
+    placeInfo.coordinates.longitude
+  ) {
+    const { latitude, longitude } = placeInfo.coordinates;
+    return `${baseUrl}${currentPath}?rev=${latitude},${longitude}${currentHash}`;
+  }
+
+  // Fallback to base URL with hash if no valid data is available
+  return `${baseUrl}${currentPath}${currentHash}`;
 };
 
 const ShareModal: React.FC<ShareModalProps> = ({
