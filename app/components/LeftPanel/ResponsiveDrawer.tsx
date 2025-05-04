@@ -33,9 +33,7 @@ const ResponsiveDrawer: React.FC<ResponsiveDrawerProps> = ({
   const drawerRef = useRef<HTMLDivElement>(null);
   const [drawerHeight, setDrawerHeight] = useState(INITIAL_DRAWER_HEIGHT);
   const resizeTimeoutRef = useRef<NodeJS.Timeout>();
-  const { placeDetails, placeDetailsLoading } = useAppSelector(
-    (state) => state.search
-  );
+  const { placeDetails } = useAppSelector((state) => state.search);
 
   const isMobile = width < MOBILE_BREAKPOINT;
   const isTab = width < TABLET_BREAKPOINT;
@@ -234,10 +232,14 @@ const ResponsiveDrawer: React.FC<ResponsiveDrawerProps> = ({
             height: contentHeight,
           }}
         >
-          <DrawerContent
-            placeDetails={placeDetails}
-            placeDetailsLoading={placeDetailsLoading}
-          />
+          <div
+            className='h-full overflow-y-auto overflow-x-hidden'
+            style={{
+              height: contentHeight,
+            }}
+          >
+            <DrawerContent />
+          </div>
         </div>
 
         {isMobile && (
