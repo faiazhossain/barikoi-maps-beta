@@ -34,6 +34,11 @@ const ResponsiveDrawer: React.FC<ResponsiveDrawerProps> = ({
   const [drawerHeight, setDrawerHeight] = useState(INITIAL_DRAWER_HEIGHT);
   const resizeTimeoutRef = useRef<NodeJS.Timeout>();
   const { placeDetails } = useAppSelector((state) => state.search);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartTimeRef = useRef<number>(0);
+  const dragThresholdTime = 300; // 2 seconds threshold for intentional drag
+  const [dragProgress, setDragProgress] = useState(0); // 0 to 1 for progress
+  const dragTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const isMobile = width < MOBILE_BREAKPOINT;
   const isTab = width < TABLET_BREAKPOINT;
@@ -139,9 +144,68 @@ const ResponsiveDrawer: React.FC<ResponsiveDrawerProps> = ({
     }
   }, [isMobile, height, drawerHeight, controls, isOpen]);
 
+  const handleDragStart = useCallback(() => {
+    if (!isMobile) return;
+
+    dragStartTimeRef.current = Date.now();
+    setIsDragging(true);
+    setDragProgress(0);
+
+    // Start a timer to update progress
+    if (dragTimerRef.current) {
+      clearInterval(dragTimerRef.current);
+    }
+
+    dragTimerRef.current = setInterval(() => {
+      const elapsed = Date.now() - dragStartTimeRef.current;
+      const progress = Math.min(elapsed / dragThresholdTime, 1);
+      setDragProgress(progress);
+
+      if (progress >= 1 && dragTimerRef.current) {
+        clearInterval(dragTimerRef.current);
+      }
+    }, 50);
+  }, [isMobile]);
+
+  const handleDrag = useCallback(
+    (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+      if (!isMobile || !isDragging) return;
+
+      // Check if we've been dragging long enough to consider it intentional
+      const dragDuration = Date.now() - dragStartTimeRef.current;
+      if (dragDuration < dragThresholdTime) {
+        return; // Ignore short drags
+      }
+
+      // Only update position during intentional drag
+      const currentY = info.point.y;
+      if (currentY > 0 && currentY < height) {
+        controls.set({ y: currentY });
+      }
+    },
+    [isMobile, isDragging, height, controls]
+  );
+
   const handleDragEnd = useCallback(
     (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
       if (!isMobile) return;
+
+      // Clear the progress update timer
+      if (dragTimerRef.current) {
+        clearInterval(dragTimerRef.current);
+        dragTimerRef.current = null;
+      }
+
+      const dragDuration = Date.now() - dragStartTimeRef.current;
+      setIsDragging(false);
+      setDragProgress(0); // Reset progress
+
+      // Only process as drawer resize if it's been dragged for longer than threshold
+      if (dragDuration < dragThresholdTime) {
+        // Return to original position if not held long enough
+        controls.start(isOpen ? 'open' : 'closed');
+        return;
+      }
 
       const currentY = info.point.y;
       const threshold = height / 3;
@@ -163,8 +227,17 @@ const ResponsiveDrawer: React.FC<ResponsiveDrawerProps> = ({
         });
       }
     },
-    [isMobile, height, controls]
+    [isMobile, height, controls, isOpen]
   );
+
+  // Clean up interval when component unmounts
+  useEffect(() => {
+    return () => {
+      if (dragTimerRef.current) {
+        clearInterval(dragTimerRef.current);
+      }
+    };
+  }, []);
 
   const buttonStyle = useMemo(
     () =>
@@ -205,7 +278,9 @@ const ResponsiveDrawer: React.FC<ResponsiveDrawerProps> = ({
         variants={isMobile ? variants.mobile : variants.desktop}
         drag={isMobile ? 'y' : false}
         dragConstraints={isMobile ? { top: 0, bottom: height } : undefined}
-        onDragEnd={isMobile ? handleDragEnd : undefined}
+        onDragStart={handleDragStart}
+        onDrag={handleDrag}
+        onDragEnd={handleDragEnd}
         dragElastic={isMobile ? 0.1 : 0}
         style={{
           ...(isMobile && { height: drawerHeight }),
@@ -217,6 +292,24 @@ const ResponsiveDrawer: React.FC<ResponsiveDrawerProps> = ({
           }),
         }}
       >
+        {/* Drag handle for mobile with progress indicator */}
+        {isMobile && (
+          <div
+            className='absolute top-0 left-0 w-full h-10 cursor-grab active:cursor-grabbing'
+            style={{ touchAction: 'none' }}
+          >
+            <div className='absolute top-2 left-1/2 transform -translate-x-1/2 w-12 h-1 rounded-full bg-gray-300 overflow-hidden'>
+              <div
+                className='absolute top-0 left-0 h-full rounded-full transition-all duration-100 ease-linear'
+                style={{
+                  width: `${dragProgress * 100}%`,
+                  backgroundColor: dragProgress >= 1 ? '#10B981' : '#60A5FA',
+                }}
+              />
+            </div>
+          </div>
+        )}
+
         <button
           onClick={toggleDrawer}
           className='absolute z-30 p-2 bg-gray-800 text-white shadow-lg hover:bg-gray-700 transition-colors'
@@ -230,6 +323,7 @@ const ResponsiveDrawer: React.FC<ResponsiveDrawerProps> = ({
           className='h-full overflow-y-auto overflow-x-hidden'
           style={{
             height: contentHeight,
+            ...(isMobile && { paddingTop: '10px' }), // Add padding for drag handle
           }}
         >
           <div
@@ -241,10 +335,6 @@ const ResponsiveDrawer: React.FC<ResponsiveDrawerProps> = ({
             <DrawerContent />
           </div>
         </div>
-
-        {isMobile && (
-          <div className='absolute top-2 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-gray-300 rounded-full' />
-        )}
       </motion.div>
     </>
   );
