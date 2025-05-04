@@ -39,6 +39,7 @@ const MapContainer: React.FC = () => {
     handleContextMenu,
     contextMenu,
     closeContextMenu,
+    setSelectedFeature,
   } = useMapEventHandlers();
 
   // Add URL params hook
@@ -64,6 +65,10 @@ const MapContainer: React.FC = () => {
       closeContextMenu();
     }
   }, [contextMenu.visible, closeContextMenu]);
+
+  const handleCloseInfoCard = React.useCallback(() => {
+    setSelectedFeature(null);
+  }, [setSelectedFeature]);
 
   return (
     <>
@@ -129,7 +134,7 @@ const MapContainer: React.FC = () => {
 
         <AnimatePresence>
           {selectedFeature && !selectedFeature.properties?.place_code && (
-            <InfoCard feature={selectedFeature} />
+            <InfoCard feature={selectedFeature} onClose={handleCloseInfoCard} />
           )}
         </AnimatePresence>
       </div>

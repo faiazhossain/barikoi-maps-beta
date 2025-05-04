@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { twMerge } from 'tailwind-merge';
-import { FaClipboardCheck, FaCopy } from 'react-icons/fa';
+import { FaClipboardCheck, FaCopy, FaTimes } from 'react-icons/fa';
 
 interface InfoCardProps {
   feature: {
@@ -22,9 +22,10 @@ interface InfoCardProps {
     };
     source: string;
   };
+  onClose?: () => void;
 }
 
-const InfoCard: React.FC<InfoCardProps> = ({ feature }) => {
+const InfoCard: React.FC<InfoCardProps> = ({ feature, onClose }) => {
   const isOpenMapTiles = feature.source === 'openmaptiles';
   const [copied, setCopied] = React.useState(false);
 
@@ -61,11 +62,26 @@ const InfoCard: React.FC<InfoCardProps> = ({ feature }) => {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 50, opacity: 0 }}
         className={twMerge(
-          'backdrop-blur-md rounded-2xl shadow-2xl p-2.5 max-w-[280px] w-full pointer-events-auto',
+          'backdrop-blur-md rounded-2xl shadow-2xl p-2.5 max-w-[280px] w-full pointer-events-auto relative',
           'border ring-1 ring-white/10',
           themeColors.bg
         )}
       >
+        {/* Close button */}
+        {onClose && (
+          <button
+            onClick={onClose}
+            className={twMerge(
+              'absolute -top-2 -right-2 rounded-full p-1.5',
+              'bg-slate-700 text-white hover:bg-slate-600',
+              'shadow-lg transition-colors z-10'
+            )}
+            aria-label='Close'
+          >
+            <FaTimes className='w-3 h-3' />
+          </button>
+        )}
+
         <div className='space-y-1'>
           <div className='flex items-center justify-between gap-1.5'>
             <h3

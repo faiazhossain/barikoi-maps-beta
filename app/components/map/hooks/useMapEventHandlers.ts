@@ -54,12 +54,19 @@ export const useMapEventHandlers = () => {
         return;
       }
 
-      const feature = event.target.queryRenderedFeatures(event.point)[0];
+      // Get all features at click point
+      const features = event.target.queryRenderedFeatures(event.point);
+      const featuresNotPoint = event.target.queryRenderedFeatures(event);
+      console.log(
+        '🚀 ~ useMapEventHandlers ~ featuresNotPoint:',
+        featuresNotPoint
+      );
+      const feature = features.length > 0 ? features[0] : null;
+      const clickedLngLat = event.lngLat;
 
       if (feature) {
         const coordinates = feature.geometry.coordinates;
         const properties = feature.properties;
-        const clickedLngLat = event.lngLat;
 
         if (properties?.place_code) {
           // Clear selectedFeature when clicking on a POI
@@ -85,6 +92,20 @@ export const useMapEventHandlers = () => {
           dispatch(fetchPlaceDetails(properties.place_code));
           dispatch(openLeftBar());
         } else {
+          // No place_code - clear URL parameters but keep hash
+          const pathname = window.location.pathname;
+          const hash = window.location.hash;
+          window.history.replaceState({}, '', `${pathname}${hash}`);
+
+          // Make sure we properly set the selected feature regardless of source
+          setSelectedFeature({
+            ...feature,
+            geometry: {
+              ...feature.geometry,
+              coordinates: [clickedLngLat.lng, clickedLngLat.lat],
+            },
+          });
+
           setMarkerCoords({
             latitude: clickedLngLat.lat,
             longitude: clickedLngLat.lng,
@@ -92,20 +113,17 @@ export const useMapEventHandlers = () => {
               source: 'mapClick',
             },
           });
-          setSelectedFeature((prev: any) => {
-            if (prev?.id === feature.id) return prev;
-            return {
-              ...feature,
-              geometry: {
-                ...feature.geometry,
-                coordinates: [clickedLngLat.lng, clickedLngLat.lat],
-              },
-            };
-          });
+
           dispatch(closeLeftBar());
           dispatch(clearSearch());
         }
       } else {
+        // No feature - clear URL parameters but keep hash
+        const pathname = window.location.pathname;
+        const hash = window.location.hash;
+        window.history.replaceState({}, '', `${pathname}${hash}`);
+
+        // Clear selected feature and marker when clicking on empty areas
         setMarkerCoords(null);
         setSelectedFeature(null);
         dispatch(clearSearch());
@@ -153,7 +171,7 @@ export const useMapEventHandlers = () => {
   const handleMapDoubleClick = useCallback(
     (event: any) => {
       const clickedLngLat = event.lngLat;
-
+      setSelectedFeature(null);
       if (clickedLngLat) {
         // Get the precise coordinates of the click
         const latitude = clickedLngLat.lat;

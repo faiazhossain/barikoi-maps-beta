@@ -52,21 +52,28 @@ export const useUrlParams = () => {
 
   // Update URL when place details change
   useEffect(() => {
-    const currentUrl = new URL(window.location.href);
-
     if (placeDetails?.place_code || placeDetails?.uCode) {
-      // Update URL only if we have a valid place code
-      currentUrl.searchParams.set(
-        'place',
-        placeDetails.place_code || placeDetails.uCode
-      );
-      // Remove rev parameter if place is set
-      currentUrl.searchParams.delete('rev');
-      window.history.replaceState({}, '', currentUrl.toString());
-    } else if (currentUrl.searchParams.has('place')) {
-      // Remove place parameter if no valid code exists
-      currentUrl.searchParams.delete('place');
-      window.history.replaceState({}, '', currentUrl.toString());
+      // First get the current URL parts
+      const pathname = window.location.pathname;
+      const hash = window.location.hash;
+
+      // Construct the new URL with place parameter
+      const placeCode = placeDetails.place_code || placeDetails.uCode;
+      const newUrl = `${pathname}?place=${placeCode}${hash}`;
+
+      // Update URL without encoding
+      window.history.replaceState({}, '', newUrl);
+    } else if (placeDetails?.latitude && placeDetails?.longitude) {
+      // First get the current URL parts
+      const pathname = window.location.pathname;
+      const hash = window.location.hash;
+
+      // Construct the new URL with rev parameter (coordinates)
+      const coords = `${placeDetails.latitude},${placeDetails.longitude}`;
+      const newUrl = `${pathname}?rev=${coords}${hash}`;
+
+      // Update URL without encoding
+      window.history.replaceState({}, '', newUrl);
     }
   }, [placeDetails]);
 };
