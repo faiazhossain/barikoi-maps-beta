@@ -9,7 +9,7 @@ export const usePlaceDetailsEffect = (
   useEffect(() => {
     if (!placeDetails || !mapRef.current) return;
 
-    if (placeDetails.source === 'placeAPI') {
+    if (placeDetails) {
       // Get coordinates from place details
       const { latitude, longitude, place_name, uCode } = placeDetails;
 
