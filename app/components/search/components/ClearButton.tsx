@@ -4,6 +4,7 @@ import { AiOutlineClose } from 'react-icons/ai';
 import { useAppDispatch } from '@/app/store/store';
 import { clearSearch } from '@/app/store/slices/searchSlice';
 import { closeLeftBar } from '@/app/store/slices/drawerSlice';
+import { setMarkerCoords } from '@/app/store/slices/mapSlice';
 
 interface ClearButtonProps {
   searchTerm: string;
@@ -20,11 +21,15 @@ const ClearButton: React.FC<ClearButtonProps> = ({ searchTerm }) => {
 
     // Close drawer
     dispatch(closeLeftBar());
-
+    dispatch(setMarkerCoords(null));
     // Clear URL parameters
     const currentUrl = new URL(window.location.href);
-    if (currentUrl.searchParams.has('place')) {
+    if (
+      currentUrl.searchParams.has('place') ||
+      currentUrl.searchParams.has('rev')
+    ) {
       currentUrl.searchParams.delete('place');
+      currentUrl.searchParams.delete('rev');
       window.history.replaceState({}, '', currentUrl.toString());
     }
   };

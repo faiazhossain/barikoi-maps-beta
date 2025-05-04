@@ -1,5 +1,19 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
+// Define marker coordinates interface
+export interface MarkerCoords {
+  latitude: number;
+  longitude: number;
+  properties?: {
+    place_code?: string;
+    name_en?: string;
+    name_bn?: string;
+    type?: string;
+    subtype?: string;
+    source?: string;
+  };
+}
+
 interface MapState {
   viewport: {
     longitude: number;
@@ -15,6 +29,7 @@ interface MapState {
   showDirections: boolean;
   selectedCountry: string | null;
   isMapLoaded: boolean;
+  markerCoords: MarkerCoords | null;
 }
 
 const initialState: MapState = {
@@ -29,6 +44,7 @@ const initialState: MapState = {
   showDirections: false,
   selectedCountry: null,
   isMapLoaded: false,
+  markerCoords: null,
 };
 
 const mapSlice = createSlice({
@@ -56,6 +72,9 @@ const mapSlice = createSlice({
     setMapLoaded: (state, action: PayloadAction<boolean>) => {
       state.isMapLoaded = action.payload;
     },
+    setMarkerCoords: (state, action: PayloadAction<MarkerCoords | null>) => {
+      state.markerCoords = action.payload;
+    },
   },
 });
 
@@ -66,6 +85,7 @@ export const {
   toggleDirections,
   setSelectedCountry,
   setMapLoaded,
+  setMarkerCoords,
 } = mapSlice.actions;
 
 export default mapSlice.reducer;

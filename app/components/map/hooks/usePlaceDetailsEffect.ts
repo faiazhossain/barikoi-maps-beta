@@ -1,11 +1,14 @@
 import { useEffect } from 'react';
 import { MapRef } from 'react-map-gl/maplibre';
+import { useAppDispatch } from '@/app/store/store';
+import { setMarkerCoords } from '@/app/store/slices/mapSlice';
 
 export const usePlaceDetailsEffect = (
   placeDetails: any,
-  mapRef: React.RefObject<MapRef>,
-  setMarkerCoords: (coords: any) => void
+  mapRef: React.RefObject<MapRef>
 ) => {
+  const dispatch = useAppDispatch();
+
   useEffect(() => {
     if (!placeDetails || !mapRef.current) return;
 
@@ -15,16 +18,18 @@ export const usePlaceDetailsEffect = (
 
       if (latitude && longitude) {
         // Only update marker if coordinates are valid
-        setMarkerCoords({
-          latitude,
-          longitude,
-          properties: {
-            place_code: uCode,
-            name_en: place_name,
-            type: placeDetails.pType,
-            source: 'placeAPI',
-          },
-        });
+        dispatch(
+          setMarkerCoords({
+            latitude,
+            longitude,
+            properties: {
+              place_code: uCode,
+              name_en: place_name,
+              type: placeDetails.pType,
+              source: 'placeAPI',
+            },
+          })
+        );
 
         // Fly to the location with animation
         mapRef.current.getMap().flyTo({
@@ -34,5 +39,5 @@ export const usePlaceDetailsEffect = (
         });
       }
     }
-  }, [placeDetails, mapRef, setMarkerCoords]);
+  }, [placeDetails, mapRef, dispatch]);
 };

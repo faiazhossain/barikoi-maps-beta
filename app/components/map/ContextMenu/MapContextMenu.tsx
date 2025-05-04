@@ -14,19 +14,18 @@ import { useRouter } from 'next/navigation';
 import { useAppDispatch } from '@/app/store/store';
 import { openLeftBar } from '@/app/store/slices/drawerSlice';
 import { fetchReverseGeocode } from '@/app/store/thunks/searchThunks';
+import { setMarkerCoords } from '@/app/store/slices/mapSlice';
 
 interface MapContextMenuProps {
   longitude: number;
   latitude: number;
   onClose: () => void;
-  setMarkerCoords: (coords: any) => void;
 }
 
 const MapContextMenu: React.FC<MapContextMenuProps> = ({
   longitude,
   latitude,
   onClose,
-  setMarkerCoords,
 }) => {
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -45,10 +44,16 @@ const MapContextMenu: React.FC<MapContextMenuProps> = ({
   };
 
   const handleShowInfo = () => {
-    setMarkerCoords({
-      latitude: parseFloat(lat),
-      longitude: parseFloat(lng),
-    });
+    // Use Redux action to set marker coordinates
+    dispatch(
+      setMarkerCoords({
+        latitude: parseFloat(lat),
+        longitude: parseFloat(lng),
+        properties: {
+          source: 'contextMenu',
+        },
+      })
+    );
 
     dispatch(
       fetchReverseGeocode({

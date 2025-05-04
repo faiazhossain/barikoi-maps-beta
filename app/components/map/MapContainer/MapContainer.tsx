@@ -12,7 +12,7 @@ import BarikoiAttribution from './BarikoiAttribution';
 import { AnimatePresence } from 'framer-motion';
 import InfoCard from '../InfoCard/InfoCard';
 
-import { setMapLoaded } from '@/app/store/slices/mapSlice';
+import { setMapLoaded, setMarkerCoords } from '@/app/store/slices/mapSlice';
 import { useAppDispatch, useAppSelector } from '@/app/store/store';
 import ResponsiveDrawer from '../../LeftPanel/ResponsiveDrawer';
 import { useUrlParams } from '@/app/hooks/useUrlParams';
@@ -25,11 +25,9 @@ const MapContainer: React.FC = () => {
   const dispatch = useAppDispatch();
   const { isLeftBarOpen } = useAppSelector((state) => state.drawer);
   const { placeDetails } = useAppSelector((state) => state.search);
-
+  const { markerCoords } = useAppSelector((state) => state.map);
   // Use the custom hooks for event handling
   const {
-    markerCoords,
-    setMarkerCoords,
     hoveredFeatureId,
     selectedFeature,
     handleMapClick,
@@ -49,11 +47,7 @@ const MapContainer: React.FC = () => {
   useRouteFromUrl(mapRef as React.RefObject<MapRef>);
 
   // Handle place details effect
-  usePlaceDetailsEffect(
-    placeDetails,
-    mapRef as React.RefObject<MapRef>,
-    setMarkerCoords
-  );
+  usePlaceDetailsEffect(placeDetails, mapRef as React.RefObject<MapRef>);
 
   const handleMapLoad = () => {
     dispatch(setMapLoaded(true));
@@ -68,7 +62,8 @@ const MapContainer: React.FC = () => {
 
   const handleCloseInfoCard = React.useCallback(() => {
     setSelectedFeature(null);
-  }, [setSelectedFeature]);
+    dispatch(setMarkerCoords(null)); // Clear marker coordinates when closing the info card
+  }, [setSelectedFeature, dispatch]);
 
   return (
     <>
@@ -126,7 +121,6 @@ const MapContainer: React.FC = () => {
                 longitude={contextMenu.lngLat.lng}
                 latitude={contextMenu.lngLat.lat}
                 onClose={closeContextMenu}
-                setMarkerCoords={setMarkerCoords}
               />
             </>
           )}

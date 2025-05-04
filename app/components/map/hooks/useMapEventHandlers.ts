@@ -1,24 +1,12 @@
 import { useState, useCallback } from 'react';
-import { useAppDispatch } from '@/app/store/store';
+import { useAppDispatch, useAppSelector } from '@/app/store/store';
 import {
   fetchPlaceDetails,
   fetchReverseGeocode,
 } from '@/app/store/thunks/searchThunks';
 import { closeLeftBar, openLeftBar } from '@/app/store/slices/drawerSlice';
 import { clearSearch } from '@/app/store/slices/searchSlice';
-
-export interface MarkerCoords {
-  latitude: number;
-  longitude: number;
-  properties?: {
-    place_code?: string;
-    name_en?: string;
-    name_bn?: string;
-    type?: string;
-    subtype?: string;
-    source?: string;
-  };
-}
+import { setMarkerCoords } from '@/app/store/slices/mapSlice';
 
 export interface ContextMenuState {
   visible: boolean;
@@ -32,7 +20,7 @@ export interface ContextMenuState {
 
 export const useMapEventHandlers = () => {
   const dispatch = useAppDispatch();
-  const [markerCoords, setMarkerCoords] = useState<MarkerCoords | null>(null);
+  const { markerCoords } = useAppSelector((state) => state.map);
   const [hoveredFeatureId, setHoveredFeatureId] = useState<string | null>(null);
   const [selectedFeature, setSelectedFeature] = useState<any>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuState>({
@@ -56,11 +44,7 @@ export const useMapEventHandlers = () => {
 
       // Get all features at click point
       const features = event.target.queryRenderedFeatures(event.point);
-      const featuresNotPoint = event.target.queryRenderedFeatures(event);
-      console.log(
-        '🚀 ~ useMapEventHandlers ~ featuresNotPoint:',
-        featuresNotPoint
-      );
+
       const feature = features.length > 0 ? features[0] : null;
       const clickedLngLat = event.lngLat;
 
@@ -72,23 +56,24 @@ export const useMapEventHandlers = () => {
           // Clear selectedFeature when clicking on a POI
           setSelectedFeature(null);
 
-          setMarkerCoords((prev) => {
-            if (prev?.properties?.place_code === properties.place_code) {
-              return prev;
-            }
-            return {
-              latitude: coordinates[1],
-              longitude: coordinates[0],
-              properties: {
-                place_code: properties.place_code,
-                name_en: properties['name:en'],
-                name_bn: properties['name:bn'],
-                type: properties.type,
-                subtype: properties.subtype,
-                source: 'mapLayer',
-              },
-            };
-          });
+          // Check if we're clicking the same marker
+          if (markerCoords?.properties?.place_code !== properties.place_code) {
+            dispatch(
+              setMarkerCoords({
+                latitude: coordinates[1],
+                longitude: coordinates[0],
+                properties: {
+                  place_code: properties.place_code,
+                  name_en: properties['name:en'],
+                  name_bn: properties['name:bn'],
+                  type: properties.type,
+                  subtype: properties.subtype,
+                  source: 'mapLayer',
+                },
+              })
+            );
+          }
+
           dispatch(fetchPlaceDetails(properties.place_code));
           dispatch(openLeftBar());
         } else {
@@ -106,13 +91,15 @@ export const useMapEventHandlers = () => {
             },
           });
 
-          setMarkerCoords({
-            latitude: clickedLngLat.lat,
-            longitude: clickedLngLat.lng,
-            properties: {
-              source: 'mapClick',
-            },
-          });
+          dispatch(
+            setMarkerCoords({
+              latitude: clickedLngLat.lat,
+              longitude: clickedLngLat.lng,
+              properties: {
+                source: 'mapClick',
+              },
+            })
+          );
 
           dispatch(closeLeftBar());
           dispatch(clearSearch());
@@ -124,13 +111,13 @@ export const useMapEventHandlers = () => {
         window.history.replaceState({}, '', `${pathname}${hash}`);
 
         // Clear selected feature and marker when clicking on empty areas
-        setMarkerCoords(null);
+        dispatch(setMarkerCoords(null));
         setSelectedFeature(null);
         dispatch(clearSearch());
         dispatch(closeLeftBar());
       }
     },
-    [dispatch, contextMenu.visible, closeContextMenu]
+    [dispatch, contextMenu.visible, closeContextMenu, markerCoords]
   );
 
   // Handle right-click to show context menu
@@ -178,13 +165,15 @@ export const useMapEventHandlers = () => {
         const longitude = clickedLngLat.lng;
 
         // Set marker at clicked location immediately for better UX
-        setMarkerCoords({
-          latitude,
-          longitude,
-          properties: {
-            source: 'doubleClick',
-          },
-        });
+        dispatch(
+          setMarkerCoords({
+            latitude,
+            longitude,
+            properties: {
+              source: 'doubleClick',
+            },
+          })
+        );
 
         // Open the left bar immediately instead of waiting for API response
         dispatch(openLeftBar());
@@ -197,7 +186,7 @@ export const useMapEventHandlers = () => {
           });
       }
     },
-    [dispatch, setMarkerCoords]
+    [dispatch]
   );
 
   const handleMapLoad = useCallback(() => {
@@ -207,7 +196,6 @@ export const useMapEventHandlers = () => {
 
   return {
     markerCoords,
-    setMarkerCoords,
     hoveredFeatureId,
     selectedFeature,
     setSelectedFeature,
