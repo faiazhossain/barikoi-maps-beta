@@ -204,7 +204,6 @@ const MapContainer: React.FC = () => {
         }}
         style={{ width: '100vw', height: '100dvh' }}
         mapStyle='/map-styles/light-style.json'
-        np
         attributionControl={false}
         onLoad={handleMapLoad}
         onClick={handleMapClick}
