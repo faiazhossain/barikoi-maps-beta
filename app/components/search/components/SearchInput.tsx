@@ -47,6 +47,9 @@ const SearchInput: React.FC<SearchInputProps> = ({
     useState<AutoCompleteOption[]>(options);
   const [isCoordinate, setIsCoordinate] = useState(false);
 
+  // Add ref for the input element
+  const inputRef = React.useRef<any>(null);
+
   // Move coordinate check to a separate function
   const validateCoordinates = (input: string) => {
     const parts = input.split(',');
@@ -155,6 +158,15 @@ const SearchInput: React.FC<SearchInputProps> = ({
   };
 
   const handleSelect = (value: string, option: AutoCompleteOption) => {
+    // Blur the input to dismiss keyboard on mobile
+    if (inputRef.current?.blur) {
+      inputRef.current.blur();
+    }
+    // Close virtual keyboard on mobile
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+
     if (option.rawData?.type === 'coordinates') {
       const { lat, lng } = option.rawData;
       handleCoordinateSelect(lat, lng);
@@ -165,6 +177,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
   return (
     <div className='relative w-full'>
       <AutoComplete
+        ref={inputRef}
         className='searchbar_autocomplete !h-[44px] !w-full
         [&_.ant-select-selector]:!border-none 
         [&_.ant-select-selector]:!shadow-none 
