@@ -4,7 +4,6 @@ import {
   setNearbyPlaces,
   setNearbyLoading,
   setNearbyError,
-  setPlaceDetails, // Import the action creator
 } from '../slices/searchSlice';
 
 export const fetchPlaceDetails = createAsyncThunk(
