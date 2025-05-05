@@ -1,8 +1,8 @@
 'use client';
-import React, { useCallback } from 'react';
+import React from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import MapGL, { MapRef, ViewStateChangeEvent } from 'react-map-gl/maplibre';
+import MapGL, { MapRef } from 'react-map-gl/maplibre';
 import { useMapRef } from '../hooks/useMapRef';
 import { useRouteFromUrl } from '../hooks/useRouteFromUrl';
 import { useMapEventHandlers } from '../hooks/useMapEventHandlers';
@@ -74,21 +74,6 @@ const MapContainer: React.FC = () => {
     }
   };
 
-  // Add handler for map movement
-  const handleMapMove = useCallback(
-    (e: ViewStateChangeEvent) => {
-      // Update Redux state with new viewport
-      dispatch(
-        setViewport({
-          longitude: e.viewState.longitude,
-          latitude: e.viewState.latitude,
-          zoom: e.viewState.zoom,
-        })
-      );
-    },
-    [dispatch]
-  );
-
   // Add event handler to close the context menu when clicking outside
   const handleMapContainerClick = React.useCallback(() => {
     if (contextMenu.visible) {
@@ -116,7 +101,6 @@ const MapContainer: React.FC = () => {
           mapStyle='/map-styles/light-style.json'
           attributionControl={false}
           onLoad={handleMapLoad}
-          onMoveEnd={handleMapMove}
           onClick={handleMapClick}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}

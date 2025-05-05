@@ -1,12 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Slider from 'react-slick';
 import { Tooltip } from 'antd';
 import { motion } from 'framer-motion';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import styles from './NearbyCategories.module.css';
-import { useAppDispatch, useAppSelector } from '@/app/store/store'; // Add useAppSelector
-import { setSelectedCategories } from '@/app/store/slices/searchSlice';
+import { useAppDispatch, useAppSelector } from '@/app/store/store';
+import {
+  setSelectedCategories,
+  setNearbyLoading,
+} from '@/app/store/slices/searchSlice';
 import {
   FaUtensils,
   FaHotel,
@@ -16,6 +19,7 @@ import {
   FaHospital,
   FaSchool,
   FaParking,
+  FaSpinner,
 } from 'react-icons/fa';
 import { setViewport } from '@/app/store/slices/mapSlice';
 
@@ -61,9 +65,8 @@ function SamplePrevArrow(props: ArrowProps) {
 
 const NearbyCategories = () => {
   const dispatch = useAppDispatch();
-
-  // Get the current viewport coordinates from Redux
   const { viewport } = useAppSelector((state) => state.map);
+  const [loadingCategory, setLoadingCategory] = useState<string | null>(null);
 
   const settings = {
     dots: false,
@@ -108,17 +111,72 @@ const NearbyCategories = () => {
     { icon: <FaParking />, name: 'Parking', value: 'Parking' },
   ];
 
-  // Update the handleCategoryClick function
   const handleCategoryClick = (category: string) => {
-    // Use the current map viewport coordinates
-    dispatch(
-      setViewport({
-        latitude: viewport.latitude,
-        longitude: viewport.longitude,
-        zoom: 16, // Good zoom level for nearby places
-      })
-    );
-    dispatch(setSelectedCategories([category]));
+    setLoadingCategory(category);
+
+    if (navigator.geolocation) {
+      dispatch(setNearbyLoading(true));
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          dispatch(
+            setViewport({
+              longitude: position.coords.longitude,
+              latitude: position.coords.latitude,
+              zoom: 16,
+            })
+          );
+
+          dispatch(setSelectedCategories([category]));
+          dispatch(setNearbyLoading(false));
+          setLoadingCategory(null);
+        },
+        (error) => {
+          console.warn('Geolocation error:', error);
+
+          const { hash } = window.location;
+          let lat = viewport.latitude;
+          let lng = viewport.longitude;
+          let zoom = 16;
+
+          if (hash) {
+            const hashParts = hash.substring(1).split('/');
+            if (hashParts.length >= 3) {
+              zoom = parseFloat(hashParts[0] ?? '0');
+              lat = parseFloat(hashParts[1] ?? '0');
+              lng = parseFloat(hashParts[2] ?? '0');
+            }
+          }
+
+          dispatch(
+            setViewport({
+              longitude: lng,
+              latitude: lat,
+              zoom: zoom,
+            })
+          );
+
+          dispatch(setSelectedCategories([category]));
+          dispatch(setNearbyLoading(false));
+          setLoadingCategory(null);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0,
+        }
+      );
+    } else {
+      dispatch(
+        setViewport({
+          latitude: viewport.latitude,
+          longitude: viewport.longitude,
+          zoom: 16,
+        })
+      );
+      dispatch(setSelectedCategories([category]));
+      setLoadingCategory(null);
+    }
   };
 
   return (
@@ -130,7 +188,11 @@ const NearbyCategories = () => {
               <div key={index} className='px-2'>
                 <div className='flex flex-col items-center'>
                   <Tooltip
-                    title={category.name}
+                    title={
+                      loadingCategory === category.value
+                        ? 'Getting your location...'
+                        : category.name
+                    }
                     placement='bottom'
                     mouseEnterDelay={0.1}
                     mouseLeaveDelay={0.1}
@@ -146,8 +208,15 @@ const NearbyCategories = () => {
                       whileTap={{ scale: 0.95 }}
                       onClick={() => handleCategoryClick(category.value)}
                       aria-label={`Search nearby ${category.name}`}
+                      disabled={loadingCategory !== null}
                     >
-                      <span className='text-lg'>{category.icon}</span>
+                      {loadingCategory === category.value ? (
+                        <span className='text-lg animate-spin'>
+                          <FaSpinner />
+                        </span>
+                      ) : (
+                        <span className='text-lg'>{category.icon}</span>
+                      )}
                     </motion.button>
                   </Tooltip>
                 </div>
