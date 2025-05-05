@@ -42,11 +42,10 @@ const PlaceCard = ({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className='bg-white rounded-lg shadow-sm p-2.5 mb-2 hover:shadow-md transition-shadow border border-gray-50 cursor-pointer'
+      className='bg-white rounded-lg shadow-sm p-2.5 mb-2 hover:bg-gray-100 hover:shadow-md transition-shadow border border-gray-50 cursor-pointer'
       onClick={() => onSelect(place)}
       onMouseEnter={() => onHoverStart(place)}
       onMouseLeave={() => onHoverEnd()}
-      whileHover={{ scale: 1.02 }}
     >
       <div className='flex items-start'>
         <div className='p-1.5 rounded-full bg-blue-50 mr-2.5 flex-shrink-0'>
