@@ -1,8 +1,8 @@
 'use client';
-import React from 'react';
+import React, { useCallback } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import MapGL, { MapRef } from 'react-map-gl/maplibre';
+import MapGL, { MapRef, ViewStateChangeEvent } from 'react-map-gl/maplibre';
 import { useMapRef } from '../hooks/useMapRef';
 import { useRouteFromUrl } from '../hooks/useRouteFromUrl';
 import { useMapEventHandlers } from '../hooks/useMapEventHandlers';
@@ -12,20 +12,29 @@ import BarikoiAttribution from './BarikoiAttribution';
 import { AnimatePresence } from 'framer-motion';
 import InfoCard from '../InfoCard/InfoCard';
 
-import { setMapLoaded, setMarkerCoords } from '@/app/store/slices/mapSlice';
+import {
+  setMapLoaded,
+  setMarkerCoords,
+  setViewport,
+} from '@/app/store/slices/mapSlice';
 import { useAppDispatch, useAppSelector } from '@/app/store/store';
 import ResponsiveDrawer from '../../LeftPanel/ResponsiveDrawer';
 import { useUrlParams } from '@/app/hooks/useUrlParams';
 import AnimatedMarker from '../Markers/AnimatedMarker';
 import MapContextMenu from '../ContextMenu/MapContextMenu';
 import ContextMarker from '../Markers/ContextMarker';
+import NearbySearchMarker from '../Markers/NearbySearchMarker';
 
 const MapContainer: React.FC = () => {
   const mapRef = useMapRef();
   const dispatch = useAppDispatch();
   const { isLeftBarOpen } = useAppSelector((state) => state.drawer);
   const { placeDetails } = useAppSelector((state) => state.search);
-  const { markerCoords } = useAppSelector((state) => state.map);
+  const { markerCoords, viewport } = useAppSelector((state) => state.map);
+  const selectedCategories = useAppSelector(
+    (state) => state.search.selectedCategories
+  );
+  const showNearbyResults = selectedCategories.length > 0;
   // Use the custom hooks for event handling
   const {
     hoveredFeatureId,
@@ -51,7 +60,34 @@ const MapContainer: React.FC = () => {
 
   const handleMapLoad = () => {
     dispatch(setMapLoaded(true));
+
+    // Also update viewport on initial load
+    if (mapRef.current) {
+      const { lng: longitude, lat: latitude } = mapRef.current.getCenter();
+      dispatch(
+        setViewport({
+          longitude,
+          latitude,
+          zoom: mapRef.current.getZoom(),
+        })
+      );
+    }
   };
+
+  // Add handler for map movement
+  const handleMapMove = useCallback(
+    (e: ViewStateChangeEvent) => {
+      // Update Redux state with new viewport
+      dispatch(
+        setViewport({
+          longitude: e.viewState.longitude,
+          latitude: e.viewState.latitude,
+          zoom: e.viewState.zoom,
+        })
+      );
+    },
+    [dispatch]
+  );
 
   // Add event handler to close the context menu when clicking outside
   const handleMapContainerClick = React.useCallback(() => {
@@ -72,14 +108,15 @@ const MapContainer: React.FC = () => {
           ref={mapRef as unknown as React.RefObject<MapRef>}
           mapLib={maplibregl}
           initialViewState={{
-            longitude: 90.3938,
-            latitude: 23.8103,
-            zoom: 12,
+            longitude: viewport.longitude || 90.3938,
+            latitude: viewport.latitude || 23.8103,
+            zoom: viewport.zoom || 12,
           }}
           style={{ width: '100vw', height: '100dvh' }}
           mapStyle='/map-styles/light-style.json'
           attributionControl={false}
           onLoad={handleMapLoad}
+          onMoveEnd={handleMapMove}
           onClick={handleMapClick}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
@@ -107,6 +144,15 @@ const MapContainer: React.FC = () => {
               latitude={markerCoords.latitude}
               longitude={markerCoords.longitude}
               properties={markerCoords.properties}
+            />
+          )}
+
+          {/* Add nearby search center marker */}
+          {showNearbyResults && (
+            <NearbySearchMarker
+              latitude={viewport.latitude}
+              longitude={viewport.longitude}
+              categories={selectedCategories}
             />
           )}
 

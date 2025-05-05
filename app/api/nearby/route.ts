@@ -31,6 +31,7 @@ export async function GET(request: NextRequest) {
 
   // Determine which API to call based on the parameters
   if (categories) {
+    console.log('🚀 ~ GET ~ categories:', categories);
     // Multi-category search
     apiUrl = `https://barikoi.xyz/v2/api/search/nearby/multi/type/${radius}/${limit}?api_key=${API_KEY}&q=${categories}&longitude=${longitude}&latitude=${latitude}`;
   } else if (type) {

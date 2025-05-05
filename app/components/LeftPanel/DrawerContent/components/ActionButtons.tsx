@@ -4,9 +4,13 @@ import { FaShareAlt, FaMapMarkerAlt, FaEdit, FaCheck } from 'react-icons/fa';
 import { MdDirections } from 'react-icons/md';
 import { motion } from 'framer-motion';
 import ShareModal from './ShareModal';
-import { useAppSelector } from '@/app/store/store';
+import { useAppSelector, useAppDispatch } from '@/app/store/store';
+import { setSelectedCategories } from '@/app/store/slices/searchSlice';
+import { setViewport } from '@/app/store/slices/mapSlice';
+import { closeDrawer } from '@/app/store/slices/drawerSlice';
 
 export const ActionButtons = () => {
+  const dispatch = useAppDispatch();
   const [activeAction, setActiveAction] = useState<string | null>(null);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const placeDetails = useAppSelector((state) => state.search.placeDetails);
@@ -14,9 +18,72 @@ export const ActionButtons = () => {
   const handleActionClick = (action: string) => {
     if (action === 'share') {
       setIsShareModalOpen(true);
+    } else if (action === 'nearby') {
+      handleNearbyClick();
     }
+
     setActiveAction(action);
     setTimeout(() => setActiveAction(null), 1500);
+  };
+
+  // Handle the nearby action when a user clicks the "Nearby" button
+  const handleNearbyClick = () => {
+    if (placeDetails && placeDetails.latitude && placeDetails.longitude) {
+      // Get place coordinates
+      const lat = parseFloat(placeDetails.latitude);
+      const lng = parseFloat(placeDetails.longitude);
+
+      // First update the map viewport to center on the selected place
+      dispatch(
+        setViewport({
+          latitude: lat,
+          longitude: lng,
+          zoom: 16, // Good zoom level for nearby places
+        })
+      );
+
+      // Determine a relevant category based on the place type
+      let category = 'Restaurant'; // Default category
+
+      if (placeDetails.pType) {
+        // Check if the place has a type and map it to a nearby category
+        const placeType = placeDetails.pType.toLowerCase();
+        if (placeType.includes('restaurant') || placeType.includes('food')) {
+          category = 'Restaurant';
+        } else if (placeType.includes('hotel')) {
+          category = 'Hotel';
+        } else if (placeType.includes('cafe') || placeType.includes('coffee')) {
+          category = 'Cafe';
+        } else if (
+          placeType.includes('shop') ||
+          placeType.includes('store') ||
+          placeType.includes('mall')
+        ) {
+          category = 'Shopping';
+        } else if (
+          placeType.includes('hospital') ||
+          placeType.includes('clinic')
+        ) {
+          category = 'Hospital';
+        } else if (
+          placeType.includes('school') ||
+          placeType.includes('college') ||
+          placeType.includes('university')
+        ) {
+          category = 'School';
+        } else if (placeType.includes('gas') || placeType.includes('fuel')) {
+          category = 'Gas Station';
+        } else if (placeType.includes('park')) {
+          category = 'Parking';
+        }
+      }
+
+      // Set the selected category to trigger nearby search
+      dispatch(setSelectedCategories([category]));
+
+      // Close the drawer to show the map and nearby results
+      dispatch(closeDrawer());
+    }
   };
 
   const getShareInfo = () => {

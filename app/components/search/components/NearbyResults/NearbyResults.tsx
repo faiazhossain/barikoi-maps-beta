@@ -62,7 +62,6 @@ const NearbyFilters = ({
   selectedCategories: string[];
   onCategoryChange: (cat: string) => void;
 }) => {
-  console.log('🚀 ~ selectedCategories:', selectedCategories);
   return (
     <div className='mb-4 bg-white rounded-lg shadow-sm p-3'>
       <h3 className='font-medium text-gray-700 mb-2'>Filters</h3>
@@ -155,14 +154,17 @@ const NearbyResults = () => {
 
   // Fetch nearby places when coordinates, radius, or categories change
   useEffect(() => {
-    dispatch(
-      fetchNearbyPlaces({
-        latitude: viewport.latitude,
-        longitude: viewport.longitude,
-        radius: currentRadius,
-        categories: selectedCategories.join(','),
-      })
-    );
+    if (selectedCategories.length > 0) {
+      dispatch(
+        fetchNearbyPlaces({
+          // Use viewport coordinates from Redux
+          latitude: viewport.latitude,
+          longitude: viewport.longitude,
+          radius: currentRadius,
+          categories: selectedCategories.join(','),
+        })
+      );
+    }
   }, [
     viewport.latitude,
     viewport.longitude,

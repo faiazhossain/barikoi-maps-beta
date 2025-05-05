@@ -146,20 +146,14 @@ const SearchBar: React.FC = () => {
 
         // If we have a valid category, trigger nearby search
         if (category) {
-          console.log('🚀 ~ handleInputChange ~ category:', category);
           // Capitalize first letter for consistency with your category format
           const formattedCategory =
             category.charAt(0).toUpperCase() + category.slice(1);
-          console.log(
-            '🚀 ~ handleInputChange ~ formattedCategory:',
-            formattedCategory
-          );
           dispatch(setSelectedCategories([formattedCategory]));
           return; // Skip regular search
         }
       }
     }
-
     // Perform regular search if not a "near me" query
     handleSearch(value);
   };

@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import styles from './NearbyCategories.module.css';
-import { useAppDispatch, useAppSelector } from '@/app/store/store';
+import { useAppDispatch, useAppSelector } from '@/app/store/store'; // Add useAppSelector
 import { setSelectedCategories } from '@/app/store/slices/searchSlice';
 import {
   FaUtensils,
@@ -17,6 +17,7 @@ import {
   FaSchool,
   FaParking,
 } from 'react-icons/fa';
+import { setViewport } from '@/app/store/slices/mapSlice';
 
 interface ArrowProps {
   className?: string;
@@ -60,6 +61,8 @@ function SamplePrevArrow(props: ArrowProps) {
 
 const NearbyCategories = () => {
   const dispatch = useAppDispatch();
+
+  // Get the current viewport coordinates from Redux
   const { viewport } = useAppSelector((state) => state.map);
 
   const settings = {
@@ -105,11 +108,17 @@ const NearbyCategories = () => {
     { icon: <FaParking />, name: 'Parking', value: 'Parking' },
   ];
 
+  // Update the handleCategoryClick function
   const handleCategoryClick = (category: string) => {
-    if (viewport) {
-      // Clear previous selection and set new category
-      dispatch(setSelectedCategories([category]));
-    }
+    // Use the current map viewport coordinates
+    dispatch(
+      setViewport({
+        latitude: viewport.latitude,
+        longitude: viewport.longitude,
+        zoom: 16, // Good zoom level for nearby places
+      })
+    );
+    dispatch(setSelectedCategories([category]));
   };
 
   return (

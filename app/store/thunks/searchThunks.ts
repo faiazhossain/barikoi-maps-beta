@@ -1,4 +1,5 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
+import { RootState } from '../store'; // Add this import
 import {
   setNearbyPlaces,
   setNearbyLoading,
@@ -63,22 +64,29 @@ export const fetchNearbyPlaces = createAsyncThunk(
       type = '',
       categories = '',
     }: {
-      latitude: number;
-      longitude: number;
+      latitude?: number;
+      longitude?: number;
       radius?: number;
       limit?: number;
       type?: string;
       categories?: string;
     },
-    { dispatch }
+    { dispatch, getState }
   ) => {
     try {
       dispatch(setNearbyLoading(true));
 
+      // Get the state to access map viewport
+      const state = getState() as RootState;
+
+      // Use provided coordinates or fall back to viewport coordinates from Redux
+      const lat = latitude || state.map.viewport.latitude;
+      const lng = longitude || state.map.viewport.longitude;
+
       // Build query parameters
       const params = new URLSearchParams();
-      params.append('latitude', latitude.toString());
-      params.append('longitude', longitude.toString());
+      params.append('latitude', lat.toString());
+      params.append('longitude', lng.toString());
       params.append('radius', radius.toString());
       params.append('limit', limit.toString());
 
