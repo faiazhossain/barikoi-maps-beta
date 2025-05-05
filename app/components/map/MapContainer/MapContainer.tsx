@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import MapGL, { MapRef } from 'react-map-gl/maplibre';
@@ -24,17 +24,29 @@ import AnimatedMarker from '../Markers/AnimatedMarker';
 import MapContextMenu from '../ContextMenu/MapContextMenu';
 import ContextMarker from '../Markers/ContextMarker';
 import NearbySearchMarker from '../Markers/NearbySearchMarker';
+import NearbyPlaceMarker from '../Markers/NearbyPlaceMarker';
+import NearbyPlacePopup from '../Popups/NearbyPlacePopup';
+import NearbyPlaceModal from '../Modals/NearbyPlaceModal';
+import { NearbyPlace } from '@/app/types/map';
 
 const MapContainer: React.FC = () => {
   const mapRef = useMapRef();
   const dispatch = useAppDispatch();
   const { isLeftBarOpen } = useAppSelector((state) => state.drawer);
-  const { placeDetails } = useAppSelector((state) => state.search);
+  const { placeDetails, nearbyPlaces } = useAppSelector(
+    (state) => state.search
+  );
   const { markerCoords, viewport } = useAppSelector((state) => state.map);
   const selectedCategories = useAppSelector(
     (state) => state.search.selectedCategories
   );
   const showNearbyResults = selectedCategories.length > 0;
+
+  // State for selected nearby place popup and modal
+  const [selectedNearbyPlace, setSelectedNearbyPlace] =
+    useState<NearbyPlace | null>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+
   // Use the custom hooks for event handling
   const {
     hoveredFeatureId,
@@ -72,6 +84,27 @@ const MapContainer: React.FC = () => {
         })
       );
     }
+  };
+
+  // Handle nearby place marker click
+  const handleNearbyPlaceClick = (place: NearbyPlace) => {
+    setSelectedNearbyPlace(place);
+    setShowDetailsModal(false);
+  };
+
+  // Close popup
+  const handleClosePopup = () => {
+    setSelectedNearbyPlace(null);
+  };
+
+  // Show details modal
+  const handleViewDetails = () => {
+    setShowDetailsModal(true);
+  };
+
+  // Close modal
+  const handleCloseModal = () => {
+    setShowDetailsModal(false);
   };
 
   // Add event handler to close the context menu when clicking outside
@@ -131,13 +164,33 @@ const MapContainer: React.FC = () => {
             />
           )}
 
-          {/* Add nearby search center marker */}
+          {/* Add nearby search center marker and results */}
           {showNearbyResults && (
-            <NearbySearchMarker
-              latitude={viewport.latitude}
-              longitude={viewport.longitude}
-              categories={selectedCategories}
-            />
+            <>
+              <NearbySearchMarker
+                latitude={viewport.latitude}
+                longitude={viewport.longitude}
+                categories={selectedCategories}
+              />
+
+              {/* Display nearby place markers */}
+              {nearbyPlaces.map((place) => (
+                <NearbyPlaceMarker
+                  key={place.id}
+                  place={place as NearbyPlace}
+                  onClick={handleNearbyPlaceClick}
+                />
+              ))}
+
+              {/* Display popup for selected nearby place */}
+              {selectedNearbyPlace && (
+                <NearbyPlacePopup
+                  place={selectedNearbyPlace}
+                  onClose={handleClosePopup}
+                  onViewDetails={handleViewDetails}
+                />
+              )}
+            </>
           )}
 
           {/* Context menu marker and popup */}
@@ -159,6 +212,16 @@ const MapContainer: React.FC = () => {
         <AnimatePresence>
           {selectedFeature && !selectedFeature.properties?.place_code && (
             <InfoCard feature={selectedFeature} onClose={handleCloseInfoCard} />
+          )}
+        </AnimatePresence>
+
+        {/* Details modal */}
+        <AnimatePresence>
+          {showDetailsModal && selectedNearbyPlace && (
+            <NearbyPlaceModal
+              place={selectedNearbyPlace}
+              onClose={handleCloseModal}
+            />
           )}
         </AnimatePresence>
       </div>

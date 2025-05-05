@@ -1,20 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { fetchPlaceDetails, fetchReverseGeocode } from '../thunks/searchThunks';
-
-// Define nearby place interface
-export interface NearbyPlace {
-  id: string;
-  name: string;
-  address: string;
-  pType: string;
-  city: string;
-  area: string;
-  postCode: string;
-  uCode: string;
-  distance: number;
-  latitude: number;
-  longitude: number;
-}
+import { NearbyPlace } from '@/app/types/map';
 
 interface SearchState {
   searchTerm: string;
