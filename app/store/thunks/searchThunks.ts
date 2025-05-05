@@ -1,11 +1,11 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { RootState } from '../store'; // Add this import
+import { RootState } from '../store';
 import {
   setNearbyPlaces,
   setNearbyLoading,
   setNearbyError,
+  setPlaceDetails, // Import the action creator
 } from '../slices/searchSlice';
-import { selectPlaceDetails } from '../selectors/searchSelectors';
 
 export const fetchPlaceDetails = createAsyncThunk(
   'search/fetchPlaceDetails',
@@ -20,10 +20,7 @@ export const fetchPlaceDetails = createAsyncThunk(
 
 export const fetchReverseGeocode = createAsyncThunk(
   'search/reverseGeocode',
-  async (
-    { latitude, longitude }: { latitude: number; longitude: number },
-    { dispatch }
-  ) => {
+  async ({ latitude, longitude }: { latitude: number; longitude: number }) => {
     try {
       // Use our server-side API route instead of calling directly
       const response = await fetch(
@@ -37,9 +34,7 @@ export const fetchReverseGeocode = createAsyncThunk(
       const data = await response.json();
 
       if (data.status === 200 && data.place) {
-        // Dispatch action to update place details in Redux store
-        dispatch(selectPlaceDetails(data.place));
-        return data;
+        return data.place;
       }
 
       return null;

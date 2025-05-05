@@ -34,6 +34,7 @@ const ResponsiveDrawer: React.FC<ResponsiveDrawerProps> = ({
   const [drawerHeight, setDrawerHeight] = useState(INITIAL_DRAWER_HEIGHT);
   const resizeTimeoutRef = useRef<NodeJS.Timeout>();
   const { placeDetails } = useAppSelector((state) => state.search);
+
   const [isDragging, setIsDragging] = useState(false);
   const dragStartTimeRef = useRef<number>(0);
   const dragThresholdTime = 300; // 2 seconds threshold for intentional drag

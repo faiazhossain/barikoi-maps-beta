@@ -246,7 +246,13 @@ const SearchBar: React.FC = () => {
           className={`bg-white transition-all duration-100 ${
             isExpanded || showNearbyResults
               ? `${
-                  isVisible ? 'rounded-none' : 'rounded-t-[20px]'
+                  isVisible
+                    ? `${
+                        showNearbyResults
+                          ? 'rounded-bl-2xl rounded-br-2xl pb-3'
+                          : 'rounded-none'
+                      }`
+                    : 'rounded-t-[20px]'
                 } sm:rounded-t-[20px]`
               : 'rounded-none sm:rounded-full'
           } shadow-deep`}

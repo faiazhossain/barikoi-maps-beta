@@ -12,9 +12,10 @@ import {
 import { MdDirections } from 'react-icons/md';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch } from '@/app/store/store';
-import { openLeftBar } from '@/app/store/slices/drawerSlice';
+import { closeDrawer, openLeftBar } from '@/app/store/slices/drawerSlice';
 import { fetchReverseGeocode } from '@/app/store/thunks/searchThunks';
-import { setMarkerCoords } from '@/app/store/slices/mapSlice';
+import { setMarkerCoords, setViewport } from '@/app/store/slices/mapSlice';
+import { setSelectedCategories } from '@/app/store/slices/searchSlice';
 
 interface MapContextMenuProps {
   longitude: number;
@@ -69,7 +70,22 @@ const MapContextMenu: React.FC<MapContextMenuProps> = ({
   };
 
   const handleSearchNearby = () => {
-    router.push(`/search/nearby?lat=${lat}&lng=${lng}`);
+    dispatch(
+      setViewport({
+        latitude: latitude,
+        longitude: longitude,
+        zoom: 16, // Good zoom level for nearby places
+      })
+    );
+
+    // Determine a relevant category based on the place type
+    const category = 'Restaurant'; // Default category
+
+    // Set the selected category to trigger nearby search
+    dispatch(setSelectedCategories([category]));
+
+    // Close the drawer to show the map and nearby results
+    dispatch(closeDrawer());
     onClose();
   };
 

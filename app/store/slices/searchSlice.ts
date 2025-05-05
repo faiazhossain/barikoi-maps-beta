@@ -85,6 +85,9 @@ const searchSlice = createSlice({
       state.suggestions = [];
       // Add any other direction-specific state you want to clear
     },
+    setPlaceDetails: (state, action: PayloadAction<any | null>) => {
+      state.placeDetails = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -123,13 +126,14 @@ export const {
   setSearchMode,
   setSelectedPlace,
   clearSearch,
-  clearDirections, // Add this export
+  clearDirections,
   setNearbyPlaces,
   setNearbyLoading,
   setNearbyError,
   setSelectedCategories,
   setCurrentRadius,
   clearNearbySearch,
+  setPlaceDetails, // Add this line
 } = searchSlice.actions;
 
 export default searchSlice.reducer;
