@@ -123,7 +123,7 @@ const MapContainer: React.FC = () => {
           {isLeftBarOpen && <ResponsiveDrawer />}
 
           {/* Display regular marker if we have coordinates */}
-          {markerCoords && (
+          {!showNearbyResults && markerCoords && (
             <AnimatedMarker
               latitude={markerCoords.latitude}
               longitude={markerCoords.longitude}

@@ -18,7 +18,11 @@ import {
   selectSuggestions,
   selectSearchMode,
 } from '@/app/store/selectors/searchSelectors';
-import { closeDrawer, openLeftBar } from '@/app/store/slices/drawerSlice';
+import {
+  closeDrawer,
+  openDrawer,
+  openLeftBar,
+} from '@/app/store/slices/drawerSlice';
 import { fetchPlaceDetails } from '@/app/store/thunks/searchThunks';
 
 // Custom hooks
@@ -220,6 +224,9 @@ const SearchBar: React.FC = () => {
   // Handle closing nearby results
   const handleCloseNearbyResults = () => {
     dispatch(setSelectedCategories([]));
+    if (placeDetails) {
+      dispatch(openDrawer());
+    }
   };
 
   return (

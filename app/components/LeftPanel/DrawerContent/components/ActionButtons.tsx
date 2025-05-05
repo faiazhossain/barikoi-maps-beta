@@ -43,40 +43,7 @@ export const ActionButtons = () => {
       );
 
       // Determine a relevant category based on the place type
-      let category = 'Restaurant'; // Default category
-
-      if (placeDetails.pType) {
-        // Check if the place has a type and map it to a nearby category
-        const placeType = placeDetails.pType.toLowerCase();
-        if (placeType.includes('restaurant') || placeType.includes('food')) {
-          category = 'Restaurant';
-        } else if (placeType.includes('hotel')) {
-          category = 'Hotel';
-        } else if (placeType.includes('cafe') || placeType.includes('coffee')) {
-          category = 'Cafe';
-        } else if (
-          placeType.includes('shop') ||
-          placeType.includes('store') ||
-          placeType.includes('mall')
-        ) {
-          category = 'Shopping';
-        } else if (
-          placeType.includes('hospital') ||
-          placeType.includes('clinic')
-        ) {
-          category = 'Hospital';
-        } else if (
-          placeType.includes('school') ||
-          placeType.includes('college') ||
-          placeType.includes('university')
-        ) {
-          category = 'School';
-        } else if (placeType.includes('gas') || placeType.includes('fuel')) {
-          category = 'Gas Station';
-        } else if (placeType.includes('park')) {
-          category = 'Parking';
-        }
-      }
+      const category = 'Restaurant'; // Default category
 
       // Set the selected category to trigger nearby search
       dispatch(setSelectedCategories([category]));
