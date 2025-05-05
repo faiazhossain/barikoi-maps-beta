@@ -5,6 +5,7 @@ import { fetchNearbyPlaces } from '@/app/store/thunks/searchThunks';
 import {
   setCurrentRadius,
   setSelectedCategories,
+  setHoveredNearbyPlace,
 } from '@/app/store/slices/searchSlice';
 import {
   FaMapMarkerAlt,
@@ -16,9 +17,21 @@ import {
 } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input, Tooltip } from 'antd';
+import { NearbyPlace } from '@/app/types/map';
+import NearbyPlaceModal from '@/app/components/map/Modals/NearbyPlaceModal';
 
 // Place card component for displaying individual nearby places
-const PlaceCard = ({ place }: { place: any }) => {
+const PlaceCard = ({
+  place,
+  onSelect,
+  onHoverStart,
+  onHoverEnd,
+}: {
+  place: NearbyPlace;
+  onSelect: (place: NearbyPlace) => void;
+  onHoverStart: (place: NearbyPlace) => void;
+  onHoverEnd: () => void;
+}) => {
   // Convert distance string to number and divide by 1000 to get km
   const distanceInKm = place.distance_in_meters
     ? (parseFloat(place.distance_in_meters) / 1000).toFixed(2)
@@ -29,7 +42,11 @@ const PlaceCard = ({ place }: { place: any }) => {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className='bg-white rounded-lg shadow-sm p-2.5 mb-2 hover:shadow-md transition-shadow border border-gray-50'
+      className='bg-white rounded-lg shadow-sm p-2.5 mb-2 hover:shadow-md transition-shadow border border-gray-50 cursor-pointer'
+      onClick={() => onSelect(place)}
+      onMouseEnter={() => onHoverStart(place)}
+      onMouseLeave={() => onHoverEnd()}
+      whileHover={{ scale: 1.02 }}
     >
       <div className='flex items-start'>
         <div className='p-1.5 rounded-full bg-blue-50 mr-2.5 flex-shrink-0'>
@@ -40,7 +57,7 @@ const PlaceCard = ({ place }: { place: any }) => {
             {place.name}
           </h3>
           <p className='text-xs text-gray-600 line-clamp-1 mt-0.5'>
-            {place.Address || place.address}
+            {place.Address}
           </p>
           <div className='flex items-center mt-1.5 gap-2'>
             <span className='text-xs bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded-full font-medium'>
@@ -188,6 +205,8 @@ const NearbyResults = () => {
   const [searchTerm, setSearchTerm] = useState('');
   // State for panel expansion
   const [isPanelExpanded, setIsPanelExpanded] = useState(true);
+  // State for selected place to show in modal
+  const [selectedPlace, setSelectedPlace] = useState<NearbyPlace | null>(null);
 
   // Redux state
   const { viewport } = useAppSelector((state) => state.map);
@@ -198,6 +217,25 @@ const NearbyResults = () => {
     currentRadius,
     selectedCategories,
   } = useAppSelector((state) => state.search);
+
+  // Handle place selection
+  const handlePlaceSelect = (place: NearbyPlace) => {
+    setSelectedPlace(place);
+  };
+
+  // Close modal
+  const handleCloseModal = () => {
+    setSelectedPlace(null);
+  };
+
+  // Handle hover for map marker highlight
+  const handlePlaceHoverStart = (place: NearbyPlace) => {
+    dispatch(setHoveredNearbyPlace(place.id.toString()));
+  };
+
+  const handlePlaceHoverEnd = () => {
+    dispatch(setHoveredNearbyPlace(null));
+  };
 
   // Handle search term change
   const handleSearchTermChange = (value: string) => {
@@ -320,7 +358,13 @@ const NearbyResults = () => {
                   </div>
                   <div className='overflow-y-auto max-h-[calc(100vh-240px)]'>
                     {nearbyPlaces.map((place) => (
-                      <PlaceCard key={place.id} place={place} />
+                      <PlaceCard
+                        key={place.id}
+                        place={place as NearbyPlace}
+                        onSelect={handlePlaceSelect}
+                        onHoverStart={handlePlaceHoverStart}
+                        onHoverEnd={handlePlaceHoverEnd}
+                      />
                     ))}
                   </div>
                 </div>
@@ -353,6 +397,13 @@ const NearbyResults = () => {
           )}
         </button>
       </div>
+
+      {/* Place details modal */}
+      <AnimatePresence>
+        {selectedPlace && (
+          <NearbyPlaceModal place={selectedPlace} onClose={handleCloseModal} />
+        )}
+      </AnimatePresence>
     </div>
   );
 };

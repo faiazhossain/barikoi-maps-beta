@@ -1,20 +1,32 @@
 'use client';
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FaPhone, FaDirections, FaMapMarkerAlt, FaTimes } from 'react-icons/fa';
+import { FaDirections, FaMapMarkerAlt, FaTimes } from 'react-icons/fa';
 import { NearbyPlace } from '@/app/types/map';
-
+import { fetchPlaceDetails } from '@/app/store/thunks/searchThunks';
+import { openDrawer } from '@/app/store/slices/drawerSlice';
+import { setSelectedCategories } from '@/app/store/slices/searchSlice';
+import { useAppDispatch } from '@/app/store/store';
+import { MdReadMore } from 'react-icons/md';
 interface NearbyPlaceModalProps {
   place: NearbyPlace;
   onClose: () => void;
 }
-
 const NearbyPlaceModal: React.FC<NearbyPlaceModalProps> = ({
   place,
   onClose,
 }) => {
+  const dispatch = useAppDispatch();
+  const handleViewMore = () => {
+    if (place.uCode) {
+      dispatch(fetchPlaceDetails(place.uCode));
+      dispatch(openDrawer());
+      dispatch(setSelectedCategories([]));
+      onClose();
+    }
+  };
   const distanceInKm = (parseFloat(place.distance_in_meters) / 1000).toFixed(2);
-
+  // Add this handler
   return (
     <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4'>
       <motion.div
@@ -97,10 +109,15 @@ const NearbyPlaceModal: React.FC<NearbyPlaceModalProps> = ({
           </div>
 
           <div className='flex justify-between mt-4'>
-            <button className='bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700 flex items-center text-sm transition-colors'>
-              <FaPhone className='mr-1.5' size={12} />
-              Call
-            </button>
+            {place.uCode && (
+              <button
+                onClick={handleViewMore}
+                className='bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700 flex items-center text-sm transition-colors'
+              >
+                <MdReadMore className='mr-1.5' size={12} />
+                View More
+              </button>
+            )}
             <button className='bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700 flex items-center text-sm transition-colors'>
               <FaDirections className='mr-1.5' size={12} />
               Get Directions

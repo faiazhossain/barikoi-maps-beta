@@ -4,6 +4,9 @@ import { SearchOutlined } from '@ant-design/icons';
 import styles from './SearchBar/SearchBar.module.css';
 import { useDropdownStyles } from '../hooks/useDropdownStyles';
 import Image from 'next/image';
+import { useAppDispatch } from '@/app/store/store';
+import { fetchReverseGeocode } from '@/app/store/thunks/searchThunks';
+import { openLeftBar } from '@/app/store/slices/drawerSlice';
 
 interface AutoCompleteOption {
   value: string;
@@ -38,6 +41,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
   onDropdownVisibleChange,
   onDirectSearch,
 }) => {
+  const dispatch = useAppDispatch();
   const dropdownStyle = useDropdownStyles();
   const [processedOptions, setProcessedOptions] =
     useState<AutoCompleteOption[]>(options);
@@ -136,6 +140,28 @@ const SearchInput: React.FC<SearchInputProps> = ({
     }
   };
 
+  const handleCoordinateSelect = async (lat: number, lng: number) => {
+    try {
+      await dispatch(
+        fetchReverseGeocode({
+          latitude: lat,
+          longitude: lng,
+        })
+      ).unwrap();
+      dispatch(openLeftBar());
+    } catch (error) {
+      console.error('Error in reverse geocoding:', error);
+    }
+  };
+
+  const handleSelect = (value: string, option: AutoCompleteOption) => {
+    if (option.rawData?.type === 'coordinates') {
+      const { lat, lng } = option.rawData;
+      handleCoordinateSelect(lat, lng);
+    }
+    onSelect(value, option);
+  };
+
   return (
     <div className='relative w-full'>
       <AutoComplete
@@ -158,7 +184,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
         options={processedOptions}
         allowClear={{ clearIcon: <div className='hidden bg-none'></div> }}
         onSearch={onSearch}
-        onSelect={(value, option) => onSelect(value, option)}
+        onSelect={handleSelect}
         onChange={onChange}
         onBlur={onBlur}
         onKeyDown={handleKeyDown}

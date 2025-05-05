@@ -16,6 +16,7 @@ interface SearchState {
   nearbyError: string | null;
   selectedCategories: string[];
   currentRadius: number;
+  hoveredNearbyPlaceId: string | null; // Add this property
 }
 
 const initialState: SearchState = {
@@ -32,6 +33,7 @@ const initialState: SearchState = {
   nearbyError: null,
   selectedCategories: [],
   currentRadius: 0.5, // Default 0.5 km radius
+  hoveredNearbyPlaceId: null, // Add initial value
 };
 
 const searchSlice = createSlice({
@@ -88,6 +90,9 @@ const searchSlice = createSlice({
     setPlaceDetails: (state, action: PayloadAction<any | null>) => {
       state.placeDetails = action.payload;
     },
+    setHoveredNearbyPlace: (state, action: PayloadAction<string | null>) => {
+      state.hoveredNearbyPlaceId = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -134,6 +139,7 @@ export const {
   setCurrentRadius,
   clearNearbySearch,
   setPlaceDetails, // Add this line
+  setHoveredNearbyPlace, // Add this line
 } = searchSlice.actions;
 
 export default searchSlice.reducer;

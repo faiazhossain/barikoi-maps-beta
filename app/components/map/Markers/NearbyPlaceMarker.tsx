@@ -12,6 +12,8 @@ import {
   FaQuestion,
 } from 'react-icons/fa';
 import { NearbyPlace } from '@/app/types/map';
+import { useAppSelector } from '@/app/store/store';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface NearbyPlaceMarkerProps {
   place: NearbyPlace;
@@ -79,6 +81,12 @@ const NearbyPlaceMarker: React.FC<NearbyPlaceMarkerProps> = ({
   place,
   onClick,
 }) => {
+  // Get the hovered place ID from Redux
+  const hoveredPlaceId = useAppSelector(
+    (state) => state.search.hoveredNearbyPlaceId
+  );
+  const isHovered = hoveredPlaceId === String(place.id);
+
   return (
     <Marker
       longitude={parseFloat(place.longitude)}
@@ -88,13 +96,34 @@ const NearbyPlaceMarker: React.FC<NearbyPlaceMarkerProps> = ({
     >
       <div className='cursor-pointer transform transition-transform hover:scale-110'>
         <div className='flex flex-col items-center'>
-          <div
+          <motion.div
             className={`w-8 h-8 rounded-full ${getMarkerColor(
               place.pType
             )} flex items-center justify-center text-white shadow-md border-2 border-white`}
+            animate={{
+              scale: isHovered ? 1.2 : 1,
+              boxShadow: isHovered
+                ? '0 0 0 4px rgba(59, 130, 246, 0.5)'
+                : 'none',
+            }}
+            transition={{ duration: 0.2 }}
           >
             {getPlaceIcon(place.pType)}
-          </div>
+          </motion.div>
+
+          {/* Label that appears when hovered */}
+          <AnimatePresence>
+            {isHovered && (
+              <motion.div
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+                className='absolute bottom-full mb-1 bg-white px-2 py-1 rounded shadow-md text-xs font-medium whitespace-nowrap'
+              >
+                {place.name}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </Marker>

@@ -55,17 +55,13 @@ const MapContextMenu: React.FC<MapContextMenuProps> = ({
         },
       })
     );
-
+    dispatch(openLeftBar());
     dispatch(
       fetchReverseGeocode({
         latitude: parseFloat(lat),
         longitude: parseFloat(lng),
       })
-    )
-      .unwrap()
-      .then(() => {
-        dispatch(openLeftBar());
-      });
+    );
     onClose();
   };
 

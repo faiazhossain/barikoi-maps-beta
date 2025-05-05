@@ -22,7 +22,7 @@ const NearbySearchMarker: React.FC<NearbySearchMarkerProps> = ({
           animate={{ opacity: 1, y: 0 }}
           className='bg-blue-600 text-white px-2 py-1 rounded-lg text-xs mb-1 shadow-md whitespace-nowrap'
         >
-          Searching Nearby: {categories.join(', ')}
+          Nearby: {categories.join(', ')}
         </motion.div>
         <motion.div
           initial={{ scale: 0.5, opacity: 0 }}
