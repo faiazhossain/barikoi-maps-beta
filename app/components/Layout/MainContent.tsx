@@ -1,11 +1,10 @@
 import { useAppSelector } from '@/app/store/store';
 import SearchBar from '../search/components/SearchBar/SearchBar';
-import NearbyCategories from '../search/components/NearbyCategories/NearbyCategories';
 import MobileAppLink from '../common/TopPanel/MobileAppLink';
 import dynamic from 'next/dynamic';
 import { useState, useEffect } from 'react';
 import LoadingPage from '../common/LoadingPage/LoadingPage';
-// import { useState, useEffect } from 'react';
+import NearbyCategories from '../search/components/NearbyCategories/NearbyCategories';
 
 const MapContainer = dynamic(() => import('../map/MapContainer/MapContainer'), {
   ssr: false,
@@ -14,6 +13,10 @@ const MapContainer = dynamic(() => import('../map/MapContainer/MapContainer'), {
 const MainContent = () => {
   const isVisible = useAppSelector((state) => state.ui.isTopPanelVisible);
   const isMapLoaded = useAppSelector((state) => state.map.isMapLoaded);
+  const selectedCategories = useAppSelector(
+    (state) => state.search.selectedCategories
+  );
+  const showNearbyResults = selectedCategories.length > 0;
 
   const [currentFact, setCurrentFact] = useState(0);
 
@@ -34,10 +37,13 @@ const MainContent = () => {
         <div
           className={`absolute ${
             isVisible ? `top-[53px] sm:top-0` : `top-2`
-          } left-0 w-full flex flex-row flex-wrap justify-center gap-2 sm:gap-6 md:gap-11`}
+          } left-0  flex flex-row flex-wrap ${
+            !showNearbyResults ? 'justify-center w-full' : `justify-start w-fit`
+          } gap-2 sm:gap-6 md:gap-11`}
         >
           <SearchBar />
-          <NearbyCategories />
+          {/* Only show NearbyCategories when not showing nearby results */}
+          {!showNearbyResults && <NearbyCategories />}
         </div>
       </>
     </main>

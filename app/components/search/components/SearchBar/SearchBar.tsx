@@ -4,12 +4,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Space } from 'antd';
 import { useAppDispatch, useAppSelector } from '@/app/store/store';
+import { FaTimes } from 'react-icons/fa'; // Add this import for the close button
 
 // Redux actions and selectors
 import {
   setSearchTerm,
   setSuggestions,
   setSelectedPlace,
+  setSelectedCategories,
 } from '@/app/store/slices/searchSlice';
 import {
   selectSearchTerm,
@@ -29,7 +31,7 @@ import ClearButton from '../ClearButton';
 import DirectionsToggle from '../DirectionToggle';
 import SearchInput from '../SearchInput';
 import CountrySelect from '../CountrySelect/CountrySelect';
-// import { AnimatePresence, motion } from 'framer-motion';
+import NearbyResults from '../NearbyResults/NearbyResults';
 
 // Styles
 import './styles.css';
@@ -42,6 +44,10 @@ const SearchBar: React.FC = () => {
   const searchMode = useAppSelector(selectSearchMode);
   const isVisible = useAppSelector((state) => state.ui.isTopPanelVisible);
   const placeDetails = useAppSelector((state) => state.search.placeDetails);
+  const selectedCategories = useAppSelector(
+    (state) => state.search.selectedCategories
+  );
+  const showNearbyResults = selectedCategories.length > 0;
 
   // Local state
   const [isMounted, setIsMounted] = useState(false);
@@ -89,6 +95,14 @@ const SearchBar: React.FC = () => {
     }
   }, [placeDetails, dispatch]);
 
+  // Add this effect
+  useEffect(() => {
+    // When nearby results appear, clear the search term
+    if (showNearbyResults) {
+      dispatch(setSearchTerm(''));
+    }
+  }, [showNearbyResults, dispatch]);
+
   // Event handlers
   const handleSelect = (value: string, option: any) => {
     const selectedData = option.rawData;
@@ -119,7 +133,35 @@ const SearchBar: React.FC = () => {
 
   const handleInputChange = (value: string) => {
     dispatch(setSearchTerm(value));
-    handleSearch(value); // Debounced search
+
+    // Check for "near me" or "nearme" searches
+    const lowerValue = value.toLowerCase();
+    const nearMePattern = /(.+?)\s*(?:near\s*me|nearme)$/i;
+
+    if (nearMePattern.test(lowerValue)) {
+      // Extract the category from the search text
+      const match = lowerValue.match(nearMePattern);
+      if (match && match[1]) {
+        const category = match[1].trim();
+
+        // If we have a valid category, trigger nearby search
+        if (category) {
+          console.log('🚀 ~ handleInputChange ~ category:', category);
+          // Capitalize first letter for consistency with your category format
+          const formattedCategory =
+            category.charAt(0).toUpperCase() + category.slice(1);
+          console.log(
+            '🚀 ~ handleInputChange ~ formattedCategory:',
+            formattedCategory
+          );
+          dispatch(setSelectedCategories([formattedCategory]));
+          return; // Skip regular search
+        }
+      }
+    }
+
+    // Perform regular search if not a "near me" query
+    handleSearch(value);
   };
 
   const handleDropdownVisibility = (open: boolean) => {
@@ -135,14 +177,31 @@ const SearchBar: React.FC = () => {
 
   const handleDirectSearch = async (value: string) => {
     try {
-      // 1. Create FormData exactly like in the working project
+      // Check for "near me" searches first
+      const lowerValue = value.toLowerCase();
+      const nearMePattern = /(.+?)\s*(?:near\s*me|nearme)$/i;
+
+      if (nearMePattern.test(lowerValue)) {
+        const match = lowerValue.match(nearMePattern);
+        if (match && match[1]) {
+          const category = match[1].trim();
+          if (category) {
+            // Capitalize first letter for consistency with your category format
+            const formattedCategory =
+              category.charAt(0).toUpperCase() + category.slice(1);
+            dispatch(setSelectedCategories([formattedCategory]));
+            return; // Skip API call
+          }
+        }
+      }
+
+      // Regular direct search if not a "near me" query
       const formData = new FormData();
       formData.append('q', value);
 
-      // 2. Make the request with the same parameters
       const response = await fetch('/api/rupantor', {
         method: 'POST',
-        body: formData, // No headers needed for FormData
+        body: formData,
       });
 
       if (!response.ok) {
@@ -151,7 +210,6 @@ const SearchBar: React.FC = () => {
 
       const responseData = await response.json();
 
-      // 3. Get the uCode from response
       const uCode = responseData.geocoded_address?.uCode;
       if (!uCode) throw new Error('No uCode found in response');
 
@@ -161,8 +219,13 @@ const SearchBar: React.FC = () => {
       }
     } catch (error) {
       console.error('Search error:', error);
-      throw error; // Re-throw to handle in component
+      throw error;
     }
+  };
+
+  // Handle closing nearby results
+  const handleCloseNearbyResults = () => {
+    dispatch(setSelectedCategories([]));
   };
 
   return (
@@ -180,42 +243,67 @@ const SearchBar: React.FC = () => {
         {/* Search box wrapper */}
         <div
           className={`bg-white transition-all duration-100 ${
-            isExpanded
+            isExpanded || showNearbyResults
               ? `${
                   isVisible ? 'rounded-none' : 'rounded-t-[20px]'
                 } sm:rounded-t-[20px]`
               : 'rounded-none sm:rounded-full'
           } shadow-deep`}
         >
-          <div className='flex items-center gap-2'>
-            {/* Search input and clear button */}
-            <div className='relative w-full'>
-              <SearchInput
-                value={searchTerm}
-                options={options}
-                placeholder={
-                  searchMode === 'directions'
-                    ? 'Enter start location'
-                    : 'Search places...'
-                }
-                isExpanded={isExpanded}
-                isAnimating={isAnimating}
-                onSearch={handleInputChange}
-                onSelect={handleSelect}
-                onChange={handleInputChange}
-                onBlur={() => setIsExpanded(false)}
-                onDropdownVisibleChange={handleDropdownVisibility}
-                onDirectSearch={handleDirectSearch}
-              />
-              <ClearButton searchTerm={searchTerm} />
-            </div>
+          {showNearbyResults ? (
+            /* Nearby Results Mode */
+            <div className='flex flex-col'>
+              {/* Header with close button */}
+              <div className='flex items-center p-3 border-b'>
+                <h3 className='text-base font-medium flex-1'>
+                  Nearby {selectedCategories.join(', ')}
+                </h3>
+                <button
+                  onClick={handleCloseNearbyResults}
+                  className='p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors'
+                  aria-label='Close nearby results'
+                >
+                  <FaTimes />
+                </button>
+              </div>
 
-            {/* Additional controls */}
-            <Space size={0} className='!ml-2'>
-              <DirectionsToggle />
-              <CountrySelect />
-            </Space>
-          </div>
+              {/* Embed NearbyResults component with fixed height and scrolling */}
+              <div className='max-h-[60vh] overflow-y-auto pointer-events-auto'>
+                <NearbyResults />
+              </div>
+            </div>
+          ) : (
+            /* Normal Search Mode */
+            <div className='flex items-center gap-2'>
+              {/* Search input and clear button */}
+              <div className='relative w-full'>
+                <SearchInput
+                  value={searchTerm}
+                  options={options}
+                  placeholder={
+                    searchMode === 'directions'
+                      ? 'Enter start location'
+                      : 'Search places...'
+                  }
+                  isExpanded={isExpanded}
+                  isAnimating={isAnimating}
+                  onSearch={handleInputChange}
+                  onSelect={handleSelect}
+                  onChange={handleInputChange}
+                  onBlur={() => setIsExpanded(false)}
+                  onDropdownVisibleChange={handleDropdownVisibility}
+                  onDirectSearch={handleDirectSearch}
+                />
+                <ClearButton searchTerm={searchTerm} />
+              </div>
+
+              {/* Additional controls */}
+              <Space size={0} className='!ml-2'>
+                <DirectionsToggle />
+                <CountrySelect />
+              </Space>
+            </div>
+          )}
         </div>
       </div>
     </>

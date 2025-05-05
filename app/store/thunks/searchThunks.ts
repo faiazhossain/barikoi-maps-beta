@@ -1,5 +1,10 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { setPlaceDetails } from '../slices/searchSlice';
+import {
+  setNearbyPlaces,
+  setNearbyLoading,
+  setNearbyError,
+} from '../slices/searchSlice';
+import { selectPlaceDetails } from '../selectors/searchSelectors';
 
 export const fetchPlaceDetails = createAsyncThunk(
   'search/fetchPlaceDetails',
@@ -32,7 +37,7 @@ export const fetchReverseGeocode = createAsyncThunk(
 
       if (data.status === 200 && data.place) {
         // Dispatch action to update place details in Redux store
-        dispatch(setPlaceDetails(data.place));
+        dispatch(selectPlaceDetails(data.place));
         return data;
       }
 
@@ -40,6 +45,74 @@ export const fetchReverseGeocode = createAsyncThunk(
     } catch (error) {
       console.error('Error fetching reverse geocode:', error);
       throw error;
+    }
+  }
+);
+
+/**
+ * Fetch nearby places based on coordinates and optional filters
+ */
+export const fetchNearbyPlaces = createAsyncThunk(
+  'search/fetchNearbyPlaces',
+  async (
+    {
+      latitude,
+      longitude,
+      radius = 0.5,
+      limit = 10,
+      type = '',
+      categories = '',
+    }: {
+      latitude: number;
+      longitude: number;
+      radius?: number;
+      limit?: number;
+      type?: string;
+      categories?: string;
+    },
+    { dispatch }
+  ) => {
+    try {
+      dispatch(setNearbyLoading(true));
+
+      // Build query parameters
+      const params = new URLSearchParams();
+      params.append('latitude', latitude.toString());
+      params.append('longitude', longitude.toString());
+      params.append('radius', radius.toString());
+      params.append('limit', limit.toString());
+
+      if (type) {
+        params.append('type', type);
+      }
+
+      if (categories) {
+        params.append('categories', categories);
+      }
+
+      // Make API request
+      const response = await fetch(`/api/nearby?${params.toString()}`);
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch nearby places: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // Format and store places
+      const places = data.places || [];
+      dispatch(setNearbyPlaces(places));
+      dispatch(setNearbyError(null));
+
+      return places;
+    } catch (error) {
+      console.error('Error fetching nearby places:', error);
+      dispatch(
+        setNearbyError(error instanceof Error ? error.message : 'Unknown error')
+      );
+      throw error;
+    } finally {
+      dispatch(setNearbyLoading(false));
     }
   }
 );

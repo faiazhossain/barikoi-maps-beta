@@ -1,29 +1,49 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import {
-  SearchState,
-  SearchMode,
-  Location,
-  Place,
-  Suggestion,
-  NearbyLocation,
-} from '@/app/types/search';
 import { fetchPlaceDetails, fetchReverseGeocode } from '../thunks/searchThunks';
+
+// Define nearby place interface
+export interface NearbyPlace {
+  id: string;
+  name: string;
+  address: string;
+  pType: string;
+  city: string;
+  area: string;
+  postCode: string;
+  uCode: string;
+  distance: number;
+  latitude: number;
+  longitude: number;
+}
+
+interface SearchState {
+  searchTerm: string;
+  suggestions: any[];
+  searchMode: 'search' | 'directions';
+  selectedPlace: any | null;
+  placeDetails: any | null;
+  placeDetailsLoading: boolean;
+  placeDetailsError: string | null;
+  nearbyPlaces: NearbyPlace[];
+  nearbyLoading: boolean;
+  nearbyError: string | null;
+  selectedCategories: string[];
+  currentRadius: number;
+}
 
 const initialState: SearchState = {
   searchTerm: '',
   suggestions: [],
-  isLoading: false,
-  searchMode: 'location',
-  startLocation: null,
-  endLocation: null,
-  selectedCategory: null,
-  nearbyLocations: [],
+  searchMode: 'search',
   selectedPlace: null,
   placeDetails: null,
   placeDetailsLoading: false,
   placeDetailsError: null,
-  reverseGeocodeLoading: false,
-  reverseGeocodeError: null,
+  nearbyPlaces: [],
+  nearbyLoading: false,
+  nearbyError: null,
+  selectedCategories: [],
+  currentRadius: 0.5, // Default 0.5 km radius
 };
 
 const searchSlice = createSlice({
@@ -33,60 +53,46 @@ const searchSlice = createSlice({
     setSearchTerm: (state, action: PayloadAction<string>) => {
       state.searchTerm = action.payload;
     },
-    setSuggestions: (state, action: PayloadAction<Suggestion[]>) => {
+    setSuggestions: (state, action: PayloadAction<any[]>) => {
       state.suggestions = action.payload;
     },
-    setIsLoading: (state, action: PayloadAction<boolean>) => {
-      state.isLoading = action.payload;
-    },
-    setSearchMode: (state, action: PayloadAction<SearchMode>) => {
+    setSearchMode: (state, action: PayloadAction<'search' | 'directions'>) => {
       state.searchMode = action.payload;
     },
-    setStartLocation: (state, action: PayloadAction<Location | null>) => {
-      state.startLocation = action.payload;
-    },
-    setEndLocation: (state, action: PayloadAction<Location | null>) => {
-      state.endLocation = action.payload;
-    },
-    setSelectedCategory: (state, action: PayloadAction<string | null>) => {
-      state.selectedCategory = action.payload;
-    },
-    setNearbyLocations: (state, action: PayloadAction<NearbyLocation[]>) => {
-      state.nearbyLocations = action.payload;
-    },
-    setSelectedPlace: (state, action: PayloadAction<Place | null>) => {
+    setSelectedPlace: (state, action: PayloadAction<any | null>) => {
       state.selectedPlace = action.payload;
     },
-    setPlaceDetails: (state, action) => {
-      state.placeDetails = action.payload;
-      state.isLoading = false;
-    },
-    clearDirections: (state) => {
-      state.startLocation = null;
-      state.endLocation = null;
-      state.searchMode = 'location';
-    },
     clearSearch: (state) => {
-      // Reset all search related states to initial values
       state.searchTerm = '';
       state.suggestions = [];
       state.selectedPlace = null;
       state.placeDetails = null;
-      state.placeDetailsLoading = false;
       state.placeDetailsError = null;
-      state.reverseGeocodeLoading = false;
-      state.reverseGeocodeError = null;
-      state.isLoading = false;
-      state.searchMode = 'location';
-      state.startLocation = null;
-      state.endLocation = null;
-      state.selectedCategory = null;
-      state.nearbyLocations = [];
+    },
+    // Nearby search actions
+    setNearbyPlaces: (state, action: PayloadAction<NearbyPlace[]>) => {
+      state.nearbyPlaces = action.payload;
+    },
+    setNearbyLoading: (state, action: PayloadAction<boolean>) => {
+      state.nearbyLoading = action.payload;
+    },
+    setNearbyError: (state, action: PayloadAction<string | null>) => {
+      state.nearbyError = action.payload;
+    },
+    setSelectedCategories: (state, action: PayloadAction<string[]>) => {
+      state.selectedCategories = action.payload;
+    },
+    setCurrentRadius: (state, action: PayloadAction<number>) => {
+      state.currentRadius = action.payload;
+    },
+    clearNearbySearch: (state) => {
+      state.nearbyPlaces = [];
+      state.nearbyError = null;
+      state.selectedCategories = [];
     },
   },
   extraReducers: (builder) => {
     builder
-      // fetchPlaceDetails cases
       .addCase(fetchPlaceDetails.pending, (state) => {
         state.placeDetailsLoading = true;
         state.placeDetailsError = null;
@@ -100,20 +106,18 @@ const searchSlice = createSlice({
         state.placeDetailsError =
           action.error.message || 'Failed to fetch details';
       })
-
-      // fetchReverseGeocode cases
       .addCase(fetchReverseGeocode.pending, (state) => {
-        state.reverseGeocodeLoading = true;
-        state.reverseGeocodeError = null;
+        state.placeDetailsLoading = true;
+        state.placeDetailsError = null;
       })
-      .addCase(fetchReverseGeocode.fulfilled, (state) => {
-        state.reverseGeocodeLoading = false;
-        // Note: we don't set placeDetails here since it's done via the setPlaceDetails action
+      .addCase(fetchReverseGeocode.fulfilled, (state, action) => {
+        state.placeDetailsLoading = false;
+        state.placeDetails = action.payload;
       })
       .addCase(fetchReverseGeocode.rejected, (state, action) => {
-        state.reverseGeocodeLoading = false;
-        state.reverseGeocodeError =
-          action.error.message || 'Failed to fetch reverse geocode';
+        state.placeDetailsLoading = false;
+        state.placeDetailsError =
+          action.error.message || 'Failed to reverse geocode';
       });
   },
 });
@@ -121,16 +125,15 @@ const searchSlice = createSlice({
 export const {
   setSearchTerm,
   setSuggestions,
-  setIsLoading,
   setSearchMode,
-  setStartLocation,
-  setEndLocation,
-  setSelectedCategory,
-  setNearbyLocations,
-  clearDirections,
-  clearSearch,
   setSelectedPlace,
-  setPlaceDetails,
+  clearSearch,
+  setNearbyPlaces,
+  setNearbyLoading,
+  setNearbyError,
+  setSelectedCategories,
+  setCurrentRadius,
+  clearNearbySearch,
 } = searchSlice.actions;
 
 export default searchSlice.reducer;

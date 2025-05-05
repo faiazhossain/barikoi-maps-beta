@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import styles from './NearbyCategories.module.css';
+import { useAppDispatch, useAppSelector } from '@/app/store/store';
+import { setSelectedCategories } from '@/app/store/slices/searchSlice';
 import {
   FaUtensils,
   FaHotel,
@@ -57,6 +59,9 @@ function SamplePrevArrow(props: ArrowProps) {
 }
 
 const NearbyCategories = () => {
+  const dispatch = useAppDispatch();
+  const { viewport } = useAppSelector((state) => state.map);
+
   const settings = {
     dots: false,
     infinite: true,
@@ -90,19 +95,26 @@ const NearbyCategories = () => {
   };
 
   const categories = [
-    { icon: <FaUtensils />, name: 'Restaurants' },
-    { icon: <FaHotel />, name: 'Hotels' },
-    { icon: <FaCoffee />, name: 'Cafés' },
-    { icon: <FaShoppingBag />, name: 'Shopping' },
-    { icon: <FaGasPump />, name: 'Gas Stations' },
-    { icon: <FaHospital />, name: 'Hospitals' },
-    { icon: <FaSchool />, name: 'Schools' },
-    { icon: <FaParking />, name: 'Parking' },
+    { icon: <FaUtensils />, name: 'Restaurant', value: 'Restaurant' },
+    { icon: <FaHotel />, name: 'Hotels', value: 'Hotel' },
+    { icon: <FaCoffee />, name: 'Cafés', value: 'Cafe' },
+    { icon: <FaShoppingBag />, name: 'Shopping', value: 'Shopping' },
+    { icon: <FaGasPump />, name: 'Gas Stations', value: 'Gas Station' },
+    { icon: <FaHospital />, name: 'Hospitals', value: 'Hospital' },
+    { icon: <FaSchool />, name: 'Schools', value: 'School' },
+    { icon: <FaParking />, name: 'Parking', value: 'Parking' },
   ];
+
+  const handleCategoryClick = (category: string) => {
+    if (viewport) {
+      // Clear previous selection and set new category
+      dispatch(setSelectedCategories([category]));
+    }
+  };
 
   return (
     <div className='min-w-[300px] max-w-[400px] mt-0 mx-auto lg:mr-auto lg:mx-0 sm:mt-[16px] sm:top-2 z-10 opacity-90 hover:opacity-100 transition-opacity'>
-      <div className='bg-white bg-opacity-90 rounded-full backdrop-blur-sm'>
+      <div className='bg-white bg-opacity-90 rounded-full backdrop-blur-sm shadow-sm'>
         <div className='w-3/4 mx-auto'>
           <Slider {...settings}>
             {categories.map((category, index) => (
@@ -123,6 +135,8 @@ const NearbyCategories = () => {
                         transition: { duration: 0.2 },
                       }}
                       whileTap={{ scale: 0.95 }}
+                      onClick={() => handleCategoryClick(category.value)}
+                      aria-label={`Search nearby ${category.name}`}
                     >
                       <span className='text-lg'>{category.icon}</span>
                     </motion.button>
