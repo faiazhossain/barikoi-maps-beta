@@ -24,6 +24,7 @@ interface SearchState {
   placeDetails: any | null;
   placeDetailsLoading: boolean;
   placeDetailsError: string | null;
+  reverseGeocodeLoading: boolean; // Add this property
   nearbyPlaces: NearbyPlace[];
   nearbyLoading: boolean;
   nearbyError: string | null;
@@ -39,6 +40,7 @@ const initialState: SearchState = {
   placeDetails: null,
   placeDetailsLoading: false,
   placeDetailsError: null,
+  reverseGeocodeLoading: false, // Add initial value
   nearbyPlaces: [],
   nearbyLoading: false,
   nearbyError: null,
@@ -107,15 +109,15 @@ const searchSlice = createSlice({
           action.error.message || 'Failed to fetch details';
       })
       .addCase(fetchReverseGeocode.pending, (state) => {
-        state.placeDetailsLoading = true;
+        state.reverseGeocodeLoading = true; // Use the new property
         state.placeDetailsError = null;
       })
       .addCase(fetchReverseGeocode.fulfilled, (state, action) => {
-        state.placeDetailsLoading = false;
+        state.reverseGeocodeLoading = false; // Use the new property
         state.placeDetails = action.payload;
       })
       .addCase(fetchReverseGeocode.rejected, (state, action) => {
-        state.placeDetailsLoading = false;
+        state.reverseGeocodeLoading = false; // Use the new property
         state.placeDetailsError =
           action.error.message || 'Failed to reverse geocode';
       });
