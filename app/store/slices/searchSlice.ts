@@ -92,6 +92,13 @@ const searchSlice = createSlice({
       state.nearbyError = null;
       state.selectedCategories = [];
     },
+    // Add this new action
+    clearDirections: (state) => {
+      // Reset direction-related state
+      state.searchTerm = '';
+      state.suggestions = [];
+      // Add any other direction-specific state you want to clear
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -130,6 +137,7 @@ export const {
   setSearchMode,
   setSelectedPlace,
   clearSearch,
+  clearDirections, // Add this export
   setNearbyPlaces,
   setNearbyLoading,
   setNearbyError,

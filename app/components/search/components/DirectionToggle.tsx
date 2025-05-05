@@ -17,13 +17,13 @@ const DirectionsToggle: React.FC = () => {
       dispatch(setSearchMode('directions'));
     } else {
       dispatch(clearDirections());
-      dispatch(setSearchMode('location'));
+      dispatch(setSearchMode('search')); // Change 'location' to 'search'
     }
   };
 
   return (
     <Button
-      type="text"
+      type='text'
       icon={<FaDirections />}
       onClick={handleDirectionsToggle}
       className={`!transition-colors !text-[16px] hover:!bg-none ${
