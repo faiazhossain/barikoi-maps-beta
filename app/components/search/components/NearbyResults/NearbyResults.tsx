@@ -6,8 +6,15 @@ import {
   setCurrentRadius,
   setSelectedCategories,
 } from '@/app/store/slices/searchSlice';
-import { FaMapMarkerAlt, FaSpinner, FaSearch, FaWalking } from 'react-icons/fa';
-import { motion } from 'framer-motion';
+import {
+  FaMapMarkerAlt,
+  FaSpinner,
+  FaSearch,
+  FaWalking,
+  FaChevronDown,
+  FaChevronUp,
+} from 'react-icons/fa';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Input, Tooltip } from 'antd';
 
 // Place card component for displaying individual nearby places
@@ -179,6 +186,8 @@ const NearbyResults = () => {
 
   // Local state for search term
   const [searchTerm, setSearchTerm] = useState('');
+  // State for panel expansion
+  const [isPanelExpanded, setIsPanelExpanded] = useState(true);
 
   // Redux state
   const { viewport } = useAppSelector((state) => state.map);
@@ -256,57 +265,93 @@ const NearbyResults = () => {
   }
 
   return (
-    <div className='flex flex-col max-h-full'>
-      {/* Filters section */}
-      <div className='p-2.5'>
-        <NearbyFilters
-          radius={currentRadius}
-          setRadius={handleRadiusChange}
-          selectedCategory={searchTerm}
-          onCategoryChange={handleSearchTermChange}
-          onCategorySubmit={handleSearchSubmit}
-          onCategorySelect={handleCategorySelect}
-          predefinedCategories={COMMON_CATEGORIES}
-        />
-      </div>
+    <div className='flex flex-col max-h-full relative'>
+      <AnimatePresence initial={false}>
+        {isPanelExpanded && (
+          <motion.div
+            className='flex flex-col'
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {/* Filters section */}
+            <div className='p-2.5'>
+              <NearbyFilters
+                radius={currentRadius}
+                setRadius={handleRadiusChange}
+                selectedCategory={searchTerm}
+                onCategoryChange={handleSearchTermChange}
+                onCategorySubmit={handleSearchSubmit}
+                onCategorySelect={handleCategorySelect}
+                predefinedCategories={COMMON_CATEGORIES}
+              />
+            </div>
 
-      {/* Results section */}
-      <div className='px-2.5 pb-2.5 overflow-y-auto'>
-        {nearbyLoading ? (
-          <div className='flex flex-col items-center justify-center h-24 text-gray-500'>
-            <FaSpinner className='text-xl animate-spin mb-2' />
-            <p className='text-sm'>Loading nearby places...</p>
-          </div>
-        ) : nearbyError ? (
-          <div className='bg-red-50 text-red-700 p-2.5 rounded-lg text-sm'>
-            <p>Error: {nearbyError}</p>
-          </div>
-        ) : nearbyPlaces.length === 0 ? (
-          <div className='flex flex-col items-center justify-center h-24 text-gray-500'>
-            <p className='text-sm text-center'>
-              No places found nearby. Try increasing the radius or changing your
-              search.
-            </p>
-          </div>
-        ) : (
-          <div>
-            <div className='flex justify-between items-center mb-2.5'>
-              <p className='text-xs text-gray-500'>
-                {nearbyPlaces.length} places found
-              </p>
-              {selectedCategories.length > 0 && (
-                <span className='text-xs bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded-full font-medium'>
-                  {selectedCategories[0]}
-                </span>
+            {/* Results section */}
+            <div className='px-2.5 pb-2.5 overflow-y-auto'>
+              {nearbyLoading ? (
+                <div className='flex flex-col items-center justify-center h-24 text-gray-500'>
+                  <FaSpinner className='text-xl animate-spin mb-2' />
+                  <p className='text-sm'>Loading nearby places...</p>
+                </div>
+              ) : nearbyError ? (
+                <div className='bg-red-50 text-red-700 p-2.5 rounded-lg text-sm'>
+                  <p>Error: {nearbyError}</p>
+                </div>
+              ) : nearbyPlaces.length === 0 ? (
+                <div className='flex flex-col items-center justify-center h-24 text-gray-500'>
+                  <p className='text-sm text-center'>
+                    No places found nearby. Try increasing the radius or
+                    changing your search.
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <div className='flex justify-between items-center mb-2.5'>
+                    <p className='text-xs text-gray-500'>
+                      {nearbyPlaces.length} places found
+                    </p>
+                    {selectedCategories.length > 0 && (
+                      <span className='text-xs bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded-full font-medium'>
+                        {selectedCategories[0]}
+                      </span>
+                    )}
+                  </div>
+                  <div className='overflow-y-auto max-h-[calc(100vh-240px)]'>
+                    {nearbyPlaces.map((place) => (
+                      <PlaceCard key={place.id} place={place} />
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
-            <div className='overflow-y-auto max-h-[calc(100vh-240px)]'>
-              {nearbyPlaces.map((place) => (
-                <PlaceCard key={place.id} place={place} />
-              ))}
-            </div>
-          </div>
+          </motion.div>
         )}
+      </AnimatePresence>
+
+      {/* Toggle button */}
+      <div className='sticky bottom-0 w-full bg-white border-t border-gray-100 shadow-sm'>
+        <button
+          onClick={() => setIsPanelExpanded(!isPanelExpanded)}
+          className='w-full py-2 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors'
+        >
+          {isPanelExpanded ? (
+            <>
+              <FaChevronUp className='mr-1.5' />
+              <span className='text-xs font-medium'>Minimize</span>
+            </>
+          ) : (
+            <>
+              <FaChevronDown className='mr-1.5' />
+              <span className='text-xs font-medium'>
+                {nearbyPlaces.length > 0
+                  ? `Show ${nearbyPlaces.length} places`
+                  : 'Expand'}
+              </span>
+            </>
+          )}
+        </button>
       </div>
     </div>
   );
