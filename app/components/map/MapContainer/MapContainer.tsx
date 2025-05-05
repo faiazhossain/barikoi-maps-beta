@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import maplibregl from 'maplibre-gl';
+import maplibregl, { LngLatBounds } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import MapGL, { MapRef } from 'react-map-gl/maplibre';
 import { useMapRef } from '../hooks/useMapRef';
@@ -118,6 +118,32 @@ const MapContainer: React.FC = () => {
     setSelectedFeature(null);
     dispatch(setMarkerCoords(null)); // Clear marker coordinates when closing the info card
   }, [setSelectedFeature, dispatch]);
+
+  // Add this helper function
+  const fitMarkersInView = React.useCallback(() => {
+    if (!mapRef.current || !nearbyPlaces.length) return;
+
+    const bounds = new LngLatBounds();
+
+    // Extend bounds to include all nearby places
+    nearbyPlaces.forEach((place) => {
+      bounds.extend([parseFloat(place.longitude), parseFloat(place.latitude)]);
+    });
+
+    // Add some padding to the bounds
+    mapRef.current.fitBounds(bounds, {
+      padding: 50,
+      maxZoom: 16,
+      duration: 1000,
+    });
+  }, [nearbyPlaces]);
+
+  // Add useEffect to trigger bounds fitting when nearby places change
+  React.useEffect(() => {
+    if (showNearbyResults && nearbyPlaces.length > 0) {
+      fitMarkersInView();
+    }
+  }, [showNearbyResults, nearbyPlaces, fitMarkersInView]);
 
   return (
     <>
