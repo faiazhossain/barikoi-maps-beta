@@ -5,8 +5,8 @@ import { motion } from 'framer-motion';
 import { useAppDispatch, useAppSelector } from '@/app/store/store';
 import { toggleMapillaryLayer } from '@/app/store/slices/mapillarySlice';
 
-const MAPILLARY_TILE_URL =
-  'https://tiles.mapillary.com/maps/vtp/mly1_public/2/{z}/{x}/{y}?access_token=MLY|9965372463534997|6cee240fad8e5571016e52cd3f24d7f8';
+// Replace direct URL with our proxy
+const MAPILLARY_TILE_URL = '/api/mapillary?z={z}&x={x}&y={y}';
 
 const MapillaryLayer: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -24,8 +24,8 @@ const MapillaryLayer: React.FC = () => {
           id='mapillary'
           type='vector'
           tiles={[MAPILLARY_TILE_URL]}
-          minzoom={6}
-          maxzoom={14}
+          minzoom={0} // Allow all zoom levels
+          maxzoom={22}
         >
           <Layer
             id='mapillary-sequences'
