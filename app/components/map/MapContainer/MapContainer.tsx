@@ -28,6 +28,7 @@ import NearbyPlaceMarker from '../Markers/NearbyPlaceMarker';
 import NearbyPlacePopup from '../Popups/NearbyPlacePopup';
 import NearbyPlaceModal from '../Modals/NearbyPlaceModal';
 import { NearbyPlace } from '@/app/types/map';
+import MapillaryLayer from '../Mapillary/MapillaryLayer';
 
 const MapContainer: React.FC = () => {
   const mapRef = useMapRef();
@@ -73,14 +74,17 @@ const MapContainer: React.FC = () => {
   const handleMapLoad = () => {
     dispatch(setMapLoaded(true));
 
-    // Also update viewport on initial load
+    // Access the actual maplibre-gl map instance
     if (mapRef.current) {
-      const { lng: longitude, lat: latitude } = mapRef.current.getCenter();
+      const map = mapRef.current;
+
+      // Also update viewport on initial load
+      const { lng: longitude, lat: latitude } = map.getCenter();
       dispatch(
         setViewport({
           longitude,
           latitude,
-          zoom: mapRef.current.getZoom(),
+          zoom: map.getZoom(),
         })
       );
     }
@@ -233,6 +237,9 @@ const MapContainer: React.FC = () => {
               />
             </>
           )}
+
+          {/* Updated MapillaryLayer - no props needed */}
+          <MapillaryLayer />
         </MapGL>
 
         <AnimatePresence>

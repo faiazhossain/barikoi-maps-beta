@@ -1,32 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { NavigationControl, GeolocateControl } from 'react-map-gl/maplibre';
+import { useAppDispatch, useAppSelector } from '@/app/store/store';
+import { setIsLargeScreen } from '@/app/store/slices/uiSlice';
 
 const MapControls: React.FC = () => {
-  const [isLargeScreen, setIsLargeScreen] = useState(false);
+  const dispatch = useAppDispatch();
+  const isLargeScreen = useAppSelector((state) => state.ui.isLargeScreen);
 
   useEffect(() => {
     // Initial check
-    setIsLargeScreen(window.innerWidth > 640);
+    dispatch(setIsLargeScreen(window.innerWidth > 640));
 
     // Add resize listener
     const handleResize = () => {
-      setIsLargeScreen(window.innerWidth > 640);
+      dispatch(setIsLargeScreen(window.innerWidth > 640));
     };
 
     window.addEventListener('resize', handleResize);
 
     // Cleanup
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [dispatch]);
 
   return (
     <>
       {isLargeScreen && (
         <>
-          <NavigationControl position="bottom-right" />
+          <NavigationControl position='bottom-right' />
         </>
       )}
-      <GeolocateControl position="bottom-right" />
+      <GeolocateControl position='bottom-right' />
     </>
   );
 };

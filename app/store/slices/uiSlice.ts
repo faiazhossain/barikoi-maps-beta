@@ -1,25 +1,30 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-interface UIState {
+interface UiState {
   isTopPanelVisible: boolean;
+  isLargeScreen: boolean;
+  // ...other UI state
 }
 
-const initialState: UIState = {
+const initialState: UiState = {
   isTopPanelVisible: true,
+  isLargeScreen: true, // Default value, will be updated on mount
+  // ...other UI initial state
 };
 
 const uiSlice = createSlice({
-  name: "ui",
+  name: 'ui',
   initialState,
   reducers: {
-    toggleTopPanel: (state) => {
-      state.isTopPanelVisible = !state.isTopPanelVisible;
-    },
-    setTopPanelVisibility: (state, action) => {
+    setTopPanelVisible: (state, action: PayloadAction<boolean>) => {
       state.isTopPanelVisible = action.payload;
     },
+    setIsLargeScreen: (state, action: PayloadAction<boolean>) => {
+      state.isLargeScreen = action.payload;
+    },
+    // ...other UI reducers
   },
 });
 
-export const { toggleTopPanel, setTopPanelVisibility } = uiSlice.actions;
+export const { setTopPanelVisible, setIsLargeScreen } = uiSlice.actions;
 export default uiSlice.reducer;
