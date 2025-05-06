@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { Marker } from 'react-map-gl/maplibre';
+import { Marker, MarkerEvent } from 'react-map-gl/maplibre';
 import {
   FaUtensils,
   FaHotel,
@@ -87,14 +87,23 @@ const NearbyPlaceMarker: React.FC<NearbyPlaceMarkerProps> = ({
   );
   const isHovered = hoveredPlaceId === String(place.id);
 
+  const handleMarkerClick = (e: MarkerEvent<MouseEvent>) => {
+    e.originalEvent?.preventDefault();
+    e.originalEvent?.stopPropagation();
+    onClick(place);
+  };
+
   return (
     <Marker
       longitude={parseFloat(place.longitude)}
       latitude={parseFloat(place.latitude)}
       anchor='top'
-      onClick={() => onClick(place)}
+      onClick={handleMarkerClick}
     >
-      <div className='cursor-pointer transform transition-transform hover:scale-110'>
+      <div
+        className='cursor-pointer transform transition-transform hover:scale-110'
+        onClick={(e: React.MouseEvent) => e.stopPropagation()}
+      >
         <div className='flex flex-col items-center'>
           <motion.div
             className={`w-8 h-8 rounded-full ${getMarkerColor(
