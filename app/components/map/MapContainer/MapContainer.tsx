@@ -177,6 +177,8 @@ const MapContainer: React.FC = () => {
             'health',
             'government',
             'religious',
+            'mapillary-images',
+            'mapillary-sequences',
           ]}
           cursor={hoveredFeatureId ? 'pointer' : 'default'}
           hash={true}
