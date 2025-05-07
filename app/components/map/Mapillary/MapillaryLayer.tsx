@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
-import { Source, Layer } from "react-map-gl/maplibre";
+import { Source, Layer, Marker } from "react-map-gl/maplibre";
 import { useAppSelector } from "@/app/store/store";
 import { useMap } from "react-map-gl/maplibre";
 import { MapillaryFeature, MAPILLARY_TILE_URL } from "./MapillaryUtils";
@@ -17,6 +17,9 @@ const MapillaryLayer: React.FC = () => {
     null
   );
   const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
+  const [selectedPoint, setSelectedPoint] = useState<[number, number] | null>(
+    null
+  );
 
   // Handle mouse events for mapillary features
   const handleMouseEnter = useCallback(
@@ -68,6 +71,9 @@ const MapillaryLayer: React.FC = () => {
           e.originalEvent.returnValue = false;
         }
 
+        // Save the coordinates of the clicked point
+        setSelectedPoint(mapillaryFeature.geometry.coordinates);
+
         // Directly open the viewer when a point is clicked
         setSelectedImageId(mapillaryFeature.properties.id);
 
@@ -89,6 +95,7 @@ const MapillaryLayer: React.FC = () => {
   // Clear selected image
   const handleCloseViewer = useCallback(() => {
     setSelectedImageId(null);
+    setSelectedPoint(null);
   }, []);
 
   // Setup and cleanup map event listeners when visibility changes
@@ -157,6 +164,27 @@ const MapillaryLayer: React.FC = () => {
             }}
           />
         </Source>
+      )}
+
+      {/* Marker for the selected point */}
+      {isVisible && selectedPoint && (
+        <Marker
+          longitude={selectedPoint[0]}
+          latitude={selectedPoint[1]}
+          anchor="center"
+        >
+          <div
+            className="animate-pulse"
+            style={{
+              width: "20px",
+              height: "20px",
+              borderRadius: "50%",
+              backgroundColor: "rgba(203, 107, 5, 1)",
+              border: "3px solidrgb(203, 104, 5)",
+              boxShadow: "0 0 8px rgba(203, 88, 5, 1)",
+            }}
+          />
+        </Marker>
       )}
 
       {/* Popup for hovering over Mapillary image points */}
