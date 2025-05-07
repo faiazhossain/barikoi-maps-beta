@@ -113,7 +113,7 @@ const MapillaryJSViewer: React.FC<MapillaryJSViewerProps> = ({
             isFullScreen ? 'text-lg' : 'text-sm'
           } font-semibold ml-2`}
         >
-          Mapillary Street View
+          Barikoi Street View
         </div>
         <div className='flex space-x-1'>
           <button
