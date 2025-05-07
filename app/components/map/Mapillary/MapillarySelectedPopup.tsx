@@ -1,7 +1,19 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Popup } from 'react-map-gl/maplibre';
-import { FaImage } from 'react-icons/fa';
-import { MapillaryFeature, formatDate } from './MapillaryUtils';
+import {
+  FaImage,
+  FaCalendarAlt,
+  FaCompass,
+  FaExpand,
+  FaStreetView,
+} from 'react-icons/fa';
+import {
+  MapillaryFeature,
+  formatDate,
+  fetchMapillaryImageData,
+} from './MapillaryUtils';
+import MapillaryJSViewer from './MapillaryJSViewer';
+import Image from 'next/image';
 
 interface MapillarySelectedPopupProps {
   feature: MapillaryFeature;
@@ -12,60 +24,151 @@ const MapillarySelectedPopup: React.FC<MapillarySelectedPopupProps> = ({
   feature,
   onClose,
 }) => {
+  const [showViewer, setShowViewer] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+
+  // Fetch the image data when component mounts
+  useEffect(() => {
+    const fetchImageData = async () => {
+      setImageLoaded(false);
+      setImageError(false);
+
+      try {
+        const imageData = await fetchMapillaryImageData(feature.properties.id);
+        if (imageData?.thumb_1024_url) {
+          setThumbnailUrl(imageData.thumb_1024_url);
+        } else {
+          // If we didn't get thumbnail URLs, set error
+          setImageError(true);
+        }
+      } catch (error) {
+        console.error('Error fetching image data:', error);
+        setImageError(true);
+      }
+    };
+
+    fetchImageData();
+  }, [feature.properties.id]);
+
+  // Open the interactive viewer
+  const openViewer = () => {
+    setShowViewer(true);
+  };
+
+  // Close the interactive viewer
+  const closeViewer = () => {
+    setShowViewer(false);
+  };
+
   return (
-    <Popup
-      longitude={feature.coordinates[0]}
-      latitude={feature.coordinates[1]}
-      closeButton={true}
-      closeOnClick={false}
-      className='mapillary-popup-selected'
-      offset={[0, -5]}
-      anchor='bottom'
-      onClose={onClose}
-    >
-      <div className='p-2 bg-white rounded shadow-md max-w-xs'>
-        <div className='flex items-center justify-between mb-1.5 border-b pb-1.5 border-gray-100'>
-          <div className='flex items-center'>
-            <FaImage className='text-orange-500 mr-2' />
-            <span className='font-medium text-sm'>Mapillary Image</span>
-          </div>
-        </div>
-        <div className='text-xs space-y-1.5'>
-          <div className='flex justify-between'>
-            <span className='text-gray-500'>Captured:</span>
-            <span>{formatDate(feature.properties.captured_at)}</span>
-          </div>
-          {feature.properties.compass_angle && (
-            <div className='flex justify-between'>
-              <span className='text-gray-500'>Direction:</span>
-              <span>{Math.round(feature.properties.compass_angle)}°</span>
+    <>
+      <Popup
+        longitude={feature.coordinates[0]}
+        latitude={feature.coordinates[1]}
+        closeButton={true}
+        closeOnClick={false}
+        className='mapillary-popup-selected'
+        offset={[0, -10]}
+        anchor='bottom'
+        onClose={onClose}
+      >
+        <div className='p-3 bg-white rounded-lg shadow-lg max-w-sm border border-orange-200'>
+          <div className='flex items-center justify-between mb-2 border-b pb-2 border-gray-200'>
+            <div className='flex items-center'>
+              <FaImage className='text-orange-500 mr-2 text-lg' />
+              <span className='font-medium'>Street View Photo</span>
             </div>
-          )}
-          <div className='flex justify-between'>
-            <span className='text-gray-500'>Image ID:</span>
-            <span className='truncate max-w-[150px]'>
-              {feature.properties.id}
-            </span>
           </div>
-          <div className='flex justify-between'>
-            <span className='text-gray-500'>Sequence:</span>
-            <span className='truncate max-w-[150px]'>
-              {feature.properties.sequence_id}
-            </span>
-          </div>
-          <div className='mt-2'>
-            <a
-              href={`https://www.mapillary.com/app/?focus=photo&pKey=${feature.properties.id}`}
-              target='_blank'
-              rel='noopener noreferrer'
-              className='text-xs bg-orange-500 text-white px-2 py-1 rounded hover:bg-orange-600 inline-block w-full text-center mt-1'
+
+          {/* Show thumbnail preview */}
+          <div className='mb-3 relative rounded-md overflow-hidden'>
+            <div
+              className={`w-full h-36 bg-gray-100 ${
+                !imageLoaded && !imageError && thumbnailUrl
+                  ? 'animate-pulse'
+                  : ''
+              }`}
             >
-              View on Mapillary
-            </a>
+              {thumbnailUrl && !imageError && (
+                <img
+                  src={thumbnailUrl}
+                  alt='Mapillary street view preview'
+                  className={`w-full h-full object-cover transition-opacity duration-300 ${
+                    imageLoaded ? 'opacity-100' : 'opacity-0'
+                  }`}
+                  onLoad={() => setImageLoaded(true)}
+                  onError={() => setImageError(true)}
+                />
+              )}
+              {!thumbnailUrl && !imageError && (
+                <div className='absolute inset-0 flex items-center justify-center'>
+                  <span className='text-xs text-gray-500'>
+                    Loading preview...
+                  </span>
+                </div>
+              )}
+              {imageError && (
+                <div className='absolute inset-0 flex items-center justify-center bg-gray-100'>
+                  <FaImage className='text-gray-400 text-2xl' />
+                </div>
+              )}
+            </div>
+
+            {/* View street view button overlay */}
+            <button
+              onClick={openViewer}
+              className='absolute top-2 right-2 bg-black bg-opacity-60 text-white p-1.5 rounded-full hover:bg-opacity-80 transition-colors'
+              aria-label='Open street view'
+            >
+              <FaExpand size={14} />
+            </button>
+          </div>
+
+          <div className='text-sm space-y-2.5'>
+            <div className='flex items-center'>
+              <FaCalendarAlt className='text-gray-500 mr-3 w-4' />
+              <div>
+                <div className='text-xs text-gray-500 mb-0.5'>Captured</div>
+                <div className='text-gray-700'>
+                  {formatDate(feature.properties.captured_at)}
+                </div>
+              </div>
+            </div>
+
+            {feature.properties.compass_angle && (
+              <div className='flex items-center'>
+                <FaCompass className='text-gray-500 mr-3 w-4' />
+                <div>
+                  <div className='text-xs text-gray-500 mb-0.5'>Direction</div>
+                  <div className='text-gray-700'>
+                    {Math.round(feature.properties.compass_angle)}°
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className='mt-3 pt-2 border-t border-gray-200'>
+              <button
+                onClick={openViewer}
+                className='w-full flex items-center justify-center text-sm bg-blue-500 text-white px-3 py-2 rounded-md hover:bg-blue-600 transition-colors duration-200'
+              >
+                <FaStreetView className='mr-2' /> Open Interactive Street View
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </Popup>
+      </Popup>
+
+      {/* Interactive Mapillary.js viewer */}
+      {showViewer && (
+        <MapillaryJSViewer
+          imageId={feature.properties.id}
+          onClose={closeViewer}
+        />
+      )}
+    </>
   );
 };
 
