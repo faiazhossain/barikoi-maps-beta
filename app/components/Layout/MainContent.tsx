@@ -12,6 +12,9 @@ const MapContainer = dynamic(() => import('../map/MapContainer/MapContainer'), {
 
 const MainContent = () => {
   const isVisible = useAppSelector((state) => state.ui.isTopPanelVisible);
+  const isMapillaryVisible = useAppSelector(
+    (state) => state.mapillary.isVisible
+  );
   const isMapLoaded = useAppSelector((state) => state.map.isMapLoaded);
   const selectedCategories = useAppSelector(
     (state) => state.search.selectedCategories
@@ -41,9 +44,9 @@ const MainContent = () => {
             !showNearbyResults ? 'justify-center w-full' : `justify-start w-fit`
           } gap-2 sm:gap-6 md:gap-11`}
         >
-          <SearchBar />
+          {!isMapillaryVisible && <SearchBar />}
           {/* Only show NearbyCategories when not showing nearby results */}
-          {!showNearbyResults && <NearbyCategories />}
+          {!showNearbyResults && !isMapillaryVisible && <NearbyCategories />}
         </div>
       </>
     </main>

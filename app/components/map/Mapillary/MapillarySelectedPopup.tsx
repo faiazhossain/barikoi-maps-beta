@@ -52,13 +52,27 @@ const MapillarySelectedPopup: React.FC<MapillarySelectedPopupProps> = ({
     fetchImageData();
   }, [feature.properties.id]);
 
+  // Prevent event propagation on the popup
+  const handlePopupClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
   // Open the interactive viewer
-  const openViewer = () => {
+  const openViewer = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setShowViewer(true);
   };
 
   // Close the interactive viewer
-  const closeViewer = () => {
+  const closeViewer = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setShowViewer(false);
   };
 
@@ -74,7 +88,10 @@ const MapillarySelectedPopup: React.FC<MapillarySelectedPopupProps> = ({
         anchor='bottom'
         onClose={onClose}
       >
-        <div className='p-3 bg-white rounded-lg shadow-lg max-w-sm border border-orange-200'>
+        <div
+          className='p-3 bg-white rounded-lg shadow-lg max-w-sm border border-orange-200'
+          onClick={handlePopupClick}
+        >
           <div className='flex items-center justify-between mb-2 border-b pb-2 border-gray-200'>
             <div className='flex items-center'>
               <FaImage className='text-orange-500 mr-2 text-lg' />
@@ -92,12 +109,14 @@ const MapillarySelectedPopup: React.FC<MapillarySelectedPopupProps> = ({
               }`}
             >
               {thumbnailUrl && !imageError && (
-                <img
+                <Image
                   src={thumbnailUrl}
                   alt='Mapillary street view preview'
                   className={`w-full h-full object-cover transition-opacity duration-300 ${
                     imageLoaded ? 'opacity-100' : 'opacity-0'
                   }`}
+                  width={256}
+                  height={144}
                   onLoad={() => setImageLoaded(true)}
                   onError={() => setImageError(true)}
                 />

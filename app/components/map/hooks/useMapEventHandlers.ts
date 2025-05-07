@@ -36,6 +36,17 @@ export const useMapEventHandlers = () => {
 
   const handleMapClick = useCallback(
     (event: any) => {
+      // Check if the click is on a Mapillary layer - if so, don't process further
+      const features = event.target.queryRenderedFeatures(event.point);
+      const isMapillaryFeature = features.some(
+        (f) => f.layer && f.layer.id && f.layer.id.startsWith('mapillary')
+      );
+
+      // Skip processing if clicking on Mapillary features - they have their own handlers
+      if (isMapillaryFeature) {
+        return;
+      }
+
       // Close context menu if it's open
       if (contextMenu.visible) {
         closeContextMenu();
@@ -43,8 +54,6 @@ export const useMapEventHandlers = () => {
       }
 
       // Get all features at click point
-      const features = event.target.queryRenderedFeatures(event.point);
-
       const feature = features.length > 0 ? features[0] : null;
       const clickedLngLat = event.lngLat;
 

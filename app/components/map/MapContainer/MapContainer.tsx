@@ -41,6 +41,9 @@ const MapContainer: React.FC = () => {
   const selectedCategories = useAppSelector(
     (state) => state.search.selectedCategories
   );
+  const isMapillaryVisible = useAppSelector(
+    (state) => state.mapillary.isVisible
+  );
   const showNearbyResults = selectedCategories.length > 0;
 
   // State for selected nearby place popup and modal
@@ -185,10 +188,10 @@ const MapContainer: React.FC = () => {
         >
           <MapControls />
           <BarikoiAttribution />
-          {isLeftBarOpen && <ResponsiveDrawer />}
+          {isLeftBarOpen && !isMapillaryVisible && <ResponsiveDrawer />}
 
           {/* Display regular marker if we have coordinates */}
-          {!showNearbyResults && markerCoords && (
+          {!showNearbyResults && markerCoords && !isMapillaryVisible && (
             <AnimatedMarker
               latitude={markerCoords.latitude}
               longitude={markerCoords.longitude}
@@ -197,7 +200,7 @@ const MapContainer: React.FC = () => {
           )}
 
           {/* Add nearby search center marker and results */}
-          {showNearbyResults && (
+          {showNearbyResults && !isMapillaryVisible && (
             <>
               <NearbySearchMarker
                 latitude={viewport.latitude}
@@ -226,7 +229,7 @@ const MapContainer: React.FC = () => {
           )}
 
           {/* Context menu marker and popup */}
-          {contextMenu.visible && contextMenu.lngLat && (
+          {contextMenu.visible && contextMenu.lngLat && !isMapillaryVisible && (
             <>
               <ContextMarker
                 longitude={contextMenu.lngLat.lng}
@@ -239,26 +242,32 @@ const MapContainer: React.FC = () => {
               />
             </>
           )}
-
           {/* Updated MapillaryLayer - no props needed */}
           <MapillaryLayer />
         </MapGL>
 
-        <AnimatePresence>
-          {selectedFeature && !selectedFeature.properties?.place_code && (
-            <InfoCard feature={selectedFeature} onClose={handleCloseInfoCard} />
-          )}
-        </AnimatePresence>
+        {!isMapillaryVisible && (
+          <AnimatePresence>
+            {selectedFeature && !selectedFeature.properties?.place_code && (
+              <InfoCard
+                feature={selectedFeature}
+                onClose={handleCloseInfoCard}
+              />
+            )}
+          </AnimatePresence>
+        )}
 
         {/* Details modal */}
-        <AnimatePresence>
-          {showDetailsModal && selectedNearbyPlace && (
-            <NearbyPlaceModal
-              place={selectedNearbyPlace}
-              onClose={handleCloseModal}
-            />
-          )}
-        </AnimatePresence>
+        {!isMapillaryVisible && (
+          <AnimatePresence>
+            {showDetailsModal && selectedNearbyPlace && (
+              <NearbyPlaceModal
+                place={selectedNearbyPlace}
+                onClose={handleCloseModal}
+              />
+            )}
+          </AnimatePresence>
+        )}
       </div>
     </>
   );

@@ -38,6 +38,12 @@ const MapillaryHoverPopup: React.FC<MapillaryHoverPopupProps> = ({
     fetchImageData();
   }, [feature.properties.id]);
 
+  // Prevent event propagation
+  const handlePopupClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
   return (
     <Popup
       longitude={feature.coordinates[0]}
@@ -48,7 +54,10 @@ const MapillaryHoverPopup: React.FC<MapillaryHoverPopupProps> = ({
       offset={[0, -10]}
       anchor='bottom'
     >
-      <div className='p-2 bg-white rounded-lg shadow-md max-w-xs border border-green-200'>
+      <div
+        className='p-2 bg-white rounded-lg shadow-md max-w-xs border border-green-200'
+        onClick={handlePopupClick}
+      >
         <div className='flex items-center mb-1.5 border-b pb-1.5 border-gray-200'>
           <FaImage className='text-green-600 mr-2' />
           <span className='font-medium text-sm'>Street View Photo</span>

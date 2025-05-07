@@ -55,27 +55,43 @@ const MapillaryLayer: React.FC = () => {
     (e: any) => {
       if (!e.features || e.features.length === 0) return;
 
-      const feature = e.features[0];
-      const layerId = feature.layer.id;
+      // Check if we have a mapillary-images feature in the clicked features
+      const mapillaryFeature = e.features.find(
+        (f) => f.layer.id === 'mapillary-images'
+      );
 
-      if (layerId === 'mapillary-images') {
+      if (mapillaryFeature) {
+        // Necessary steps to properly prevent propagation in MapLibre
+        if (e.originalEvent) {
+          e.originalEvent.stopPropagation();
+          e.originalEvent.preventDefault();
+          e.originalEvent.cancelBubble = true;
+          e.originalEvent.returnValue = false;
+        }
+
         // Set the selected feature, which will keep the popup open
         setSelectedFeature({
           type: 'image',
-          coordinates: feature.geometry.coordinates,
-          properties: feature.properties,
+          coordinates: mapillaryFeature.geometry.coordinates,
+          properties: mapillaryFeature.properties,
         });
+
         // Clear the hover state to avoid duplicates
         setHoveredFeature(null);
-      } else if (
-        !e.features.some((f) => f.layer.id === 'mapillary-images') &&
-        selectedFeature
-      ) {
+
+        // Tell MapLibre to stop processing this event for other layers
+        if (map) {
+          // This is important: mark the event as handled
+          map.triggerRepaint();
+        }
+
+        return false;
+      } else if (selectedFeature) {
         // If clicking elsewhere on the map (and not on another Mapillary image), clear selection
         setSelectedFeature(null);
       }
     },
-    [selectedFeature]
+    [selectedFeature, map]
   );
 
   // Clear selected feature
