@@ -1,23 +1,22 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { Source, Layer } from 'react-map-gl/maplibre';
-import { useAppSelector } from '@/app/store/store';
-import { useMap } from 'react-map-gl/maplibre';
-import { MapillaryFeature, MAPILLARY_TILE_URL } from './MapillaryUtils';
-import MapillaryHoverPopup from './MapillaryHoverPopup';
-import MapillarySelectedPopup from './MapillarySelectedPopup';
-import MapillaryToggleButton from './MapillaryToggleButton';
+import React, { useState, useCallback, useEffect, useRef } from "react";
+import { Source, Layer } from "react-map-gl/maplibre";
+import { useAppSelector } from "@/app/store/store";
+import { useMap } from "react-map-gl/maplibre";
+import { MapillaryFeature, MAPILLARY_TILE_URL } from "./MapillaryUtils";
+import MapillaryHoverPopup from "./MapillaryHoverPopup";
+import MapillaryJSViewer from "./MapillaryJSViewer";
+import MapillaryToggleButton from "./MapillaryToggleButton";
 
 const MapillaryLayer: React.FC = () => {
   const isVisible = useAppSelector((state) => state.mapillary.isVisible);
   const { current: map } = useMap();
   const mapillaryLayersAdded = useRef(false);
 
-  // State for hovering and selection
+  // State for hovering and viewer
   const [hoveredFeature, setHoveredFeature] = useState<MapillaryFeature | null>(
     null
   );
-  const [selectedFeature, setSelectedFeature] =
-    useState<MapillaryFeature | null>(null);
+  const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
 
   // Handle mouse events for mapillary features
   const handleMouseEnter = useCallback(
@@ -28,26 +27,26 @@ const MapillaryLayer: React.FC = () => {
       const layerId = feature.layer.id;
 
       // Only show hover effect for image points, not sequences
-      if (layerId === 'mapillary-images' && !selectedFeature) {
+      if (layerId === "mapillary-images" && !selectedImageId) {
         setHoveredFeature({
-          type: 'image',
+          type: "image",
           coordinates: feature.geometry.coordinates,
           properties: feature.properties,
         });
-        e.target.getCanvas().style.cursor = 'pointer';
+        e.target.getCanvas().style.cursor = "pointer";
       }
     },
-    [selectedFeature]
+    [selectedImageId]
   );
 
   const handleMouseLeave = useCallback(
     (e: any) => {
-      if (!selectedFeature) {
+      if (!selectedImageId) {
         setHoveredFeature(null);
-        e.target.getCanvas().style.cursor = '';
+        e.target.getCanvas().style.cursor = "";
       }
     },
-    [selectedFeature]
+    [selectedImageId]
   );
 
   // Handle click on mapillary images
@@ -57,7 +56,7 @@ const MapillaryLayer: React.FC = () => {
 
       // Check if we have a mapillary-images feature in the clicked features
       const mapillaryFeature = e.features.find(
-        (f) => f.layer.id === 'mapillary-images'
+        (f) => f.layer.id === "mapillary-images"
       );
 
       if (mapillaryFeature) {
@@ -69,12 +68,8 @@ const MapillaryLayer: React.FC = () => {
           e.originalEvent.returnValue = false;
         }
 
-        // Set the selected feature, which will keep the popup open
-        setSelectedFeature({
-          type: 'image',
-          coordinates: mapillaryFeature.geometry.coordinates,
-          properties: mapillaryFeature.properties,
-        });
+        // Directly open the viewer when a point is clicked
+        setSelectedImageId(mapillaryFeature.properties.id);
 
         // Clear the hover state to avoid duplicates
         setHoveredFeature(null);
@@ -86,17 +81,14 @@ const MapillaryLayer: React.FC = () => {
         }
 
         return false;
-      } else if (selectedFeature) {
-        // If clicking elsewhere on the map (and not on another Mapillary image), clear selection
-        setSelectedFeature(null);
       }
     },
-    [selectedFeature, map]
+    [map]
   );
 
-  // Clear selected feature
-  const handleClosePopup = useCallback(() => {
-    setSelectedFeature(null);
+  // Clear selected image
+  const handleCloseViewer = useCallback(() => {
+    setSelectedImageId(null);
   }, []);
 
   // Setup and cleanup map event listeners when visibility changes
@@ -105,10 +97,9 @@ const MapillaryLayer: React.FC = () => {
 
     if (isVisible) {
       // Add event listeners when the layer becomes visible
-      map.on('mousemove', 'mapillary-images', handleMouseEnter);
-      map.on('mouseleave', 'mapillary-images', handleMouseLeave);
-      map.on('click', 'mapillary-images', handleClick);
-      map.on('click', handleClick); // To detect clicks outside mapillary features
+      map.on("mousemove", "mapillary-images", handleMouseEnter);
+      map.on("mouseleave", "mapillary-images", handleMouseLeave);
+      map.on("click", "mapillary-images", handleClick);
 
       // Set the layers as added
       mapillaryLayersAdded.current = true;
@@ -117,10 +108,9 @@ const MapillaryLayer: React.FC = () => {
     // Cleanup function to remove event listeners
     return () => {
       if (mapillaryLayersAdded.current) {
-        map.off('mousemove', 'mapillary-images', handleMouseEnter);
-        map.off('mouseleave', 'mapillary-images', handleMouseLeave);
-        map.off('click', 'mapillary-images', handleClick);
-        map.off('click', handleClick);
+        map.off("mousemove", "mapillary-images", handleMouseEnter);
+        map.off("mouseleave", "mapillary-images", handleMouseLeave);
+        map.off("click", "mapillary-images", handleClick);
       }
     };
   }, [map, isVisible, handleMouseEnter, handleMouseLeave, handleClick]);
@@ -129,77 +119,57 @@ const MapillaryLayer: React.FC = () => {
     <>
       {isVisible && (
         <Source
-          id='mapillary'
-          type='vector'
+          id="mapillary"
+          type="vector"
           tiles={[MAPILLARY_TILE_URL]}
           minzoom={6}
           maxzoom={14}
         >
           {/* Sequence lines */}
           <Layer
-            id='mapillary-sequences'
-            type='line'
-            source='mapillary'
-            source-layer='sequence'
+            id="mapillary-sequences"
+            type="line"
+            source="mapillary"
+            source-layer="sequence"
             paint={{
-              'line-color': '#05CB63',
-              'line-width': 2,
-              'line-opacity': 0.8,
+              "line-color": "#05CB63",
+              "line-width": 2,
+              "line-opacity": 0.8,
             }}
             layout={{
-              'line-join': 'round',
-              'line-cap': 'round',
+              "line-join": "round",
+              "line-cap": "round",
             }}
           />
 
-          {/* Image points with clear distinguishable styling - NO ARROW */}
+          {/* Image points with clear distinguishable styling */}
           <Layer
-            id='mapillary-images'
-            type='circle'
-            source='mapillary'
-            source-layer='image'
+            id="mapillary-images"
+            type="circle"
+            source="mapillary"
+            source-layer="image"
             paint={{
-              'circle-color': [
-                'case',
-                [
-                  'boolean',
-                  ['==', ['get', 'id'], selectedFeature?.properties?.id || ''],
-                  false,
-                ],
-                '#FF8C00', // Orange for selected
-                '#034748', // Green for normal state
-              ],
-              'circle-radius': [
-                'case',
-                [
-                  'boolean',
-                  ['==', ['get', 'id'], selectedFeature?.properties?.id || ''],
-                  false,
-                ],
-                10, // Larger radius for selected
-                6, // Default radius
-              ],
-              'circle-stroke-width': 2,
-              'circle-stroke-color': '#FFFFFF',
-              'circle-pitch-alignment': 'map',
+              "circle-color": "#034748", // Green for normal state
+              "circle-radius": 6, // Default radius
+              "circle-stroke-width": 2,
+              "circle-stroke-color": "#FFFFFF",
+              "circle-pitch-alignment": "map",
             }}
           />
-
-          {/* Removed the direction indicator arrow layer */}
         </Source>
       )}
 
       {/* Popup for hovering over Mapillary image points */}
       {isVisible &&
         hoveredFeature &&
-        hoveredFeature.type === 'image' &&
-        !selectedFeature && <MapillaryHoverPopup feature={hoveredFeature} />}
+        hoveredFeature.type === "image" &&
+        !selectedImageId && <MapillaryHoverPopup feature={hoveredFeature} />}
 
-      {/* Popup for selected Mapillary image points */}
-      {isVisible && selectedFeature && (
-        <MapillarySelectedPopup
-          feature={selectedFeature}
-          onClose={handleClosePopup}
+      {/* Open Mapillary JS Viewer directly when an image is selected */}
+      {isVisible && selectedImageId && (
+        <MapillaryJSViewer
+          imageId={selectedImageId}
+          onClose={handleCloseViewer}
         />
       )}
 
@@ -208,7 +178,5 @@ const MapillaryLayer: React.FC = () => {
     </>
   );
 };
-
-// Removed the AddMapImages component that was adding arrow images to the map
 
 export default MapillaryLayer;
