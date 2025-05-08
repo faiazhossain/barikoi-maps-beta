@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import maplibregl, { LngLatBounds } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import MapGL, { MapRef } from "react-map-gl/maplibre";
@@ -9,11 +9,13 @@ import { useMapEventHandlers } from "../hooks/useMapEventHandlers";
 import { usePlaceDetailsEffect } from "../hooks/usePlaceDetailsEffect";
 import MapControls from "./MapControls";
 import BarikoiAttribution from "./BarikoiAttribution";
+import MapLayerSwitcher from "./MapLayerSwitcher";
 import { AnimatePresence } from "framer-motion";
 import InfoCard from "../InfoCard/InfoCard";
 
 import {
   setMapLoaded,
+  setMapStyle,
   setMarkerCoords,
   setViewport,
 } from "@/app/store/slices/mapSlice";
@@ -37,7 +39,9 @@ const MapContainer: React.FC = () => {
   const { placeDetails, nearbyPlaces } = useAppSelector(
     (state) => state.search
   );
-  const { markerCoords, viewport } = useAppSelector((state) => state.map);
+  const { markerCoords, viewport, mapStyle } = useAppSelector(
+    (state) => state.map
+  );
   const selectedCategories = useAppSelector(
     (state) => state.search.selectedCategories
   );
@@ -45,6 +49,20 @@ const MapContainer: React.FC = () => {
     (state) => state.mapillary.isVisible
   );
   const showNearbyResults = selectedCategories.length > 0;
+
+  // Local state for current map style url
+  const [currentMapStyle, setCurrentMapStyle] = useState(
+    mapStyle || "/map-styles/light-style.json"
+  );
+
+  // Handle map style change
+  const handleMapStyleChange = useCallback(
+    (styleUrl: string) => {
+      setCurrentMapStyle(styleUrl);
+      dispatch(setMapStyle(styleUrl));
+    },
+    [dispatch]
+  );
 
   // State for selected nearby place popup and modal
   const [selectedNearbyPlace, setSelectedNearbyPlace] =
@@ -164,7 +182,7 @@ const MapContainer: React.FC = () => {
             zoom: viewport.zoom || 12,
           }}
           style={{ width: "100vw", height: "100dvh" }}
-          mapStyle="/map-styles/light-style.json"
+          mapStyle={currentMapStyle || "/map-styles/light-style.json"}
           attributionControl={false}
           onLoad={handleMapLoad}
           onClick={handleMapClick}
@@ -244,6 +262,14 @@ const MapContainer: React.FC = () => {
           )}
           {/* Updated MapillaryLayer - no props needed */}
           <MapillaryLayer />
+
+          {/* Add the Map Layer Switcher */}
+          {!isMapillaryVisible && (
+            <MapLayerSwitcher
+              onStyleChange={handleMapStyleChange}
+              currentStyleUrl={currentMapStyle}
+            />
+          )}
         </MapGL>
 
         {!isMapillaryVisible && (
