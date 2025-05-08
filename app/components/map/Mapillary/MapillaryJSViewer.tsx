@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom';
 import { Viewer as MapillaryViewer, ViewerOptions } from 'mapillary-js';
 import { FaTimes, FaExpand, FaCompress } from 'react-icons/fa';
 import { MAPILLARY_ACCESS_TOKEN } from './MapillaryUtils';
+import { useAppDispatch } from '@/app/store/store';
+import { updateMapillaryPosition } from '@/app/store/slices/mapillarySlice';
 
 // You need to import the CSS in your _app.tsx or similar global file
 // import 'mapillary-js/dist/mapillary.css';
@@ -20,6 +22,7 @@ const MapillaryJSViewer: React.FC<MapillaryJSViewerProps> = ({
   const viewerRef = useRef<MapillaryViewer | null>(null);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const dispatch = useAppDispatch();
 
   // Initialize viewer
   useEffect(() => {
@@ -50,6 +53,33 @@ const MapillaryJSViewer: React.FC<MapillaryJSViewerProps> = ({
     };
 
     viewer.on('image', loadingHandler);
+
+    // Add position tracking event handler
+    viewer.on('position', async () => {
+      try {
+        const position = await viewer.getPosition();
+        if (position) {
+          const lng = position.lng;
+          const lat = position.lat;
+          const currentImage = await viewer.getImage();
+
+          console.log(
+            `Image ID: ${currentImage?.id}, lng: ${lng}, lat: ${lat}`
+          );
+
+          // Dispatch position to Redux
+          dispatch(
+            updateMapillaryPosition({
+              imageId: currentImage?.id || imageId,
+              lng,
+              lat,
+            })
+          );
+        }
+      } catch (error) {
+        console.error('Error getting Mapillary position:', error);
+      }
+    });
 
     // Clean up
     return () => {
