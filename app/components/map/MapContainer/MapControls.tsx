@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
-import { NavigationControl, GeolocateControl } from 'react-map-gl/maplibre';
-import { useAppDispatch, useAppSelector } from '@/app/store/store';
-import { setIsLargeScreen } from '@/app/store/slices/uiSlice';
+import React, { useEffect } from "react";
+import { NavigationControl, GeolocateControl } from "react-map-gl/maplibre";
+import { useAppDispatch, useAppSelector } from "@/app/store/store";
+import { setIsLargeScreen } from "@/app/store/slices/uiSlice";
 
 const MapControls: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -16,20 +16,20 @@ const MapControls: React.FC = () => {
       dispatch(setIsLargeScreen(window.innerWidth > 640));
     };
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     // Cleanup
-    return () => window.removeEventListener('resize', handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, [dispatch]);
 
   return (
     <>
       {isLargeScreen && (
         <>
-          <NavigationControl position='bottom-right' />
+          <NavigationControl position="bottom-right" />
         </>
       )}
-      <GeolocateControl position='bottom-right' />
+      <GeolocateControl position="bottom-right" />
     </>
   );
 };

@@ -103,12 +103,16 @@ div {
 }
 
 .marker-pulse::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: -8px;
   border-radius: 50%;
   background: rgba(34, 197, 94, 0.4);
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.maplibregl-ctrl-bottom-right {
+  bottom: 88px !important;
 }
 
 /* Add to your app/globals.css file */

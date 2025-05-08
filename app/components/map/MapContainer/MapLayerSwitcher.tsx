@@ -11,31 +11,31 @@ import Image from "next/image";
 const MAP_STYLES = [
   {
     id: "default",
-    name: "Light Style",
+    name: "Default Style",
     url: "/map-styles/light-style.json",
     thumbnail: "/images/map-thumbnails/light-style.webp",
   },
   {
     id: "barikoi-green",
-    name: "Barikoi Green",
+    name: "Green Map",
     url: "https://map.barikoi.com/styles/barkoi_green/style.json?key=NDE2NzpVNzkyTE5UMUoy",
     thumbnail: "/images/map-thumbnails/barikoi-green.webp",
   },
   {
     id: "barikoi-dark",
-    name: "Barikoi Dark",
+    name: "Dark Map",
     url: "https://map.barikoi.com/styles/barikoi-dark-mode/style.json?key=NDE2NzpVNzkyTE5UMUoy",
     thumbnail: "/images/map-thumbnails/barikoi-dark.webp",
   },
   {
     id: "planet-barikoi",
-    name: "Planet Barikoi",
+    name: "Planet Map",
     url: "https://map.barikoi.com/styles/osm_barikoi_v2/style.json?key=NDE2NzpVNzkyTE5UMUoy",
     thumbnail: "/images/map-thumbnails/planet-barikoi.webp",
   },
   {
-    id: "maptiler",
-    name: "MapTiler Streets",
+    id: "satellite",
+    name: "Satellite View",
     url: "https://api.maptiler.com/maps/dfa2a215-243b-4b69-87ef-ce275b09249c/style.json?key=ASrfqapsZfy4BRFJJdVy",
     thumbnail: "/images/map-thumbnails/satellite-view.webp",
   },
@@ -47,7 +47,7 @@ const STYLE_COLORS = {
   "barikoi-green": "bg-green-100",
   "barikoi-dark": "bg-gray-800",
   "planet-barikoi": "bg-blue-200",
-  maptiler: "bg-amber-50",
+  satellite: "bg-amber-50",
 };
 
 interface MapLayerSwitcherProps {
@@ -72,11 +72,7 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
   };
 
   return (
-    <div
-      className={`absolute z-10 ${
-        isLargeScreen ? "bottom-0" : "bottom-0"
-      } right-2 flex justify-center items-center`}
-    >
+    <div className="absolute z-10 bottom-4 right-2 flex justify-center items-center">
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -90,34 +86,36 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.5 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="absolute bottom-12 right-0 bg-white shadow-xl rounded-lg overflow-hidden"
-              style={{ width: "320px", transformOrigin: "bottom right" }}
+              className="absolute bottom-0 right-12 bg-white shadow-xl rounded-lg overflow-hidden"
+              style={{ width: "280px", transformOrigin: "bottom right" }}
             >
-              <div className="flex justify-between items-center p-3 border-b border-gray-100">
-                <h3 className="text-gray-800 font-medium">Map Styles</h3>
+              <div className="flex justify-between items-center p-2 border-b border-gray-100">
+                <h3 className="text-gray-800 font-medium text-sm">
+                  Map Styles
+                </h3>
                 <button
                   onClick={togglePanel}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="text-gray-400 hover:text-gray-600 transition-colors p-1"
                 >
-                  <FaTimes size={16} />
+                  <FaTimes size={14} />
                 </button>
               </div>
-              <div className="p-3">
-                <div className="grid grid-cols-2 gap-3 max-h-[60vh] overflow-y-auto">
+              <div className="p-2">
+                <div className="grid grid-cols-3 gap-2 max-h-[45vh] p-2 overflow-y-auto">
                   {MAP_STYLES.map((style) => (
                     <motion.div
                       key={style.id}
-                      whileHover={{ scale: 1.02 }}
+                      whileHover={{ scale: 1.04 }}
                       whileTap={{ scale: 0.98 }}
-                      className={`cursor-pointer rounded-lg ${
+                      className={`cursor-pointer rounded-md ${
                         style.url === currentStyleUrl
-                          ? "ring-2 ring-green-500 ring-offset-2"
-                          : "hover:bg-gray-50"
+                          ? "ring-2 ring-green-500"
+                          : " hover:bg-green-100"
                       }`}
                       onClick={() => handleStyleSelect(style.url)}
                     >
                       <div className="flex flex-col">
-                        <div className="h-24 rounded-lg overflow-hidden bg-gray-100 relative">
+                        <div className="h-16 rounded-md overflow-hidden bg-gray-100 relative">
                           <div
                             className={`absolute inset-0 ${
                               STYLE_COLORS[
@@ -130,18 +128,14 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
                             alt={style.name}
                             fill
                             className="object-cover"
-                            sizes="(max-width: 150px) 100vw, 150px"
+                            sizes="(max-width: 100px) 100vw, 100px"
                             priority={style.id === "default"}
                           />
                           {style.url === currentStyleUrl && (
-                            <div className="absolute inset-0 bg-green-500/20 flex items-center justify-center">
-                              <span className="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                                Active
-                              </span>
-                            </div>
+                            <div className="absolute inset-0 bg-green-500/20 flex items-center justify-center"></div>
                           )}
                         </div>
-                        <span className="font-medium text-gray-800 text-sm mt-2 text-center">
+                        <span className="text-gray-800 text-xs mt-1 text-center truncate px-1">
                           {style.name}
                         </span>
                       </div>
@@ -154,8 +148,8 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
         </AnimatePresence>
 
         <Tooltip
-          title="Change Map Style"
-          placement="left"
+          title="Layers"
+          placement="top"
           mouseEnterDelay={0.1}
           className="map-style-tooltip"
           open={isLargeScreen ? undefined : false}
