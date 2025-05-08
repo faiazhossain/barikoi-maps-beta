@@ -29,7 +29,7 @@ const MapillaryToggleButton: React.FC = () => {
           title={isVisible ? "Hide Street View" : "Show Street View"}
           placement="left"
           mouseEnterDelay={0.1}
-          overlayClassName="mapillary-tooltip"
+          className="mapillary-tooltip"
           open={isLargeScreen ? undefined : false} // Only show on large screens
         >
           <motion.button

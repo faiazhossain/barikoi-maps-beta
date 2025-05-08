@@ -189,8 +189,7 @@ const NearbyPlaceMarker: React.FC<NearbyPlaceMarkerProps> = ({
         title={null}
         placement="top"
         open={popoverOpen}
-        overlayClassName="nearby-place-popover"
-        overlayStyle={{ maxWidth: "250px" }}
+        className="nearby-place-popover max-w-[250px]"
         onOpenChange={setPopoverOpen}
         trigger="hover"
       >
