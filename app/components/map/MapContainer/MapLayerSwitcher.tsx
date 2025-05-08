@@ -74,7 +74,7 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
   return (
     <div
       className={`absolute z-10 ${
-        isLargeScreen ? "bottom-[184px]" : "bottom-28"
+        isLargeScreen ? "bottom-0" : "bottom-0"
       } right-2 flex justify-center items-center`}
     >
       <motion.div
@@ -86,67 +86,68 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
         <AnimatePresence>
           {isOpen && (
             <motion.div
-              initial={{ opacity: 0, x: 40, scale: 0.5 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: 40, scale: 0.5 }}
+              initial={{ opacity: 0, y: 20, scale: 0.5 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.5 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="absolute bottom-0 right-10 bg-white shadow-xl rounded-lg overflow-hidden w-32 mb-0"
-              style={{ transformOrigin: "right center" }}
+              className="absolute bottom-12 right-0 bg-white shadow-xl rounded-lg overflow-hidden"
+              style={{ width: "320px", transformOrigin: "bottom right" }}
             >
-              <div className="flex justify-between items-center p-2 border-b border-gray-100">
-                <h3 className="text-gray-800 font-medium text-xs">
-                  Map Styles
-                </h3>
+              <div className="flex justify-between items-center p-3 border-b border-gray-100">
+                <h3 className="text-gray-800 font-medium">Map Styles</h3>
                 <button
                   onClick={togglePanel}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                  <FaTimes size={14} />
+                  <FaTimes size={16} />
                 </button>
               </div>
-              <div className="max-h-[40vh] overflow-y-auto p-1.5">
-                {MAP_STYLES.map((style) => (
-                  <motion.div
-                    key={style.id}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className={`cursor-pointer p-1.5 rounded-lg mb-1.5 ${
-                      style.url === currentStyleUrl
-                        ? "bg-green-50 border-2 border-green-500"
-                        : "hover:bg-gray-50 border-2 border-transparent"
-                    }`}
-                    onClick={() => handleStyleSelect(style.url)}
-                  >
-                    <div className="flex flex-col">
-                      <div className="h-12 rounded-md overflow-hidden bg-gray-100 mb-1 relative">
-                        <div
-                          className={`absolute inset-0 ${
-                            STYLE_COLORS[style.id as keyof typeof STYLE_COLORS]
-                          }`}
-                        ></div>
-                        {/* Using Image component with placeholder for thumbnails */}
-                        <Image
-                          src={style.thumbnail}
-                          alt={style.name}
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 180px) 100vw, 180px"
-                          priority={style.id === "default"}
-                        />
-                        {style.url === currentStyleUrl && (
-                          <div className="absolute inset-0 bg-green-500/20 flex items-center justify-center">
-                            <span className="bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                              Active
-                            </span>
-                          </div>
-                        )}
+              <div className="p-3">
+                <div className="grid grid-cols-2 gap-3 max-h-[60vh] overflow-y-auto">
+                  {MAP_STYLES.map((style) => (
+                    <motion.div
+                      key={style.id}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className={`cursor-pointer rounded-lg ${
+                        style.url === currentStyleUrl
+                          ? "ring-2 ring-green-500 ring-offset-2"
+                          : "hover:bg-gray-50"
+                      }`}
+                      onClick={() => handleStyleSelect(style.url)}
+                    >
+                      <div className="flex flex-col">
+                        <div className="h-24 rounded-lg overflow-hidden bg-gray-100 relative">
+                          <div
+                            className={`absolute inset-0 ${
+                              STYLE_COLORS[
+                                style.id as keyof typeof STYLE_COLORS
+                              ]
+                            }`}
+                          />
+                          <Image
+                            src={style.thumbnail}
+                            alt={style.name}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 150px) 100vw, 150px"
+                            priority={style.id === "default"}
+                          />
+                          {style.url === currentStyleUrl && (
+                            <div className="absolute inset-0 bg-green-500/20 flex items-center justify-center">
+                              <span className="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                                Active
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <span className="font-medium text-gray-800 text-sm mt-2 text-center">
+                          {style.name}
+                        </span>
                       </div>
-                      <span className="font-medium text-gray-800 text-xs">
-                        {style.name}
-                      </span>
-                    </div>
-                  </motion.div>
-                ))}
+                    </motion.div>
+                  ))}
+                </div>
               </div>
             </motion.div>
           )}
