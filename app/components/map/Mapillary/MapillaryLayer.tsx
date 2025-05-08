@@ -14,12 +14,44 @@ const MapillaryLayer: React.FC = () => {
   );
   const { current: map } = useMap();
   const mapillaryLayersAdded = useRef(false);
+  const previousPositionRef = useRef<{
+    lng: number | null;
+    lat: number | null;
+  } | null>(null);
 
   // State for hovering and viewer
   const [hoveredFeature, setHoveredFeature] = useState<MapillaryFeature | null>(
     null
   );
   const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
+
+  // Effect to update map view when currentPosition changes
+  useEffect(() => {
+    if (!map || !isVisible || !currentPosition.lng || !currentPosition.lat)
+      return;
+
+    // Skip if position hasn't changed
+    if (
+      previousPositionRef.current?.lng === currentPosition.lng &&
+      previousPositionRef.current?.lat === currentPosition.lat
+    ) {
+      return;
+    }
+
+    // Update map view to follow Mapillary navigation
+    map.flyTo({
+      center: [currentPosition.lng, currentPosition.lat],
+      zoom: map.getZoom(),
+      essential: true,
+      duration: 1000,
+    });
+
+    // Remember this position to avoid unnecessary updates
+    previousPositionRef.current = {
+      lng: currentPosition.lng,
+      lat: currentPosition.lat,
+    };
+  }, [map, isVisible, currentPosition.lng, currentPosition.lat]);
 
   // Handle mouse events for mapillary features
   const handleMouseEnter = useCallback(
