@@ -1,24 +1,24 @@
-import { createAsyncThunk } from '@reduxjs/toolkit';
-import { RootState } from '../store';
+import { createAsyncThunk } from "@reduxjs/toolkit";
+import { RootState } from "../store";
 import {
   setNearbyPlaces,
   setNearbyLoading,
   setNearbyError,
-} from '../slices/searchSlice';
+} from "../slices/searchSlice";
 
 export const fetchPlaceDetails = createAsyncThunk(
-  'search/fetchPlaceDetails',
+  "search/fetchPlaceDetails",
   async (uCode: string) => {
     const response = await fetch(`/api/place/${uCode}`);
     if (!response.ok) {
-      throw new Error('Failed to fetch place details');
+      throw new Error("Failed to fetch place details");
     }
     return response.json();
   }
 );
 
 export const fetchReverseGeocode = createAsyncThunk(
-  'search/reverseGeocode',
+  "search/reverseGeocode",
   async ({ latitude, longitude }: { latitude: number; longitude: number }) => {
     try {
       // Use our server-side API route instead of calling directly
@@ -27,7 +27,7 @@ export const fetchReverseGeocode = createAsyncThunk(
       );
 
       if (!response.ok) {
-        throw new Error('Failed to fetch reverse geocode data');
+        throw new Error("Failed to fetch reverse geocode data");
       }
 
       const data = await response.json();
@@ -38,7 +38,7 @@ export const fetchReverseGeocode = createAsyncThunk(
 
       return null;
     } catch (error) {
-      console.error('Error fetching reverse geocode:', error);
+      console.error("Error fetching reverse geocode:", error);
       throw error;
     }
   }
@@ -48,15 +48,15 @@ export const fetchReverseGeocode = createAsyncThunk(
  * Fetch nearby places based on coordinates and optional filters
  */
 export const fetchNearbyPlaces = createAsyncThunk(
-  'search/fetchNearbyPlaces',
+  "search/fetchNearbyPlaces",
   async (
     {
       latitude,
       longitude,
       radius = 0.5,
       limit = 10,
-      type = '',
-      categories = '',
+      type = "",
+      categories = "",
     }: {
       latitude?: number;
       longitude?: number;
@@ -68,6 +68,7 @@ export const fetchNearbyPlaces = createAsyncThunk(
     { dispatch, getState }
   ) => {
     try {
+      dispatch(setNearbyPlaces([]));
       dispatch(setNearbyLoading(true));
 
       // Get the state to access map viewport
@@ -79,17 +80,17 @@ export const fetchNearbyPlaces = createAsyncThunk(
 
       // Build query parameters
       const params = new URLSearchParams();
-      params.append('latitude', lat.toString());
-      params.append('longitude', lng.toString());
-      params.append('radius', radius.toString());
-      params.append('limit', limit.toString());
+      params.append("latitude", lat.toString());
+      params.append("longitude", lng.toString());
+      params.append("radius", radius.toString());
+      params.append("limit", limit.toString());
 
       if (type) {
-        params.append('type', type);
+        params.append("type", type);
       }
 
       if (categories) {
-        params.append('categories', categories);
+        params.append("categories", categories);
       }
 
       // Make API request
@@ -108,9 +109,9 @@ export const fetchNearbyPlaces = createAsyncThunk(
 
       return places;
     } catch (error) {
-      console.error('Error fetching nearby places:', error);
+      console.error("Error fetching nearby places:", error);
       dispatch(
-        setNearbyError(error instanceof Error ? error.message : 'Unknown error')
+        setNearbyError(error instanceof Error ? error.message : "Unknown error")
       );
       throw error;
     } finally {

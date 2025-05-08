@@ -1,34 +1,34 @@
-'use client';
-import React, { useState } from 'react';
-import maplibregl, { LngLatBounds } from 'maplibre-gl';
-import 'maplibre-gl/dist/maplibre-gl.css';
-import MapGL, { MapRef } from 'react-map-gl/maplibre';
-import { useMapRef } from '../hooks/useMapRef';
-import { useRouteFromUrl } from '../hooks/useRouteFromUrl';
-import { useMapEventHandlers } from '../hooks/useMapEventHandlers';
-import { usePlaceDetailsEffect } from '../hooks/usePlaceDetailsEffect';
-import MapControls from './MapControls';
-import BarikoiAttribution from './BarikoiAttribution';
-import { AnimatePresence } from 'framer-motion';
-import InfoCard from '../InfoCard/InfoCard';
+"use client";
+import React, { useState } from "react";
+import maplibregl, { LngLatBounds } from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
+import MapGL, { MapRef } from "react-map-gl/maplibre";
+import { useMapRef } from "../hooks/useMapRef";
+import { useRouteFromUrl } from "../hooks/useRouteFromUrl";
+import { useMapEventHandlers } from "../hooks/useMapEventHandlers";
+import { usePlaceDetailsEffect } from "../hooks/usePlaceDetailsEffect";
+import MapControls from "./MapControls";
+import BarikoiAttribution from "./BarikoiAttribution";
+import { AnimatePresence } from "framer-motion";
+import InfoCard from "../InfoCard/InfoCard";
 
 import {
   setMapLoaded,
   setMarkerCoords,
   setViewport,
-} from '@/app/store/slices/mapSlice';
-import { useAppDispatch, useAppSelector } from '@/app/store/store';
-import ResponsiveDrawer from '../../LeftPanel/ResponsiveDrawer';
-import { useUrlParams } from '@/app/hooks/useUrlParams';
-import AnimatedMarker from '../Markers/AnimatedMarker';
-import MapContextMenu from '../ContextMenu/MapContextMenu';
-import ContextMarker from '../Markers/ContextMarker';
-import NearbySearchMarker from '../Markers/NearbySearchMarker';
-import NearbyPlaceMarker from '../Markers/NearbyPlaceMarker';
-import NearbyPlacePopup from '../Popups/NearbyPlacePopup';
-import NearbyPlaceModal from '../Modals/NearbyPlaceModal';
-import { NearbyPlace } from '@/app/types/map';
-import MapillaryLayer from '../Mapillary/MapillaryLayer';
+} from "@/app/store/slices/mapSlice";
+import { useAppDispatch, useAppSelector } from "@/app/store/store";
+import ResponsiveDrawer from "../../LeftPanel/ResponsiveDrawer";
+import { useUrlParams } from "@/app/hooks/useUrlParams";
+import AnimatedMarker from "../Markers/AnimatedMarker";
+import MapContextMenu from "../ContextMenu/MapContextMenu";
+import ContextMarker from "../Markers/ContextMarker";
+import NearbySearchMarker from "../Markers/NearbySearchMarker";
+import NearbyPlaceMarker from "../Markers/NearbyPlaceMarker";
+import NearbyPlacePopup from "../Popups/NearbyPlacePopup";
+import NearbyPlaceModal from "../Modals/NearbyPlaceModal";
+import { NearbyPlace } from "@/app/types/map";
+import MapillaryLayer from "../Mapillary/MapillaryLayer";
 
 const MapContainer: React.FC = () => {
   const mapRef = useMapRef();
@@ -143,7 +143,7 @@ const MapContainer: React.FC = () => {
       maxZoom: 16,
       duration: 1000,
     });
-  }, [nearbyPlaces]);
+  }, [nearbyPlaces, mapRef]);
 
   // Add useEffect to trigger bounds fitting when nearby places change
   React.useEffect(() => {
@@ -163,8 +163,8 @@ const MapContainer: React.FC = () => {
             latitude: viewport.latitude || 23.8103,
             zoom: viewport.zoom || 12,
           }}
-          style={{ width: '100vw', height: '100dvh' }}
-          mapStyle='/map-styles/light-style.json'
+          style={{ width: "100vw", height: "100dvh" }}
+          mapStyle="/map-styles/light-style.json"
           attributionControl={false}
           onLoad={handleMapLoad}
           onClick={handleMapClick}
@@ -173,17 +173,17 @@ const MapContainer: React.FC = () => {
           onDblClick={handleMapDoubleClick}
           onContextMenu={handleContextMenu}
           interactiveLayerIds={[
-            'recreation',
-            'commercial',
-            'residential',
-            'education',
-            'health',
-            'government',
-            'religious',
-            'mapillary-images',
-            'mapillary-sequences',
+            "recreation",
+            "commercial",
+            "residential",
+            "education",
+            "health",
+            "government",
+            "religious",
+            "mapillary-images",
+            "mapillary-sequences",
           ]}
-          cursor={hoveredFeatureId ? 'pointer' : 'default'}
+          cursor={hoveredFeatureId ? "pointer" : "default"}
           hash={true}
         >
           <MapControls />
