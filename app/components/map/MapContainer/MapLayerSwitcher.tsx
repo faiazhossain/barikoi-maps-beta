@@ -1,11 +1,23 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tooltip } from "antd";
 import { FaLayerGroup, FaTimes } from "react-icons/fa";
 import { useAppSelector } from "@/app/store/store";
 import Image from "next/image";
+
+// Helper function to preload a map style
+const preloadMapStyle = async (styleUrl: string) => {
+  try {
+    const response = await fetch(styleUrl);
+    await response.json();
+    return true;
+  } catch (error) {
+    console.error(`Error preloading style ${styleUrl}:`, error);
+    return false;
+  }
+};
 
 // Map style definitions with thumbnails, labels, and URLs
 const MAP_STYLES = [
@@ -60,15 +72,94 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
   currentStyleUrl,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [loadedStyles, setLoadedStyles] = useState<Set<string>>(new Set());
   const isLargeScreen = useAppSelector((state) => state.ui.isLargeScreen);
+
+  // Preload map styles sequentially
+  useEffect(() => {
+    const preloadStyles = async () => {
+      // Always preload the default style first
+      const defaultStyle = MAP_STYLES[0];
+      if (defaultStyle) {
+        await preloadMapStyle(defaultStyle.url);
+        setLoadedStyles((prev) => new Set(prev).add(defaultStyle.url));
+      }
+
+      // Preload remaining styles sequentially
+      for (let i = 1; i < MAP_STYLES.length; i++) {
+        const style = MAP_STYLES[i];
+        if (style && style.url) {
+          await preloadMapStyle(style.url);
+        }
+        if (style && style.url) {
+          setLoadedStyles((prev) => new Set(prev).add(style.url));
+        }
+      }
+    };
+
+    preloadStyles();
+  }, []);
 
   const togglePanel = () => {
     setIsOpen(!isOpen);
   };
 
-  const handleStyleSelect = (styleUrl: string) => {
-    onStyleChange(styleUrl);
-    setIsOpen(false);
+  const handleStyleSelect = useCallback(
+    (styleUrl: string) => {
+      if (loadedStyles.has(styleUrl)) {
+        onStyleChange(styleUrl);
+        setIsOpen(false);
+      }
+    },
+    [loadedStyles, onStyleChange]
+  );
+
+  // Render function for map style item
+  const renderMapStyleItem = (style: (typeof MAP_STYLES)[0]) => {
+    const isLoaded = loadedStyles.has(style.url);
+    const isActive = style.url === currentStyleUrl;
+
+    return (
+      <motion.div
+        key={style.id}
+        whileHover={{ scale: isLoaded ? 1.04 : 1 }}
+        whileTap={{ scale: isLoaded ? 0.98 : 1 }}
+        className={`cursor-pointer rounded-md ${
+          isActive
+            ? "ring-2 ring-green-500"
+            : isLoaded
+            ? "hover:bg-green-100"
+            : "opacity-50 cursor-wait"
+        }`}
+        onClick={() => isLoaded && handleStyleSelect(style.url)}
+      >
+        <div className="flex flex-col">
+          <div className="h-16 rounded-md overflow-hidden bg-gray-100 relative">
+            <div
+              className={`absolute inset-0 ${
+                STYLE_COLORS[style.id as keyof typeof STYLE_COLORS]
+              }`}
+            />
+            <Image
+              src={style.thumbnail}
+              alt={style.name}
+              fill
+              className="object-cover"
+              sizes="(max-width: 100px) 100vw, 100px"
+              priority={style.id === "default"}
+            />
+            {!isLoaded && (
+              <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-green-500 border-t-transparent" />
+              </div>
+            )}
+          </div>
+          <span className="text-gray-800 text-xs mt-1 text-center truncate px-1">
+            {style.name}
+          </span>
+        </div>
+      </motion.div>
+    );
   };
 
   return (
@@ -102,45 +193,7 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
               </div>
               <div className="p-2">
                 <div className="grid grid-cols-3 gap-2 max-h-[45vh] p-2 overflow-y-auto">
-                  {MAP_STYLES.map((style) => (
-                    <motion.div
-                      key={style.id}
-                      whileHover={{ scale: 1.04 }}
-                      whileTap={{ scale: 0.98 }}
-                      className={`cursor-pointer rounded-md ${
-                        style.url === currentStyleUrl
-                          ? "ring-2 ring-green-500"
-                          : " hover:bg-green-100"
-                      }`}
-                      onClick={() => handleStyleSelect(style.url)}
-                    >
-                      <div className="flex flex-col">
-                        <div className="h-16 rounded-md overflow-hidden bg-gray-100 relative">
-                          <div
-                            className={`absolute inset-0 ${
-                              STYLE_COLORS[
-                                style.id as keyof typeof STYLE_COLORS
-                              ]
-                            }`}
-                          />
-                          <Image
-                            src={style.thumbnail}
-                            alt={style.name}
-                            fill
-                            className="object-cover"
-                            sizes="(max-width: 100px) 100vw, 100px"
-                            priority={style.id === "default"}
-                          />
-                          {style.url === currentStyleUrl && (
-                            <div className="absolute inset-0 bg-green-500/20 flex items-center justify-center"></div>
-                          )}
-                        </div>
-                        <span className="text-gray-800 text-xs mt-1 text-center truncate px-1">
-                          {style.name}
-                        </span>
-                      </div>
-                    </motion.div>
-                  ))}
+                  {MAP_STYLES.map(renderMapStyleItem)}
                 </div>
               </div>
             </motion.div>
