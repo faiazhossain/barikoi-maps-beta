@@ -4,7 +4,8 @@ import { Button } from 'antd';
 
 import { useAppDispatch, useAppSelector } from '@/app/store/store';
 import { toggleDirections } from '@/app/store/slices/mapSlice';
-import { clearDirections, setSearchMode } from '@/app/store/slices/searchSlice';
+import { setSearchMode } from '@/app/store/slices/searchSlice';
+import { clearDirections } from '@/app/store/slices/directionsSlice';
 import { FaDirections } from 'react-icons/fa';
 
 const DirectionsToggle: React.FC = () => {
@@ -17,7 +18,7 @@ const DirectionsToggle: React.FC = () => {
       dispatch(setSearchMode('directions'));
     } else {
       dispatch(clearDirections());
-      dispatch(setSearchMode('search')); // Change 'location' to 'search'
+      dispatch(setSearchMode('search'));
     }
   };
 
@@ -28,7 +29,7 @@ const DirectionsToggle: React.FC = () => {
       onClick={handleDirectionsToggle}
       className={`!transition-colors !text-[16px] hover:!bg-none ${
         showDirections ? '!text-primary' : '!text-gray-400'
-      } hover:!text-primary`} // Use primary.DEFAULT on hover
+      } hover:!text-primary`}
     />
   );
 };

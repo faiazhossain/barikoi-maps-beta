@@ -36,6 +36,7 @@ import DirectionsToggle from '../DirectionToggle';
 import SearchInput from '../SearchInput';
 import CountrySelect from '../CountrySelect/CountrySelect';
 import NearbyResults from '../NearbyResults/NearbyResults';
+import DirectionPanel from '../DirectionPanel/DirectionPanel';
 
 // Styles
 import './styles.css';
@@ -52,6 +53,7 @@ const SearchBar: React.FC = () => {
     (state) => state.search.selectedCategories
   );
   const showNearbyResults = selectedCategories.length > 0;
+  const showDirections = useAppSelector((state) => state.map.showDirections);
 
   // Local state
   const [isMounted, setIsMounted] = useState(false);
@@ -244,11 +246,11 @@ const SearchBar: React.FC = () => {
         {/* Search box wrapper */}
         <div
           className={`bg-white transition-all duration-100 ${
-            isExpanded || showNearbyResults
+            isExpanded || showNearbyResults || showDirections
               ? `${
                   isVisible
                     ? `${
-                        showNearbyResults
+                        showNearbyResults || showDirections
                           ? 'rounded-bl-2xl rounded-br-2xl pb-3'
                           : 'rounded-none'
                       }`
@@ -257,7 +259,10 @@ const SearchBar: React.FC = () => {
               : 'rounded-none sm:rounded-full'
           } shadow-deep`}
         >
-          {showNearbyResults ? (
+          {showDirections ? (
+            /* Direction Panel Mode */
+            <DirectionPanel onClose={() => {}} />
+          ) : showNearbyResults ? (
             /* Nearby Results Mode */
             <div className='flex flex-col'>
               {/* Header with close button */}

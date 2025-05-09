@@ -1,0 +1,68 @@
+/* DirectionPanel dropdown styling */
+.autocompleteDropdown {
+  border-radius: 12px !important;
+  box-shadow: 0 6px 16px -8px rgba(0, 0, 0, 0.08),
+    0 9px 28px 0 rgba(0, 0, 0, 0.05), 0 12px 48px 16px rgba(0, 0, 0, 0.03) !important;
+  padding: 8px !important;
+  max-height: 300px !important;
+  overflow-y: auto !important;
+}
+
+.autocompleteDropdown :global(.ant-select-item) {
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+  margin-bottom: 4px !important;
+}
+
+.autocompleteDropdown :global(.ant-select-item-option-active) {
+  background-color: rgba(0, 112, 243, 0.05) !important;
+}
+
+.autocompleteDropdown :global(.ant-select-item-option-selected) {
+  background-color: rgba(0, 112, 243, 0.1) !important;
+  font-weight: 500 !important;
+}
+
+/* Custom scrollbar for the dropdown */
+.autocompleteDropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.autocompleteDropdown::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 6px;
+}
+
+.autocompleteDropdown::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 6px;
+}
+
+.autocompleteDropdown::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Custom styles for the autocomplete input */
+.autocompleteInput {
+  width: 100%;
+}
+
+.autocompleteInput :global(.ant-select-selector) {
+  border: 1px solid #e5e7eb !important;
+  border-radius: 62px !important;
+  background-color: transparent !important;
+  padding-left: 36px !important;
+  height: 44px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.autocompleteInput :global(.ant-select-selection-search-input) {
+  padding: 0 !important;
+}
+
+/* Focus state */
+.autocompleteInput:global(.ant-select-focused) :global(.ant-select-selector) {
+  border-color: #4096ff !important;
+  box-shadow: 0 0 0 2px rgba(5, 145, 255, 0.1) !important;
+}

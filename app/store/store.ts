@@ -8,6 +8,7 @@ import searchReducer from './slices/searchSlice';
 import uiReducer from './slices/uiSlice';
 import drawerReducer from './slices/drawerSlice';
 import mapillaryReducer from './slices/mapillarySlice';
+import directionsReducer from './slices/directionsSlice';
 
 export const store = configureStore({
   reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore({
     ui: uiReducer,
     drawer: drawerReducer,
     mapillary: mapillaryReducer,
+    directions: directionsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
