@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { AutoComplete, Button } from 'antd';
 import { SwapOutlined } from '@ant-design/icons';
 import {
@@ -10,6 +10,8 @@ import {
   FaCar,
   FaTimes,
 } from 'react-icons/fa';
+import { TbCurrentLocation } from 'react-icons/tb';
+import { GiPositionMarker } from 'react-icons/gi';
 import { useAppDispatch, useAppSelector } from '@/app/store/store';
 import styles from './styles/DirectionPanel.module.css';
 import { fetchReverseGeocode } from '@/app/store/thunks/searchThunks';
@@ -23,6 +25,7 @@ import {
   setOriginSearch,
   setDestinationSearch,
   clearDirections,
+  setTransportMode,
 } from '@/app/store/slices/directionsSlice';
 
 interface DirectionPanelProps {
@@ -56,8 +59,8 @@ const DirectionPanel: React.FC<DirectionPanelProps> = ({ onClose }) => {
     destination,
     originSearch,
     destinationSearch,
-    routeLoading,
     route,
+    transportMode,
   } = useAppSelector((state) => state.directions);
 
   // State for dropdown visibility
@@ -77,9 +80,16 @@ const DirectionPanel: React.FC<DirectionPanelProps> = ({ onClose }) => {
   const [destinationSearchLoading, setDestinationSearchLoading] =
     useState(false);
 
+  // Debounce refs
+  const originSearchRef = useRef<NodeJS.Timeout | null>(null);
+  const destinationSearchRef = useRef<NodeJS.Timeout | null>(null);
+
   // Process suggestions into autocomplete options
-  const getOptionsFromSuggestions = (suggestions: AutocompleteSuggestion[]) => {
-    return suggestions.map((suggestion) => ({
+  const getOptionsFromSuggestions = (
+    suggestions: AutocompleteSuggestion[],
+    value: string
+  ) => {
+    const suggestionOptions = suggestions.map((suggestion) => ({
       value: suggestion.address,
       label: (
         <div className='flex flex-col p-1'>
@@ -92,6 +102,31 @@ const DirectionPanel: React.FC<DirectionPanelProps> = ({ onClose }) => {
       ),
       rawData: suggestion,
     }));
+
+    // Check if input might be coordinates
+    const coords = validateCoordinates(value);
+    if (coords) {
+      const coordinateOption = {
+        value: value,
+        label: (
+          <div className='flex flex-col p-1'>
+            <span className='font-medium'>
+              Coordinates: {coords.lat}, {coords.lng}
+            </span>
+            <span className='text-xs text-gray-500'>Go to this location</span>
+          </div>
+        ),
+        rawData: {
+          type: 'coordinates',
+          lat: coords.lat,
+          lng: coords.lng,
+          originalInput: value,
+        },
+      };
+      return [coordinateOption, ...suggestionOptions];
+    }
+
+    return suggestionOptions;
   };
 
   // Validate coordinates
@@ -194,6 +229,13 @@ const DirectionPanel: React.FC<DirectionPanelProps> = ({ onClose }) => {
     const selectedData = option.rawData;
 
     if (selectedData) {
+      // Handle coordinates selection
+      if (selectedData.type === 'coordinates') {
+        handleCoordinateSelect(selectedData.lat, selectedData.lng, type);
+        return;
+      }
+
+      // Handle regular place selection
       const location = {
         latitude: selectedData.latitude,
         longitude: selectedData.longitude,
@@ -266,24 +308,93 @@ const DirectionPanel: React.FC<DirectionPanelProps> = ({ onClose }) => {
   // Calculate route
   const calculateRoute = () => {
     if (origin && destination) {
-      dispatch(fetchRoute({ origin, destination }));
+      dispatch(fetchRoute({ origin, destination, mode: transportMode }));
     }
   };
 
   // Handle keyboard input
-  const handleKeyDown = (
+  const handleKeyDown = async (
     e: React.KeyboardEvent,
     type: 'origin' | 'destination',
     value: string
   ) => {
     if (e.key === 'Enter') {
+      // Process coordinates
       const coords = validateCoordinates(value);
       if (coords) {
         handleCoordinateSelect(coords.lat, coords.lng, type);
         return;
       }
 
-      // We could implement direct search here if needed
+      // Direct search via rupantor if not coordinates
+      if (value.trim()) {
+        try {
+          // Use Rupantor API to convert search text to a location
+          const formData = new FormData();
+          formData.append('q', value);
+
+          const response = await fetch('/api/rupantor', {
+            method: 'POST',
+            body: formData,
+          });
+
+          if (!response.ok) {
+            throw new Error(`Request failed with status: ${response.status}`);
+          }
+
+          const responseData = await response.json();
+          const uCode = responseData.geocoded_address?.uCode;
+
+          if (!uCode) {
+            console.warn('No uCode found in rupantor response');
+            return;
+          }
+
+          // Fetch additional details about the place
+          const placeResponse = await fetch(`/api/place/${uCode}`);
+          if (!placeResponse.ok) {
+            throw new Error(
+              `Place request failed with status: ${placeResponse.status}`
+            );
+          }
+
+          const placeData = await placeResponse.json();
+
+          // Create location object from the response
+          const location = {
+            latitude:
+              placeData.latitude || responseData.geocoded_address?.latitude,
+            longitude:
+              placeData.longitude || responseData.geocoded_address?.longitude,
+            address:
+              placeData.address ||
+              responseData.geocoded_address?.address ||
+              value,
+            placeCode: uCode,
+          };
+
+          // Set the location based on type
+          if (type === 'origin') {
+            dispatch(setOrigin(location));
+            dispatch(setOriginSearch(location.address));
+            setFromDropdownOpen(false);
+          } else {
+            dispatch(setDestination(location));
+            dispatch(setDestinationSearch(location.address));
+            setToDropdownOpen(false);
+          }
+
+          // Calculate route if both origin and destination are set
+          if (
+            (type === 'origin' && destination) ||
+            (type === 'destination' && origin)
+          ) {
+            calculateRoute();
+          }
+        } catch (error) {
+          console.error('Error in rupantor search:', error);
+        }
+      }
     }
   };
 
@@ -329,6 +440,50 @@ const DirectionPanel: React.FC<DirectionPanelProps> = ({ onClose }) => {
     }
   };
 
+  // Debounce search for origin
+  useEffect(() => {
+    if (originSearch && originSearch.trim().length > 0) {
+      if (originSearchRef.current) {
+        clearTimeout(originSearchRef.current);
+      }
+      setOriginSearchLoading(true);
+      originSearchRef.current = setTimeout(() => {
+        handleSearch(originSearch, 'origin');
+      }, 300);
+    } else {
+      setOriginSuggestions([]);
+      setOriginSearchLoading(false);
+    }
+
+    return () => {
+      if (originSearchRef.current) {
+        clearTimeout(originSearchRef.current);
+      }
+    };
+  }, [originSearch]);
+
+  // Debounce search for destination
+  useEffect(() => {
+    if (destinationSearch && destinationSearch.trim().length > 0) {
+      if (destinationSearchRef.current) {
+        clearTimeout(destinationSearchRef.current);
+      }
+      setDestinationSearchLoading(true);
+      destinationSearchRef.current = setTimeout(() => {
+        handleSearch(destinationSearch, 'destination');
+      }, 300);
+    } else {
+      setDestinationSuggestions([]);
+      setDestinationSearchLoading(false);
+    }
+
+    return () => {
+      if (destinationSearchRef.current) {
+        clearTimeout(destinationSearchRef.current);
+      }
+    };
+  }, [destinationSearch]);
+
   return (
     <div className='p-3 bg-white rounded-lg shadow-md direction-panel'>
       <div className='flex justify-between items-center mb-2'>
@@ -348,22 +503,47 @@ const DirectionPanel: React.FC<DirectionPanelProps> = ({ onClose }) => {
       <div className='flex mb-1 space-x-2'>
         <div className='flex-1'>
           <div className='mb-3 relative flex'>
-            <div className='absolute left-1 top-2.5 z-10 flex items-center justify-center w-6 h-6 bg-blue-100 text-blue-700 rounded-full'>
-              A
+            <div className='absolute left-1 top-2.5 z-10 flex items-center justify-center w-6 h-6 bg-blue-100 rounded-full'>
+              <TbCurrentLocation className='text-blue-600' size={16} />
             </div>
             <AutoComplete
               value={originSearch}
               className={styles.autocompleteInput}
               placeholder='Choose starting point'
-              onSearch={(value) => handleSearch(value, 'origin')}
               onSelect={(value, option) =>
                 handleSelect(value, option, 'origin')
               }
-              onChange={(value) => dispatch(setOriginSearch(value))}
+              onChange={(value) => {
+                dispatch(setOriginSearch(value));
+                // Ensure dropdown stays open while typing
+                if (value && value.length > 0) {
+                  setFromDropdownOpen(true);
+                }
+              }}
               onKeyDown={(e) => handleKeyDown(e, 'origin', originSearch)}
-              options={getOptionsFromSuggestions(originSuggestions)}
-              open={fromDropdownOpen && originSuggestions.length > 0}
-              onDropdownVisibleChange={setFromDropdownOpen}
+              options={getOptionsFromSuggestions(
+                originSuggestions,
+                originSearch
+              )}
+              open={
+                fromDropdownOpen &&
+                (originSuggestions.length > 0 ||
+                  originSearchLoading ||
+                  !!validateCoordinates(originSearch))
+              }
+              onDropdownVisibleChange={(open) => {
+                // Keep dropdown open if we have suggestions, are loading, or have coordinate input
+                if (
+                  !open ||
+                  (!originSuggestions.length &&
+                    !originSearchLoading &&
+                    !validateCoordinates(originSearch))
+                ) {
+                  setFromDropdownOpen(false);
+                } else {
+                  setFromDropdownOpen(true);
+                }
+              }}
               popupClassName={styles.autocompleteDropdown}
               popupMatchSelectWidth={true}
               size='large'
@@ -378,24 +558,49 @@ const DirectionPanel: React.FC<DirectionPanelProps> = ({ onClose }) => {
           </div>
 
           <div className='relative flex'>
-            <div className='absolute left-1 top-2.5 z-10 flex items-center justify-center w-6 h-6 bg-green-100 text-green-700 rounded-full'>
-              B
+            <div className='absolute left-1 top-2.5 z-10 flex items-center justify-center w-6 h-6 bg-green-100 rounded-full'>
+              <GiPositionMarker className='text-green-700' size={16} />
             </div>
             <AutoComplete
               value={destinationSearch}
               className={styles.autocompleteInput}
               placeholder='Choose destination'
-              onSearch={(value) => handleSearch(value, 'destination')}
               onSelect={(value, option) =>
                 handleSelect(value, option, 'destination')
               }
-              onChange={(value) => dispatch(setDestinationSearch(value))}
+              onChange={(value) => {
+                dispatch(setDestinationSearch(value));
+                // Ensure dropdown stays open while typing
+                if (value && value.length > 0) {
+                  setToDropdownOpen(true);
+                }
+              }}
               onKeyDown={(e) =>
                 handleKeyDown(e, 'destination', destinationSearch)
               }
-              options={getOptionsFromSuggestions(destinationSuggestions)}
-              open={toDropdownOpen && destinationSuggestions.length > 0}
-              onDropdownVisibleChange={setToDropdownOpen}
+              options={getOptionsFromSuggestions(
+                destinationSuggestions,
+                destinationSearch
+              )}
+              open={
+                toDropdownOpen &&
+                (destinationSuggestions.length > 0 ||
+                  destinationSearchLoading ||
+                  !!validateCoordinates(destinationSearch))
+              }
+              onDropdownVisibleChange={(open) => {
+                // Keep dropdown open if we have suggestions, are loading, or have coordinate input
+                if (
+                  !open ||
+                  (!destinationSuggestions.length &&
+                    !destinationSearchLoading &&
+                    !validateCoordinates(destinationSearch))
+                ) {
+                  setToDropdownOpen(false);
+                } else {
+                  setToDropdownOpen(true);
+                }
+              }}
               popupClassName={styles.autocompleteDropdown}
               popupMatchSelectWidth={true}
               size='large'
@@ -443,37 +648,39 @@ const DirectionPanel: React.FC<DirectionPanelProps> = ({ onClose }) => {
             shape='round'
             icon={<FaCar />}
             className='flex items-center'
-            type='primary'
+            type={transportMode === 'car' ? 'primary' : 'default'}
+            onClick={() => {
+              dispatch(setTransportMode('car'));
+              if (origin && destination) calculateRoute();
+            }}
           >
             Car
           </Button>
           <Button
-            type='default'
             shape='round'
             icon={<FaBicycle />}
             className='flex items-center'
+            type={transportMode === 'bike' ? 'primary' : 'default'}
+            onClick={() => {
+              dispatch(setTransportMode('bike'));
+              if (origin && destination) calculateRoute();
+            }}
           >
             Bike
           </Button>
           <Button
-            type='default'
             shape='round'
             icon={<FaWalking />}
             className='flex items-center'
+            type={transportMode === 'motorcycle' ? 'primary' : 'default'}
+            onClick={() => {
+              dispatch(setTransportMode('motorcycle'));
+              if (origin && destination) calculateRoute();
+            }}
           >
-            Walk
+            Motorcycle
           </Button>
         </div>
-
-        <Button
-          type='primary'
-          className='bg-blue-600 hover:bg-blue-700'
-          onClick={calculateRoute}
-          loading={routeLoading}
-          disabled={!origin || !destination}
-        >
-          Go
-        </Button>
       </div>
     </div>
   );

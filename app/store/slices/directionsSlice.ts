@@ -41,6 +41,7 @@ interface DirectionsState {
   routeError: string | null;
   originSearch: string;
   destinationSearch: string;
+  transportMode: 'car' | 'bike' | 'motorcycle';
 }
 
 // Initial state
@@ -53,6 +54,7 @@ const initialState: DirectionsState = {
   routeError: null,
   originSearch: '',
   destinationSearch: '',
+  transportMode: 'car',
 };
 
 // Async thunk for fetching route
@@ -63,10 +65,12 @@ export const fetchRoute = createAsyncThunk(
       origin,
       destination,
       waypoints = [],
+      mode = 'car',
     }: {
       origin: Location;
       destination: Location;
       waypoints?: Location[];
+      mode?: 'car' | 'bike' | 'motorcycle';
     },
     { rejectWithValue }
   ) => {
@@ -85,9 +89,8 @@ export const fetchRoute = createAsyncThunk(
       // Add destination
       url += `&point=${destination.latitude},${destination.longitude}`;
 
-      // Add other parameters
-      url +=
-        '&locale=en-us&elevation=false&profile=car&optimize=true&use_miles=false&layer=Barikoi&points_encoded=false';
+      // Add other parameters with the selected transport mode
+      url += `&locale=en-us&elevation=false&profile=${mode}&optimize=true&use_miles=false&layer=Barikoi&points_encoded=false`;
 
       const response = await fetch(url);
 
@@ -124,7 +127,7 @@ const directionsSlice = createSlice({
       state.route = null;
       state.routeError = null;
     },
-    clearDirections: (state) => {
+    clearDirections: () => {
       return initialState;
     },
     swapLocations: (state) => {
@@ -142,6 +145,12 @@ const directionsSlice = createSlice({
     },
     setDestinationSearch: (state, action: PayloadAction<string>) => {
       state.destinationSearch = action.payload;
+    },
+    setTransportMode: (
+      state,
+      action: PayloadAction<'car' | 'bike' | 'motorcycle'>
+    ) => {
+      state.transportMode = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -172,6 +181,7 @@ export const {
   swapLocations,
   setOriginSearch,
   setDestinationSearch,
+  setTransportMode,
 } = directionsSlice.actions;
 
 // Export reducer
