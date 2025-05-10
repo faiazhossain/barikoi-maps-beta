@@ -36,7 +36,7 @@ import DirectionsToggle from '../DirectionToggle';
 import SearchInput from '../SearchInput';
 import CountrySelect from '../CountrySelect/CountrySelect';
 import NearbyResults from '../NearbyResults/NearbyResults';
-import DirectionPanel from '../DirectionPanel/DirectionPanel';
+import DirectionsPanel from '../DirectionsPanel/DirectionsPanel';
 
 // Styles
 import './styles.css';
@@ -53,8 +53,6 @@ const SearchBar: React.FC = () => {
     (state) => state.search.selectedCategories
   );
   const showNearbyResults = selectedCategories.length > 0;
-  const showDirections = useAppSelector((state) => state.map.showDirections);
-
   // Local state
   const [isMounted, setIsMounted] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -231,6 +229,64 @@ const SearchBar: React.FC = () => {
     }
   };
 
+  // Determine what to render based on search mode
+  const renderContent = () => {
+    if (searchMode === 'directions') {
+      return <DirectionsPanel />;
+    } else if (showNearbyResults) {
+      return (
+        <div className='flex flex-col'>
+          {/* Header with close button */}
+          <div className='flex items-center p-3 border-b'>
+            <h3 className='text-base font-medium flex-1'>
+              Nearby {selectedCategories.join(', ')}
+            </h3>
+            <button
+              onClick={handleCloseNearbyResults}
+              className='p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors'
+              aria-label='Close nearby results'
+            >
+              <FaTimes />
+            </button>
+          </div>
+
+          {/* Embed NearbyResults component with fixed height and scrolling */}
+          <div className='max-h-[60vh] overflow-y-auto pointer-events-auto'>
+            <NearbyResults />
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div className='flex items-center gap-2'>
+          {/* Search input and clear button */}
+          <div className='relative w-full'>
+            <SearchInput
+              value={searchTerm}
+              options={options}
+              placeholder='Search places...'
+              isExpanded={isExpanded}
+              isAnimating={isAnimating}
+              onSearch={handleInputChange}
+              onSelect={handleSelect}
+              onChange={handleInputChange}
+              onBlur={() => setIsExpanded(false)}
+              onDropdownVisibleChange={handleDropdownVisibility}
+              onDirectSearch={handleDirectSearch}
+            />
+            <ClearButton searchTerm={searchTerm} />
+          </div>
+
+          {/* Additional controls */}
+          <Space size={0} className='!ml-2'>
+            <DirectionsToggle />
+            <CountrySelect />
+          </Space>
+        </div>
+      );
+    }
+  };
+
   return (
     <>
       {/* Main search container */}
@@ -246,11 +302,11 @@ const SearchBar: React.FC = () => {
         {/* Search box wrapper */}
         <div
           className={`bg-white transition-all duration-100 ${
-            isExpanded || showNearbyResults || showDirections
+            isExpanded || showNearbyResults || searchMode === 'directions'
               ? `${
                   isVisible
                     ? `${
-                        showNearbyResults || showDirections
+                        showNearbyResults || searchMode === 'directions'
                           ? 'rounded-bl-2xl rounded-br-2xl pb-3'
                           : 'rounded-none'
                       }`
@@ -259,63 +315,7 @@ const SearchBar: React.FC = () => {
               : 'rounded-none sm:rounded-full'
           } shadow-deep`}
         >
-          {showDirections ? (
-            /* Direction Panel Mode */
-            <DirectionPanel onClose={() => {}} />
-          ) : showNearbyResults ? (
-            /* Nearby Results Mode */
-            <div className='flex flex-col'>
-              {/* Header with close button */}
-              <div className='flex items-center p-3 border-b'>
-                <h3 className='text-base font-medium flex-1'>
-                  Nearby {selectedCategories.join(', ')}
-                </h3>
-                <button
-                  onClick={handleCloseNearbyResults}
-                  className='p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors'
-                  aria-label='Close nearby results'
-                >
-                  <FaTimes />
-                </button>
-              </div>
-
-              {/* Embed NearbyResults component with fixed height and scrolling */}
-              <div className='max-h-[60vh] overflow-y-auto pointer-events-auto'>
-                <NearbyResults />
-              </div>
-            </div>
-          ) : (
-            /* Normal Search Mode */
-            <div className='flex items-center gap-2'>
-              {/* Search input and clear button */}
-              <div className='relative w-full'>
-                <SearchInput
-                  value={searchTerm}
-                  options={options}
-                  placeholder={
-                    searchMode === 'directions'
-                      ? 'Enter start location'
-                      : 'Search places...'
-                  }
-                  isExpanded={isExpanded}
-                  isAnimating={isAnimating}
-                  onSearch={handleInputChange}
-                  onSelect={handleSelect}
-                  onChange={handleInputChange}
-                  onBlur={() => setIsExpanded(false)}
-                  onDropdownVisibleChange={handleDropdownVisibility}
-                  onDirectSearch={handleDirectSearch}
-                />
-                <ClearButton searchTerm={searchTerm} />
-              </div>
-
-              {/* Additional controls */}
-              <Space size={0} className='!ml-2'>
-                <DirectionsToggle />
-                <CountrySelect />
-              </Space>
-            </div>
-          )}
+          {renderContent()}
         </div>
       </div>
     </>

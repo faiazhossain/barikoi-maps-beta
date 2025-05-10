@@ -1,0 +1,190 @@
+/* DirectionsPanel styles */
+
+.custom-radio-group {
+  display: flex;
+  margin-bottom: 12px;
+  width: 100%;
+  justify-content: center;
+}
+
+.custom-radio-group .ant-radio-button-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 4px !important;
+  margin-right: 8px;
+  height: 40px;
+  font-size: 16px;
+  border: 1px solid #e0e0e0 !important;
+  color: #595959;
+}
+
+.custom-radio-group .ant-radio-button-wrapper:last-child {
+  margin-right: 0;
+}
+
+.custom-radio-group .ant-radio-button-wrapper-checked {
+  background-color: #1976d2 !important;
+  color: white !important;
+  border-color: #1976d2 !important;
+}
+
+.custom-radio-group .ant-radio-button-wrapper-checked::before {
+  display: none !important;
+}
+
+.custom-radio-group .ant-radio-button-wrapper:hover {
+  color: #1976d2;
+}
+
+.custom-radio-group .ant-radio-button-wrapper-checked:hover {
+  color: white !important;
+}
+
+.directions-panel {
+  padding: 16px;
+  width: 100%;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  position: relative;
+  z-index: 10;
+}
+
+.minimized-panel {
+  max-height: 120px;
+}
+
+.maximized-panel {
+  max-width: 450px;
+  min-width: 400px;
+  overflow-y: auto;
+}
+
+.panel-header {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.search-inputs {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.origin-input .ant-select-selector,
+.destination-input .ant-select-selector {
+  border-radius: 20px !important;
+  background-color: #f5f5f5 !important;
+}
+
+.origin-input,
+.destination-input {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 20px;
+  transition: all 0.2s ease;
+}
+
+.origin-input:focus,
+.destination-input:focus {
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+.location-btn {
+  border: none;
+  background-color: transparent;
+  color: #1976d2;
+  font-size: 16px;
+  padding: 4px 8px;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.location-btn:hover {
+  background-color: rgba(25, 118, 210, 0.1);
+  color: #1976d2;
+}
+
+.swap-btn {
+  width: 28px !important;
+  height: 28px !important;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  background-color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%) rotate(90deg);
+  z-index: 10;
+}
+
+.swap-btn:hover {
+  background-color: #f5f5f5;
+  color: #1976d2;
+  transform: rotate(90deg) scale(1.1);
+}
+
+.route-info {
+  margin-top: 16px;
+  border-top: 1px solid #e5e5e5;
+  padding-top: 12px;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  background: linear-gradient(to right, #fcfcfc, #f9f9ff);
+}
+
+.origin-marker,
+.dest-marker {
+  min-width: 24px;
+  font-size: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Transport mode buttons */
+.transport-mode-container {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.mode-btn {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 36px !important;
+  height: 36px !important;
+  transition: all 0.2s ease;
+}
+
+.mode-btn.active-mode {
+  transform: scale(1.05);
+}
+
+/* Minimize button */
+.minimize-btn {
+  height: 32px;
+  transition: all 0.2s ease;
+}
+
+.minimize-btn:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.maximize-btn {
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.maximize-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
