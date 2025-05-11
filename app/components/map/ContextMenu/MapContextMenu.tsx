@@ -10,12 +10,24 @@ import {
   FaInfoCircle,
 } from 'react-icons/fa';
 import { MdDirections } from 'react-icons/md';
-import { useRouter } from 'next/navigation';
 import { useAppDispatch } from '@/app/store/store';
 import { closeDrawer, openLeftBar } from '@/app/store/slices/drawerSlice';
 import { fetchReverseGeocode } from '@/app/store/thunks/searchThunks';
-import { setMarkerCoords, setViewport } from '@/app/store/slices/mapSlice';
-import { setSelectedCategories } from '@/app/store/slices/searchSlice';
+import {
+  setMarkerCoords,
+  setViewport,
+  toggleDirections,
+} from '@/app/store/slices/mapSlice';
+import {
+  setSelectedCategories,
+  setSearchMode,
+} from '@/app/store/slices/searchSlice';
+import {
+  setOrigin,
+  setDestination,
+  setOriginSearch,
+  setDestinationSearch,
+} from '@/app/store/slices/directionsSlice';
 
 interface MapContextMenuProps {
   longitude: number;
@@ -28,7 +40,6 @@ const MapContextMenu: React.FC<MapContextMenuProps> = ({
   latitude,
   onClose,
 }) => {
-  const router = useRouter();
   const dispatch = useAppDispatch();
   const [copied, setCopied] = useState(false);
 
@@ -84,14 +95,43 @@ const MapContextMenu: React.FC<MapContextMenuProps> = ({
     dispatch(closeDrawer());
     onClose();
   };
-
   const handleDirectionsFrom = () => {
-    router.push(`/directions?from=${lat},${lng}`);
+    // Set the coordinates as the origin in the directions panel
+    dispatch(
+      setOrigin({
+        latitude: parseFloat(lat),
+        longitude: parseFloat(lng),
+        address: `Location ${lat},${lng}`,
+      })
+    );
+    dispatch(setOriginSearch(`${lat}, ${lng}`));
+
+    // Set the search mode to directions
+    dispatch(setSearchMode('directions'));
+
+    // Make sure the directions panel is visible
+    dispatch(toggleDirections());
+
     onClose();
   };
 
   const handleDirectionsTo = () => {
-    router.push(`/directions?to=${lat},${lng}`);
+    // Set the coordinates as the destination in the directions panel
+    dispatch(
+      setDestination({
+        latitude: parseFloat(lat),
+        longitude: parseFloat(lng),
+        address: `Location ${lat},${lng}`,
+      })
+    );
+    dispatch(setDestinationSearch(`${lat}, ${lng}`));
+
+    // Set the search mode to directions
+    dispatch(setSearchMode('directions'));
+
+    // Make sure the directions panel is visible
+    dispatch(toggleDirections());
+
     onClose();
   };
 
