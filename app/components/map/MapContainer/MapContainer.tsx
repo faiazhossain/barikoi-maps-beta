@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import maplibregl, { LngLatBounds } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import MapGL, { MapRef } from 'react-map-gl/maplibre';
@@ -55,10 +55,77 @@ const MapContainer: React.FC = () => {
   );
   const showNearbyResults = selectedCategories.length > 0;
 
+  // State for user location
+  const [userLocation, setUserLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+  const [isLocatingUser, setIsLocatingUser] = useState(false);
+
   // Local state for current map style url
   const [currentMapStyle, setCurrentMapStyle] = useState(
     mapStyle || '/map-styles/light-style.json'
-  );
+  ); // Effect to get user's location on component mount
+  useEffect(() => {
+    // Function to get user's geolocation
+    const getUserLocation = () => {
+      if (!navigator.geolocation) {
+        console.warn('Geolocation is not supported by this browser');
+        return;
+      }
+
+      setIsLocatingUser(true);
+
+      // Clear any existing values first
+      setUserLocation(null);
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+
+          // Set local state first
+          setUserLocation({ latitude, longitude });
+
+          // Then update the viewport in Redux store with a slight delay to ensure state updates
+          setTimeout(() => {
+            dispatch(
+              setViewport({
+                longitude,
+                latitude,
+                zoom: 13, // A good zoom level for neighborhood view
+              })
+            );
+          }, 100);
+
+          setIsLocatingUser(false);
+        },
+        (error) => {
+          console.error('Error getting location:', error.message);
+          setIsLocatingUser(false);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000, // Increased timeout
+          maximumAge: 0,
+        }
+      );
+    };
+
+    // Get user location when component mounts
+    getUserLocation();
+  }, [dispatch]); // Effect to update map when user location changes
+  useEffect(() => {
+    if (userLocation && mapRef.current) {
+      // Only fly to the location if we haven't initialized with it
+      if (mapRef.current.getZoom() > 0) {
+        mapRef.current.flyTo({
+          center: [userLocation.longitude, userLocation.latitude],
+          zoom: 13,
+          duration: 1000,
+        });
+      }
+    }
+  }, [userLocation, mapRef]);
 
   // Handle map style change
   const handleMapStyleChange = useCallback(
@@ -223,13 +290,14 @@ const MapContainer: React.FC = () => {
   return (
     <>
       <div onClick={handleMapContainerClick}>
+        {' '}
         <MapGL
           ref={mapRef as unknown as React.RefObject<MapRef>}
           mapLib={maplibregl}
           initialViewState={{
-            longitude: viewport.longitude || 90.3938,
-            latitude: viewport.latitude || 23.8103,
-            zoom: viewport.zoom || 12,
+            longitude: userLocation?.longitude || viewport.longitude || 90.3938, // Dhaka fallback
+            latitude: userLocation?.latitude || viewport.latitude || 23.8103, // Dhaka fallback
+            zoom: userLocation ? 13 : viewport.zoom || 12,
           }}
           style={{ width: '100vw', height: '100dvh' }}
           mapStyle={currentMapStyle || '/map-styles/light-style.json'}
@@ -254,10 +322,15 @@ const MapContainer: React.FC = () => {
           cursor={hoveredFeatureId ? 'pointer' : 'default'}
           hash={true}
         >
-          <MapControls />
-          <BarikoiAttribution />
-          {isLeftBarOpen && !isMapillaryVisible && <ResponsiveDrawer />}
-
+          <MapControls /> <BarikoiAttribution />
+          {isLeftBarOpen && !isMapillaryVisible && <ResponsiveDrawer />}{' '}
+          {/* Display locating indicator when trying to get user location */}
+          {isLocatingUser && !userLocation && !isMapillaryVisible && (
+            <div className='absolute bottom-24 left-1/2 transform -translate-x-1/2 bg-white px-4 py-2 rounded-full shadow-md flex items-center space-x-2 z-10'>
+              <div className='w-4 h-4 rounded-full bg-blue-500 animate-ping'></div>
+              <span className='text-sm font-medium'>Locating you...</span>
+            </div>
+          )}
           {/* Display directions route and markers */}
           {showDirections && !isMapillaryVisible && (
             <>
@@ -265,7 +338,6 @@ const MapContainer: React.FC = () => {
               <RouteMarkers />
             </>
           )}
-
           {/* Display regular marker if we have coordinates and not in directions or nearby mode */}
           {!showNearbyResults &&
             !showDirections &&
@@ -277,7 +349,6 @@ const MapContainer: React.FC = () => {
                 properties={markerCoords.properties}
               />
             )}
-
           {/* Add nearby search center marker and results */}
           {showNearbyResults && !isMapillaryVisible && (
             <>
@@ -306,7 +377,6 @@ const MapContainer: React.FC = () => {
               )}
             </>
           )}
-
           {/* Context menu marker and popup */}
           {contextMenu.visible && contextMenu.lngLat && !isMapillaryVisible && (
             <>
@@ -323,15 +393,12 @@ const MapContainer: React.FC = () => {
           )}
           {/* Updated MapillaryLayer - no props needed */}
           <MapillaryLayer />
-
           {/* Add the Map Layer Switcher */}
-
           <MapLayerSwitcher
             onStyleChange={handleMapStyleChange}
             currentStyleUrl={currentMapStyle}
           />
         </MapGL>
-
         {!isMapillaryVisible && (
           <AnimatePresence>
             {selectedFeature && !selectedFeature.properties?.place_code && (
@@ -342,7 +409,6 @@ const MapContainer: React.FC = () => {
             )}
           </AnimatePresence>
         )}
-
         {/* Details modal */}
         {!isMapillaryVisible && (
           <AnimatePresence>
