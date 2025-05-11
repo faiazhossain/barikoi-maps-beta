@@ -32,6 +32,7 @@ import { setSearchMode } from '@/app/store/slices/searchSlice';
 
 // Custom components
 import DirectionsSearchInput from '../DirectionsSearchInput/DirectionsSearchInput';
+import RouteInstructions from './RouteInstructions';
 
 // Styles
 import './styles.css';
@@ -50,6 +51,7 @@ const DirectionsPanel: React.FC = () => {
   const [isUsingCurrentLocation, setIsUsingCurrentLocation] = useState(false);
   const [minimized, setMinimized] = useState(false);
   const [maximized, setMaximized] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(true);
 
   // Get current location function
   const getCurrentLocation = () => {
@@ -139,32 +141,61 @@ const DirectionsPanel: React.FC = () => {
         remainingMinutes > 0 ? `${remainingMinutes} min` : ''
       }`;
     }
-  };
-
-  // Render directions info if route exists
+  }; // Render directions info if route exists
   const renderRouteInfo = () => {
     if (!route) return null;
 
     return (
-      <div className='route-info p-3 mt-2 bg-white rounded-lg shadow-sm border border-gray-100'>
-        <div className='flex justify-between items-center'>
-          <div className='flex flex-col items-center'>
-            <FaRoute className='text-primary mb-1' />
-            <p className='text-xs text-gray-500 mb-1'>Distance</p>
-            <p className='text-sm font-semibold'>
-              {formatDistance(route.distance)}
-            </p>
+      <>
+        <div className='route-info p-3 mt-2 bg-white rounded-lg shadow-sm border border-gray-100'>
+          <div className='flex justify-between items-center'>
+            <div className='flex flex-col items-center'>
+              <FaRoute className='text-primary mb-1' />
+              <p className='text-xs text-gray-500 mb-1'>Distance</p>
+              <p className='text-sm font-semibold'>
+                {formatDistance(route.distance)}
+              </p>
+            </div>
+            <div className='h-8 w-px bg-gray-200'></div>
+            <div className='flex flex-col items-center'>
+              <Badge color='blue' count={transportMode} className='mb-1' />
+              <p className='text-xs text-gray-500 mb-1'>Duration</p>
+              <p className='text-sm font-semibold'>
+                {formatDuration(route.time)}
+              </p>
+            </div>
           </div>
-          <div className='h-8 w-px bg-gray-200'></div>
-          <div className='flex flex-col items-center'>
-            <Badge color='blue' count={transportMode} className='mb-1' />
-            <p className='text-xs text-gray-500 mb-1'>Duration</p>
-            <p className='text-sm font-semibold'>
-              {formatDuration(route.time)}
-            </p>
-          </div>
+
+          {/* Toggle button for instructions */}
+          {route.instructions && route.instructions.length > 0 && (
+            <Button
+              type='default'
+              onClick={() => setShowInstructions(!showInstructions)}
+              className='w-full mt-3 text-blue-600 border-blue-200 hover:text-blue-700 hover:border-blue-300'
+              icon={
+                showInstructions ? (
+                  <FaChevronUp className='mr-1' />
+                ) : (
+                  <FaChevronDown className='mr-1' />
+                )
+              }
+            >
+              {showInstructions ? 'Hide Instructions' : 'Show Instructions'}
+            </Button>
+          )}
         </div>
-      </div>
+
+        {/* Display Turn-by-Turn Instructions */}
+        {route.instructions &&
+          route.instructions.length > 0 &&
+          showInstructions && (
+            <RouteInstructions
+              instructions={route.instructions}
+              totalDistance={route.distance}
+              totalTime={route.time}
+            />
+          )}
+      </>
     );
   };
 

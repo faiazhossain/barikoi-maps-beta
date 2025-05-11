@@ -5,21 +5,29 @@ import { MdDirections } from 'react-icons/md';
 import { motion } from 'framer-motion';
 import ShareModal from './ShareModal';
 import { useAppSelector, useAppDispatch } from '@/app/store/store';
-import { setSelectedCategories } from '@/app/store/slices/searchSlice';
-import { setViewport } from '@/app/store/slices/mapSlice';
+import {
+  setSelectedCategories,
+  setSearchMode,
+} from '@/app/store/slices/searchSlice';
+import { setViewport, toggleDirections } from '@/app/store/slices/mapSlice';
 import { closeDrawer } from '@/app/store/slices/drawerSlice';
+import {
+  setDestination,
+  setDestinationSearch,
+} from '@/app/store/slices/directionsSlice';
 
 export const ActionButtons = () => {
   const dispatch = useAppDispatch();
   const [activeAction, setActiveAction] = useState<string | null>(null);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const placeDetails = useAppSelector((state) => state.search.placeDetails);
-
   const handleActionClick = (action: string) => {
     if (action === 'share') {
       setIsShareModalOpen(true);
     } else if (action === 'nearby') {
       handleNearbyClick();
+    } else if (action === 'directions') {
+      handleDirectionsClick();
     }
 
     setActiveAction(action);
@@ -49,6 +57,41 @@ export const ActionButtons = () => {
       dispatch(setSelectedCategories([category]));
 
       // Close the drawer to show the map and nearby results
+      dispatch(closeDrawer());
+    }
+  };
+
+  // Handle the directions action when a user clicks the "Directions" button
+  const handleDirectionsClick = () => {
+    if (placeDetails && placeDetails.latitude && placeDetails.longitude) {
+      // Get place coordinates
+      const lat = parseFloat(placeDetails.latitude);
+      const lng = parseFloat(placeDetails.longitude);
+      const name =
+        placeDetails.business_name ||
+        placeDetails.address ||
+        'Selected location';
+
+      // Set as destination in the directions panel
+      dispatch(
+        setDestination({
+          latitude: lat,
+          longitude: lng,
+          address: name,
+          placeCode: placeDetails.place_code,
+        })
+      );
+
+      // Set the destination search text
+      dispatch(setDestinationSearch(name));
+
+      // Set the search mode to directions
+      dispatch(setSearchMode('directions'));
+
+      // Make sure the directions panel is visible
+      dispatch(toggleDirections());
+
+      // Close the drawer to show the map with directions
       dispatch(closeDrawer());
     }
   };

@@ -26,6 +26,20 @@ const config: Config = {
         custom: 'rgba(0, 0, 0, 0.35) 0px 5px 15px',
         deep: 'rgba(0, 0, 0, 0.25) 0px 4px 4px, rgba(0, 0, 0, 0.22) 1px 1px 1px',
       },
+      keyframes: {
+        slideIn: {
+          '0%': { transform: 'translateY(10px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+      },
+      animation: {
+        slideIn: 'slideIn 0.3s ease-out forwards',
+        fadeIn: 'fadeIn 0.5s ease-out forwards',
+      },
     },
   },
   plugins: [],
