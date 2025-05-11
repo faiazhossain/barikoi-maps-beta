@@ -11,6 +11,7 @@ import {
 } from 'react-icons/fa';
 import { MdDirections } from 'react-icons/md';
 import { useAppDispatch } from '@/app/store/store';
+import { store } from '@/app/store/store';
 import { closeDrawer, openLeftBar } from '@/app/store/slices/drawerSlice';
 import { fetchReverseGeocode } from '@/app/store/thunks/searchThunks';
 import {
@@ -27,6 +28,7 @@ import {
   setDestination,
   setOriginSearch,
   setDestinationSearch,
+  fetchRoute,
 } from '@/app/store/slices/directionsSlice';
 
 interface MapContextMenuProps {
@@ -110,7 +112,27 @@ const MapContextMenu: React.FC<MapContextMenuProps> = ({
     dispatch(setSearchMode('directions'));
 
     // Make sure the directions panel is visible
-    dispatch(toggleDirections());
+    // Only toggle if it's not already visible to avoid turning it off
+    const { showDirections } = store.getState().map;
+    if (!showDirections) {
+      dispatch(toggleDirections());
+    }
+
+    // If destination is already set, calculate the route
+    const { destination } = store.getState().directions;
+    if (destination) {
+      dispatch(
+        fetchRoute({
+          origin: {
+            latitude: parseFloat(lat),
+            longitude: parseFloat(lng),
+            address: `Location ${lat},${lng}`,
+          },
+          destination,
+          mode: store.getState().directions.transportMode,
+        })
+      );
+    }
 
     onClose();
   };
@@ -130,7 +152,27 @@ const MapContextMenu: React.FC<MapContextMenuProps> = ({
     dispatch(setSearchMode('directions'));
 
     // Make sure the directions panel is visible
-    dispatch(toggleDirections());
+    // Only toggle if it's not already visible to avoid turning it off
+    const { showDirections } = store.getState().map;
+    if (!showDirections) {
+      dispatch(toggleDirections());
+    }
+
+    // If we have both origin and destination, calculate the route
+    const { origin } = store.getState().directions;
+    if (origin) {
+      dispatch(
+        fetchRoute({
+          origin,
+          destination: {
+            latitude: parseFloat(lat),
+            longitude: parseFloat(lng),
+            address: `Location ${lat},${lng}`,
+          },
+          mode: store.getState().directions.transportMode,
+        })
+      );
+    }
 
     onClose();
   };
