@@ -4,6 +4,7 @@ import { FaShareAlt, FaMapMarkerAlt, FaEdit, FaCheck } from 'react-icons/fa';
 import { MdDirections } from 'react-icons/md';
 import { motion } from 'framer-motion';
 import ShareModal from './ShareModal';
+import SuggestEditModal from './SuggestEditModal';
 import { useAppSelector, useAppDispatch } from '@/app/store/store';
 import {
   setSelectedCategories,
@@ -20,6 +21,7 @@ export const ActionButtons = () => {
   const dispatch = useAppDispatch();
   const [activeAction, setActiveAction] = useState<string | null>(null);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isSuggestEditModalOpen, setIsSuggestEditModalOpen] = useState(false);
   const placeDetails = useAppSelector((state) => state.search.placeDetails);
   const handleActionClick = (action: string) => {
     if (action === 'share') {
@@ -28,6 +30,8 @@ export const ActionButtons = () => {
       handleNearbyClick();
     } else if (action === 'directions') {
       handleDirectionsClick();
+    } else if (action === 'edit') {
+      setIsSuggestEditModalOpen(true);
     }
 
     setActiveAction(action);
@@ -117,7 +121,6 @@ export const ActionButtons = () => {
     { icon: <FaMapMarkerAlt />, label: 'Nearby', action: 'nearby' },
     { icon: <FaEdit />, label: 'Suggest Edit', action: 'edit' },
   ];
-
   return (
     <>
       <motion.div
@@ -156,19 +159,25 @@ export const ActionButtons = () => {
       </motion.div>
 
       {placeDetails && (
-        <ShareModal
-          isOpen={isShareModalOpen}
-          onClose={() => setIsShareModalOpen(false)}
-          placeInfo={
-            getShareInfo() || {
-              name: '',
-              address: '',
-              coordinates: { latitude: 0, longitude: 0 },
-              url: '',
-              uCode: '',
+        <>
+          <ShareModal
+            isOpen={isShareModalOpen}
+            onClose={() => setIsShareModalOpen(false)}
+            placeInfo={
+              getShareInfo() || {
+                name: '',
+                address: '',
+                coordinates: { latitude: 0, longitude: 0 },
+                url: '',
+                uCode: '',
+              }
             }
-          }
-        />
+          />
+          <SuggestEditModal
+            isOpen={isSuggestEditModalOpen}
+            onClose={() => setIsSuggestEditModalOpen(false)}
+          />
+        </>
       )}
     </>
   );
