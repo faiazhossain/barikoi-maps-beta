@@ -28,6 +28,12 @@ const nextConfig = {
         hostname: '**.fna.fbcdn.net',
         pathname: '/**',
       },
+      // Add flag CDN domain
+      {
+        protocol: 'https',
+        hostname: 'flagcdn.com',
+        pathname: '/**',
+      },
     ],
   },
 };
