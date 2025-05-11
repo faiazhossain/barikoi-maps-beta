@@ -51,9 +51,9 @@ const RouteLayer: React.FC = () => {
           id={ROUTE_OUTLINE_ID}
           type='line'
           paint={{
-            'line-color': '#FFFFFF', // White outline
-            'line-width': 8, // Slightly wider than the main route
-            'line-opacity': 0.9,
+            'line-color': '#30c5ff', // White outline
+            'line-width': 9, // Slightly wider than the main route
+            'line-opacity': 1,
             'line-blur': 0.5,
           }}
         />
@@ -63,8 +63,9 @@ const RouteLayer: React.FC = () => {
           type='line'
           paint={{
             'line-color': '#2563EB', // More vibrant blue
-            'line-width': 5,
-            'line-opacity': 1,
+            'line-width': 6,
+            'line-blur': 0.5, // Slight blur for a smoother look
+            'line-opacity': 0.8,
           }}
         />
       </Source>
