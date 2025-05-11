@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 // Define marker coordinates interface
 export interface MarkerCoords {
@@ -39,7 +39,7 @@ const initialState: MapState = {
     zoom: 12,
   },
   selectedLocation: null,
-  mapStyle: "",
+  mapStyle: '',
   showDirections: false,
   selectedCountry: null,
   isMapLoaded: false,
@@ -47,7 +47,7 @@ const initialState: MapState = {
 };
 
 const mapSlice = createSlice({
-  name: "map",
+  name: 'map',
   initialState,
   reducers: {
     setViewport: (state, action: PayloadAction<typeof state.viewport>) => {

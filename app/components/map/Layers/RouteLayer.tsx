@@ -6,6 +6,7 @@ import { useAppSelector } from '@/app/store/store';
 
 const ROUTE_LAYER_ID = 'route-layer';
 const ROUTE_SOURCE_ID = 'route-source';
+const ROUTE_OUTLINE_ID = 'route-outline'; // Added an outline layer ID
 
 const RouteLayer: React.FC = () => {
   const { route } = useAppSelector((state) => state.directions);
@@ -39,19 +40,34 @@ const RouteLayer: React.FC = () => {
 
   return (
     <>
-      <Source id={ROUTE_SOURCE_ID} type='geojson' data={routeData}>
+      <Source
+        id={ROUTE_SOURCE_ID}
+        type='geojson'
+        data={routeData}
+        lineMetrics={true}
+      >
+        {/* Route outline - renders under the main route for a nice border effect */}
+        <Layer
+          id={ROUTE_OUTLINE_ID}
+          type='line'
+          paint={{
+            'line-color': '#FFFFFF', // White outline
+            'line-width': 8, // Slightly wider than the main route
+            'line-opacity': 0.9,
+            'line-blur': 0.5,
+          }}
+        />
+        {/* Main route line with improved styling */}
         <Layer
           id={ROUTE_LAYER_ID}
           type='line'
           paint={{
-            'line-color': '#0066FF',
+            'line-color': '#2563EB', // More vibrant blue
             'line-width': 5,
-            'line-opacity': 0.8,
+            'line-opacity': 1,
           }}
         />
       </Source>
-
-      {/* Add markers for origin and destination points if needed */}
     </>
   );
 };

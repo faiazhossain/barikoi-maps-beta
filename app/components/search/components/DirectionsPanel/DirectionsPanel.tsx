@@ -1,19 +1,18 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/app/store/store';
 import {
-  FaExchangeAlt,
-  FaLocationArrow,
   FaCar,
   FaMotorcycle,
   FaBiking,
   FaChevronDown,
   FaChevronUp,
   FaRoute,
-  FaExpandAlt,
-  FaCompressAlt,
+  FaTimes,
+  FaRegDotCircle,
 } from 'react-icons/fa';
+import { VscKebabVertical } from 'react-icons/vsc';
 import { Button, Badge } from 'antd';
 import Image from 'next/image';
 
@@ -26,13 +25,17 @@ import {
   setDestinationSearch,
   setTransportMode,
   fetchRoute,
+  clearDirections,
 } from '@/app/store/slices/directionsSlice';
+import { toggleDirections } from '@/app/store/slices/mapSlice';
+import { setSearchMode } from '@/app/store/slices/searchSlice';
 
 // Custom components
 import DirectionsSearchInput from '../DirectionsSearchInput/DirectionsSearchInput';
 
 // Styles
 import './styles.css';
+import { MdLocationPin, MdMyLocation, MdOutlineSwapVert } from 'react-icons/md';
 
 const DirectionsPanel: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -44,24 +47,12 @@ const DirectionsPanel: React.FC = () => {
     transportMode,
     route,
   } = useAppSelector((state) => state.directions);
-  const [userAskedLocation, setUserAskedLocation] = useState(false);
+  const [isUsingCurrentLocation, setIsUsingCurrentLocation] = useState(false);
   const [minimized, setMinimized] = useState(false);
   const [maximized, setMaximized] = useState(false);
 
-  // Handle location retrieval when component mounts
-  useEffect(() => {
-    if (!userAskedLocation) {
-      navigator.permissions?.query({ name: 'geolocation' }).then((result) => {
-        if (result.state === 'granted') {
-          getCurrentLocation();
-        }
-      });
-    }
-  }, []);
-
   // Get current location function
   const getCurrentLocation = () => {
-    setUserAskedLocation(true);
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -74,9 +65,11 @@ const DirectionsPanel: React.FC = () => {
             })
           );
           dispatch(setOriginSearch('Current Location'));
+          setIsUsingCurrentLocation(true);
         },
         (error) => {
           console.error('Error getting location:', error);
+          setIsUsingCurrentLocation(false);
         }
       );
     }
@@ -85,6 +78,25 @@ const DirectionsPanel: React.FC = () => {
   // Handle swap button
   const handleSwap = () => {
     dispatch(swapLocations());
+
+    // Reset current location state if we swap
+    if (isUsingCurrentLocation) {
+      setIsUsingCurrentLocation(false);
+    }
+
+    // Recalculate route after swapping if both origin and destination exist
+    const swappedOrigin = destination;
+    const swappedDestination = origin;
+
+    if (swappedOrigin && swappedDestination) {
+      dispatch(
+        fetchRoute({
+          origin: swappedOrigin,
+          destination: swappedDestination,
+          mode: transportMode,
+        })
+      );
+    }
   };
 
   // Handle transport mode change
@@ -107,12 +119,6 @@ const DirectionsPanel: React.FC = () => {
   const toggleMinimized = () => {
     setMinimized(!minimized);
     if (maximized) setMaximized(false);
-  };
-
-  // Toggle maximized state
-  const toggleMaximized = () => {
-    setMaximized(!maximized);
-    if (minimized) setMinimized(false);
   };
 
   // Format distance and duration
@@ -164,30 +170,16 @@ const DirectionsPanel: React.FC = () => {
 
   return (
     <div
-      className={`directions-panel transition-all duration-300 bg-white rounded-lg shadow-lg `}
+      className={`directions-panel transition-all duration-300 bg-white rounded-lg shadow-lg min-w-[390px]`}
     >
       {/* Header with transport modes */}
-      <div className='panel-header p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-lg border-b border-gray-100'>
-        <div className='flex justify-between items-center mb-2'>
-          <h3 className='text-center text-primary font-medium flex items-center justify-center flex-1'>
-            <FaRoute className='mr-2' /> Direction Finder
-          </h3>
-          <Button
-            type='text'
-            size='small'
-            icon={maximized ? <FaCompressAlt /> : <FaExpandAlt />}
-            onClick={toggleMaximized}
-            className='maximize-btn text-gray-400 hover:text-primary'
-            title={maximized ? 'Normal size' : 'Maximize'}
-          />
-        </div>
-
-        <div className='transport-modes flex justify-center'>
-          <div className='transport-mode-container p-1 bg-white rounded-full shadow-sm flex space-x-1'>
+      <div className='panel-header rounded-t-lg border-b border-gray-100'>
+        <div className='transport-modes flex justify-around w-full items-center py-2'>
+          <div className='transport-mode-container p-1 bg-white rounded-full shadow-sm w-full !justify-evenly space-x-1'>
             <Button
               type={transportMode === 'car' ? 'primary' : 'default'}
               shape='circle'
-              icon={<FaCar />}
+              icon={<FaCar className='text-xl' />}
               onClick={() =>
                 handleTransportModeChange({ target: { value: 'car' } })
               }
@@ -198,7 +190,7 @@ const DirectionsPanel: React.FC = () => {
             <Button
               type={transportMode === 'motorcycle' ? 'primary' : 'default'}
               shape='circle'
-              icon={<FaMotorcycle />}
+              icon={<FaMotorcycle className='text-xl' />}
               onClick={() =>
                 handleTransportModeChange({ target: { value: 'motorcycle' } })
               }
@@ -209,7 +201,7 @@ const DirectionsPanel: React.FC = () => {
             <Button
               type={transportMode === 'bike' ? 'primary' : 'default'}
               shape='circle'
-              icon={<FaBiking />}
+              icon={<FaBiking className='text-xl' />}
               onClick={() =>
                 handleTransportModeChange({ target: { value: 'bike' } })
               }
@@ -218,24 +210,38 @@ const DirectionsPanel: React.FC = () => {
               }`}
             />
           </div>
+          <Button
+            type='text'
+            icon={<FaTimes />}
+            onClick={() => {
+              dispatch(clearDirections());
+              dispatch(toggleDirections());
+              dispatch(setSearchMode('search'));
+            }}
+            className='close-btn text-gray-400 hover:text-primary'
+          />
         </div>
       </div>
 
       {!minimized && (
         <div className='panel-content p-3'>
-          <div className='search-inputs relative'>
+          <div className='search-inputs relative gap-4'>
             {/* From input with location button */}
             <div className='flex items-center mb-2'>
-              <div className='origin-marker mr-2 w-6 h-6 rounded-full bg-green-500 flex items-center justify-center text-white text-xs font-bold shadow-sm'>
-                A
-              </div>
-              <div className='flex-1'>
+              <FaRegDotCircle className='mr-2 text-xl' />
+              <div className='flex-1 pr-6'>
                 <DirectionsSearchInput
                   value={originSearch}
                   placeholder='Enter start location'
-                  onChange={(value) => dispatch(setOriginSearch(value))}
+                  onChange={(value) => {
+                    dispatch(setOriginSearch(value));
+                    if (isUsingCurrentLocation) {
+                      setIsUsingCurrentLocation(false);
+                    }
+                  }}
                   onLocationSelect={(location) => {
                     dispatch(setOrigin(location));
+                    setIsUsingCurrentLocation(false);
                     // Check if we can calculate route
                     if (destination) {
                       dispatch(
@@ -247,34 +253,19 @@ const DirectionsPanel: React.FC = () => {
                       );
                     }
                   }}
-                  className='origin-input'
+                  className='origin-input text-sm'
                 />
               </div>
-              <Button
-                type='primary'
-                size='small'
-                icon={<FaLocationArrow />}
-                onClick={getCurrentLocation}
-                className='ml-1 location-btn'
-                title='Use current location'
-              />
             </div>
-
-            {/* Swap button */}
-            <Button
-              type='default'
-              size='small'
-              icon={<FaExchangeAlt />}
+            <VscKebabVertical className='!absolute left-[2px] top-1/2 transform -translate-y-1/2 !text-xl hover:text-green-600 cursor-pointer z-10' />
+            <MdOutlineSwapVert
               onClick={handleSwap}
-              className='swap-btn absolute left-3 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 rotate-90 bg-white shadow-md rounded-full w-6 h-6 flex items-center justify-center p-0'
+              className='swap-btn !absolute -right-2 top-1/2 transform -translate-y-1/2 hover:text-green-600 cursor-pointer z-10 rounded-full w-8 h-8 flex items-center justify-center p-0 outline-none'
             />
-
             {/* To input */}
             <div className='flex items-center'>
-              <div className='dest-marker mr-2 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold shadow-sm'>
-                B
-              </div>
-              <div className='flex-1'>
+              <MdLocationPin className='mr-2 text-2xl' />
+              <div className='flex-1 pr-6'>
                 <DirectionsSearchInput
                   value={destinationSearch}
                   placeholder='Enter destination'
@@ -292,7 +283,7 @@ const DirectionsPanel: React.FC = () => {
                       );
                     }
                   }}
-                  className='destination-input'
+                  className='destination-input text-sm'
                 />
               </div>
             </div>
@@ -303,20 +294,54 @@ const DirectionsPanel: React.FC = () => {
 
           {/* Attribution */}
           <div className='attribution mt-2 text-right'>
-            <a
-              href='https://barikoi.com/directions'
-              target='_blank'
+            <div
               rel='noopener noreferrer'
-              className='flex items-center justify-end gap-1 text-gray-400 hover:text-primary transition-colors text-xs'
+              className='flex items-center justify-between text-gray-400 hover:text-primary transition-colors text-xs'
             >
-              <span>Directions by</span>
-              <Image
-                src='/images/barikoi-logo.svg'
-                alt='Barikoi'
-                width={34}
-                height={20}
-              />
-            </a>
+              <div
+                className={`flex items-center gap-2 rounded-md cursor-pointer transition-all duration-200
+                  `}
+                onClick={getCurrentLocation}
+              >
+                <Button
+                  type={isUsingCurrentLocation ? 'primary' : 'default'}
+                  shape='circle'
+                  size='small'
+                  icon={
+                    <MdMyLocation
+                      className={`text-lg ${
+                        isUsingCurrentLocation ? 'text-white' : ''
+                      }`}
+                    />
+                  }
+                  className={`shadow-sm ${
+                    isUsingCurrentLocation ? 'bg-primary' : 'bg-white'
+                  }`}
+                />
+                <p
+                  className={`text-sm ${
+                    isUsingCurrentLocation ? 'text-primary' : 'text-black'
+                  } font-medium`}
+                >
+                  {isUsingCurrentLocation
+                    ? 'Using current location'
+                    : 'Use current location'}
+                </p>
+              </div>
+              <a
+                href='https://docs.barikoi.com/api#tag/v2.0/operation/route_with_routing_algorithm'
+                target='_blank'
+                className='flex items-center justify-end gap-1 text-gray-400 hover:text-primary transition-colors text-xs'
+              >
+                <span>Directions by</span>
+                <Image
+                  src='/images/barikoi-logo.svg'
+                  alt='Barikoi'
+                  width={34}
+                  height={20}
+                />
+              </a>
+            </div>
           </div>
         </div>
       )}
@@ -325,7 +350,7 @@ const DirectionsPanel: React.FC = () => {
       <div className='minimize-control flex justify-center border-t border-gray-100'>
         <Button
           type='text'
-          icon={minimized ? <FaChevronUp /> : <FaChevronDown />}
+          icon={minimized ? <FaChevronDown /> : <FaChevronUp />}
           onClick={toggleMinimized}
           className='minimize-btn text-gray-400 hover:text-primary w-full rounded-none rounded-b-lg'
         >

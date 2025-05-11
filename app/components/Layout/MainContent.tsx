@@ -19,6 +19,8 @@ const MainContent = () => {
   const selectedCategories = useAppSelector(
     (state) => state.search.selectedCategories
   );
+  const showDirections = useAppSelector((state) => state.map.showDirections);
+  console.log('🚀 ~ MainContent ~ showDirections:', showDirections);
   const showNearbyResults = selectedCategories.length > 0;
 
   const [currentFact, setCurrentFact] = useState(0);
@@ -41,12 +43,16 @@ const MainContent = () => {
           className={`absolute ${
             isVisible ? `top-[53px] sm:top-0` : `top-2`
           } left-0  flex flex-row flex-wrap ${
-            !showNearbyResults ? 'justify-center w-full' : `justify-start w-fit`
+            !showNearbyResults && !showDirections
+              ? 'justify-center w-full'
+              : `justify-start w-fit`
           } gap-2 sm:gap-6 md:gap-11`}
         >
           {!isMapillaryVisible && <SearchBar />}
-          {/* Only show NearbyCategories when not showing nearby results */}
-          {!showNearbyResults && !isMapillaryVisible && <NearbyCategories />}
+          {/* Only show NearbyCategories when not showing nearby results, not in mapillary mode, and not showing directions */}
+          {!showNearbyResults && !isMapillaryVisible && !showDirections && (
+            <NearbyCategories />
+          )}
         </div>
       </>
     </main>

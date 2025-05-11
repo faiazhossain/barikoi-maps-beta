@@ -3,6 +3,8 @@
 import React from 'react';
 import { Marker } from 'react-map-gl/maplibre';
 import { useAppSelector } from '@/app/store/store';
+import { FaDotCircle } from 'react-icons/fa';
+import { MdLocationPin } from 'react-icons/md';
 
 const RouteMarkers: React.FC = () => {
   const { origin, destination } = useAppSelector((state) => state.directions);
@@ -13,10 +15,15 @@ const RouteMarkers: React.FC = () => {
         <Marker
           longitude={origin.longitude}
           latitude={origin.latitude}
-          anchor='bottom'
+          anchor='center'
         >
-          <div className='w-6 h-6 flex items-center justify-center bg-blue-600 text-white rounded-full p-1 shadow-lg'>
-            A
+          <div className='relative'>
+            {/* Animated pulse effect for origin marker */}
+            <div className='absolute animate-ping rounded-full h-5 w-5 bg-blue-400 opacity-75' />
+            {/* Origin marker with shadow */}
+            <div className='relative rounded-full h-6 w-6 flex items-center justify-center bg-white border-2 border-blue-500 shadow-lg'>
+              <FaDotCircle className='text-blue-500 text-lg' />
+            </div>
           </div>
         </Marker>
       )}
@@ -27,8 +34,12 @@ const RouteMarkers: React.FC = () => {
           latitude={destination.latitude}
           anchor='bottom'
         >
-          <div className='w-6 h-6 flex items-center justify-center bg-green-600 text-white rounded-full p-1 shadow-lg'>
-            B
+          <div className='relative'>
+            {/* Destination marker with prominent styling */}
+            <MdLocationPin
+              className='text-5xl text-green-600 transform-gpu drop-shadow-lg'
+              style={{ filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.5))' }}
+            />
           </div>
         </Marker>
       )}
