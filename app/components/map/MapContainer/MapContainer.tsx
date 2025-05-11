@@ -325,12 +325,11 @@ const MapContainer: React.FC = () => {
           <MapillaryLayer />
 
           {/* Add the Map Layer Switcher */}
-          {!isMapillaryVisible && (
-            <MapLayerSwitcher
-              onStyleChange={handleMapStyleChange}
-              currentStyleUrl={currentMapStyle}
-            />
-          )}
+
+          <MapLayerSwitcher
+            onStyleChange={handleMapStyleChange}
+            currentStyleUrl={currentMapStyle}
+          />
         </MapGL>
 
         {!isMapillaryVisible && (
