@@ -155,6 +155,15 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
     [loadedStyles, onStyleChange]
   );
 
+  // Function to get panel position based on screen size
+  const getPanelPosition = () => {
+    if (isLargeScreen) {
+      return "absolute bottom-0 right-12 bg-white shadow-xl rounded-lg overflow-hidden";
+    }
+    // On mobile, position from bottom
+    return "fixed bottom-16 left-2 right-2 bg-white shadow-xl rounded-lg overflow-hidden";
+  };
+
   // Render function for map style item with mini-map
   const renderMapStyleItem = (style: (typeof MAP_STYLES)[0]) => {
     const isLoaded = loadedStyles.has(style.url);
@@ -174,8 +183,12 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
         }`}
         onClick={() => isLoaded && handleStyleSelect(style.url)}
       >
-        <div className='flex flex-col'>
-          <div className='h-24 rounded-md overflow-hidden bg-gray-100 relative'>
+        <div className='flex items-center gap-2'>
+          <div
+            className={`${
+              isLargeScreen ? "h-24 w-full" : "h-16 w-16"
+            } rounded-md overflow-hidden bg-gray-100 relative flex-shrink-0`}
+          >
             {isLoaded && (
               <Map
                 mapLib={maplibregl}
@@ -192,9 +205,14 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
               </div>
             )}
           </div>
-          <span className='text-gray-800 text-xs mt-1 text-center truncate px-1'>
-            {style.name}
-          </span>
+          {!isLargeScreen && (
+            <span className='text-gray-800 text-sm flex-1'>{style.name}</span>
+          )}
+          {isLargeScreen && (
+            <span className='text-gray-800 text-xs mt-1 text-center truncate px-1'>
+              {style.name}
+            </span>
+          )}
         </div>
       </motion.div>
     );
@@ -215,8 +233,14 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.5 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className='absolute bottom-0 right-12 bg-white shadow-xl rounded-lg overflow-hidden'
-              style={{ width: "280px", transformOrigin: "bottom right" }}
+              className={getPanelPosition()}
+              style={{
+                width: isLargeScreen ? "280px" : "auto",
+                transformOrigin: isLargeScreen
+                  ? "bottom right"
+                  : "bottom center",
+                maxHeight: isLargeScreen ? "auto" : "60vh",
+              }}
             >
               <div className='flex justify-between items-center p-2 border-b border-gray-100'>
                 <h3 className='text-gray-800 font-medium text-sm'>
@@ -230,7 +254,13 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
                 </button>
               </div>
               <div className='p-2'>
-                <div className='grid grid-cols-2 gap-2 max-h-[45vh] p-2 overflow-y-auto'>
+                <div
+                  className={`grid ${
+                    isLargeScreen ? "grid-cols-2 gap-2" : "grid-cols-1 gap-1"
+                  } max-h-[${
+                    isLargeScreen ? "45vh" : "40vh"
+                  }] p-2 overflow-y-auto`}
+                >
                   {MAP_STYLES.map(renderMapStyleItem)}
                 </div>
               </div>

@@ -1,14 +1,14 @@
 // components/common/LoadingPage/LoadingPage.tsx
-import Image from 'next/image';
-import { TbBulb, TbCloudOff, TbWifiOff } from 'react-icons/tb';
-import { useEffect, useState } from 'react';
+import Image from "next/image";
+import { TbBulb, TbCloudOff, TbWifiOff } from "react-icons/tb";
+import { useEffect, useState } from "react";
 
 const funFacts = [
-  'Did you know? Barikoi Maps powers over 1 million users worldwide!',
-  'Did you know? Barikoi supports over 50,000 businesses with location data.',
-  'Did you know? Barikoi Maps is optimized for fast and reliable navigation.',
-  'Did you know? Barikoi provides geolocation services for developers and enterprises.',
-  'Did you know? Barikoi Maps is trusted by leading companies for accurate mapping.',
+  "Did you know? Barikoi Maps powers over 1 million users worldwide!",
+  "Did you know? Barikoi supports over 50,000 businesses with location data.",
+  "Did you know? Barikoi Maps is optimized for fast and reliable navigation.",
+  "Did you know? Barikoi provides geolocation services for developers and enterprises.",
+  "Did you know? Barikoi Maps is trusted by leading companies for accurate mapping.",
 ];
 
 interface LoadingPageProps {
@@ -59,44 +59,58 @@ const LoadingPage = ({ currentFact }: LoadingPageProps) => {
   };
 
   return (
-    <div className='absolute inset-0 flex flex-col items-center justify-center bg-gray-100/80 backdrop-blur-md z-[1002]'>
+    <div className='absolute inset-0 flex flex-col items-center justify-center bg-gray-100/60 backdrop-blur-sm z-[1002] overflow-hidden'>
       {/* Background Video */}
       <video
-        src='/images/Loading/Rotating-Earth.webm'
+        src='/images/Loading/Spinning-Earth.webm'
         autoPlay
         playsInline
         loop
         muted
-        className='absolute scale-125 -inset-2 w-full h-full object-cover opacity-10'
+        className='absolute w-[200%] h-[200%] object-cover opacity-10'
+        style={{
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          filter: "blur(2px)",
+        }}
       />
 
       {/* Content Overlay */}
-      <div className='relative z-10 flex flex-col items-center'>
-        <p className='text-lg font-semibold text-gray-700 mb-2'>
+      <div className='relative z-10 flex flex-col items-center bg-white/30 backdrop-blur-md p-8 rounded-2xl shadow-lg'>
+        <p className='text-xl font-semibold text-gray-800 mb-3 animate-fade-in'>
           Hold tight, we are going to land on
         </p>
-        <Image
-          src='/images/barikoi-logo.svg'
-          alt='Barikoi Logo'
-          width={150}
-          height={50}
-          priority
-        />
-        <p className='text-2xl font-semibold text-gray-700 mt-4'>Maps!</p>
+        <div className='transform hover:scale-105 transition-transform duration-300'>
+          <Image
+            src='/images/barikoi-logo.svg'
+            alt='Barikoi Logo'
+            width={180}
+            height={60}
+            priority
+            className='animate-float'
+          />
+        </div>
+        <p className='text-3xl font-bold text-gray-800 mt-4 animate-fade-in'>
+          Maps!
+        </p>
       </div>
 
       {/* Fun Facts Section */}
-      <div className='relative z-10 mt-10 text-center px-4'>
-        <div className='inline-flex items-center bg-white/90 backdrop-blur-sm px-4 py-2 rounded-lg shadow-md'>
-          <TbBulb className='text-amber-500 text-5xl' />
-          <p className='text-lg font-semibold text-green-600 italic'>
+      <div className='relative z-10 mt-12 text-center px-4 animate-slide-up'>
+        <div className='inline-flex items-center bg-white/80 backdrop-blur-md px-6 py-3 rounded-xl shadow-lg transition-all duration-300 hover:bg-white/90'>
+          <TbBulb className='text-amber-500 text-4xl mr-3 animate-pulse' />
+          <p className='text-lg font-medium text-gray-700 italic'>
             {funFacts[currentFact]}
           </p>
         </div>
       </div>
 
       {/* Timeout Messages */}
-      {renderTimeoutMessage()}
+      <div className='relative z-10 animate-fade-in'>
+        {renderTimeoutMessage()}
+      </div>
     </div>
   );
 };
