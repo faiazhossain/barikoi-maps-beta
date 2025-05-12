@@ -54,6 +54,24 @@ interface MapLayerSwitcherProps {
   currentStyleUrl: string;
 }
 
+// Function to check if coordinates are within Bangladesh
+const isWithinBangladesh = (lat: number, lng: number) => {
+  // Approximate bounding box for Bangladesh
+  const bounds = {
+    north: 26.6342,
+    south: 20.7419,
+    east: 92.6808,
+    west: 88.0283,
+  };
+
+  return (
+    lat >= bounds.south &&
+    lat <= bounds.north &&
+    lng >= bounds.west &&
+    lng <= bounds.east
+  );
+};
+
 const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
   onStyleChange,
   currentStyleUrl,
@@ -76,9 +94,9 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
     height: 1,
   });
 
-  // Update viewState when main map moves
+  // Update viewState and check country bounds when main map moves
   useEffect(() => {
-    if (!mainMap || !isOpen) return;
+    if (!mainMap) return;
 
     const handleMove = () => {
       const center = mainMap.getCenter();
@@ -92,15 +110,34 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
         width: mainMap.getContainer().clientWidth,
         height: mainMap.getContainer().clientHeight,
       });
+
+      // Check if the new center is within Bangladesh and update style accordingly
+      const inBangladesh = isWithinBangladesh(center.lat, center.lng);
+      const defaultStyle = MAP_STYLES.find(
+        (style) => style.id === "default"
+      )?.url;
+      const planetStyle = MAP_STYLES.find(
+        (style) => style.id === "planet-barikoi"
+      )?.url;
+
+      if (inBangladesh && defaultStyle && currentStyleUrl !== defaultStyle) {
+        onStyleChange(defaultStyle);
+      } else if (
+        !inBangladesh &&
+        planetStyle &&
+        currentStyleUrl !== planetStyle
+      ) {
+        onStyleChange(planetStyle);
+      }
     };
 
     mainMap.on("moveend", handleMove);
-    handleMove();
+    handleMove(); // Initial check
 
     return () => {
       mainMap.off("moveend", handleMove);
     };
-  }, [mainMap, isOpen]);
+  }, [mainMap, currentStyleUrl, onStyleChange]);
 
   // Preload map styles sequentially
   useEffect(() => {
