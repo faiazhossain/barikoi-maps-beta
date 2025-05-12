@@ -74,6 +74,9 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [loadedStyles, setLoadedStyles] = useState<Set<string>>(new Set());
   const isLargeScreen = useAppSelector((state) => state.ui.isLargeScreen);
+  const selectedCountry = useAppSelector(
+    (state) => state.country.selectedCountry
+  );
 
   // Preload map styles sequentially
   useEffect(() => {
@@ -99,6 +102,20 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
 
     preloadStyles();
   }, []);
+
+  useEffect(() => {
+    // Set the appropriate style based on selected country
+    if (selectedCountry) {
+      const styleToUse =
+        selectedCountry === "Bangladesh"
+          ? MAP_STYLES.find((style) => style.id === "default")?.url
+          : MAP_STYLES.find((style) => style.id === "planet-barikoi")?.url;
+
+      if (styleToUse && loadedStyles.has(styleToUse)) {
+        onStyleChange(styleToUse);
+      }
+    }
+  }, [selectedCountry, loadedStyles, onStyleChange]);
 
   const togglePanel = () => {
     setIsOpen(!isOpen);

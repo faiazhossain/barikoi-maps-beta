@@ -82,9 +82,9 @@ async function loadCountriesData(): Promise<any> {
   }
 
   // Create a new promise to load the data
-  countriesCachePromise = fetch('/data/countries.geojson')
+  countriesCachePromise = fetch("/data/countries.geojson")
     .then((response) => {
-      if (!response.ok) throw new Error('Failed to fetch countries data');
+      if (!response.ok) throw new Error("Failed to fetch countries data");
       return response.json();
     })
     .then((data) => {
@@ -93,7 +93,7 @@ async function loadCountriesData(): Promise<any> {
       return data;
     })
     .catch((error) => {
-      console.error('Error loading countries data:', error);
+      console.error("Error loading countries data:", error);
       countriesCachePromise = null; // Clear the promise on error
       throw error;
     });
@@ -114,26 +114,34 @@ export async function findCountryAtPoint(
   try {
     // Get the cached GeoJSON data or load it
     const geojson = await loadCountriesData();
+    if (!geojson || !geojson.features) {
+      console.error("GeoJSON data not loaded properly");
+      return null;
+    }
+
     const point: Position = [lng, lat];
 
     // Check each country's geometry
     for (const feature of geojson.features) {
       const geometry = feature.geometry;
 
-      if (geometry.type === 'Polygon') {
+      if (geometry.type === "Polygon") {
         if (pointInRing(point, geometry.coordinates[0])) {
+          console.log("Found country at point:", feature.properties.ADMIN);
           return feature;
         }
-      } else if (geometry.type === 'MultiPolygon') {
+      } else if (geometry.type === "MultiPolygon") {
         if (pointInPolygon(point, geometry.coordinates)) {
+          console.log("Found country at point:", feature.properties.ADMIN);
           return feature;
         }
       }
     }
 
+    console.log("No country found at point:", { lng, lat });
     return null;
   } catch (error) {
-    console.error('Error finding country at point:', error);
+    console.error("Error finding country at point:", error);
     return null;
   }
 }
@@ -155,7 +163,7 @@ export async function findCountryByName(countryName: string): Promise<any> {
 
     return feature || null;
   } catch (error) {
-    console.error('Error finding country by name:', error);
+    console.error("Error finding country by name:", error);
     return null;
   }
 }
@@ -176,7 +184,7 @@ export function calculateBoundingBox(
     const [lng, lat] = coordinates;
 
     // Check if lng and lat are defined before comparing
-    if (typeof lng === 'number' && typeof lat === 'number') {
+    if (typeof lng === "number" && typeof lat === "number") {
       if (lng < minLng) minLng = lng;
       if (lng > maxLng) maxLng = lng;
       if (lat < minLat) minLat = lat;
@@ -196,9 +204,9 @@ export function calculateBoundingBox(
     }
   };
 
-  if (geometry.type === 'Polygon') {
+  if (geometry.type === "Polygon") {
     processPolygon(geometry.coordinates);
-  } else if (geometry.type === 'MultiPolygon') {
+  } else if (geometry.type === "MultiPolygon") {
     for (const polygon of geometry.coordinates) {
       processPolygon(polygon);
     }

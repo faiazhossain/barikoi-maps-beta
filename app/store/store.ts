@@ -1,14 +1,15 @@
-'use client';
+"use client";
 
-import { configureStore } from '@reduxjs/toolkit';
-import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
+import { configureStore } from "@reduxjs/toolkit";
+import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 
-import mapReducer from './slices/mapSlice';
-import searchReducer from './slices/searchSlice';
-import uiReducer from './slices/uiSlice';
-import drawerReducer from './slices/drawerSlice';
-import mapillaryReducer from './slices/mapillarySlice';
-import directionsReducer from './slices/directionsSlice';
+import mapReducer from "./slices/mapSlice";
+import searchReducer from "./slices/searchSlice";
+import uiReducer from "./slices/uiSlice";
+import drawerReducer from "./slices/drawerSlice";
+import mapillaryReducer from "./slices/mapillarySlice";
+import directionsReducer from "./slices/directionsSlice";
+import countryReducer from "./slices/countrySlice";
 
 export const store = configureStore({
   reducer: {
@@ -18,6 +19,7 @@ export const store = configureStore({
     drawer: drawerReducer,
     mapillary: mapillaryReducer,
     directions: directionsReducer,
+    country: countryReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
