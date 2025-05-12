@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Tooltip } from "antd";
 import { FaLayerGroup, FaTimes } from "react-icons/fa";
 import { useAppSelector } from "@/app/store/store";
-import Image from "next/image";
+import Map, { useMap } from "react-map-gl/maplibre";
+import maplibregl from "maplibre-gl";
 
 // Helper function to preload a map style
 const preloadMapStyle = async (styleUrl: string) => {
@@ -25,42 +26,28 @@ const MAP_STYLES = [
     id: "default",
     name: "Default Style",
     url: "/map-styles/light-style.json",
-    thumbnail: "/images/map-thumbnails/light-style.webp",
   },
   {
     id: "barikoi-green",
     name: "Green Map",
     url: "https://map.barikoi.com/styles/barkoi_green/style.json?key=NDE2NzpVNzkyTE5UMUoy",
-    thumbnail: "/images/map-thumbnails/barikoi-green.webp",
   },
   {
     id: "barikoi-dark",
     name: "Dark Map",
     url: "https://map.barikoi.com/styles/barikoi-dark-mode/style.json?key=NDE2NzpVNzkyTE5UMUoy",
-    thumbnail: "/images/map-thumbnails/barikoi-dark.webp",
   },
   {
     id: "planet-barikoi",
     name: "Planet Map",
     url: "https://map.barikoi.com/styles/osm_barikoi_v2/style.json?key=NDE2NzpVNzkyTE5UMUoy",
-    thumbnail: "/images/map-thumbnails/planet-barikoi.webp",
   },
   {
     id: "satellite",
     name: "Satellite View",
     url: "https://api.maptiler.com/maps/dfa2a215-243b-4b69-87ef-ce275b09249c/style.json?key=ASrfqapsZfy4BRFJJdVy",
-    thumbnail: "/images/map-thumbnails/satellite-view.webp",
   },
 ];
-
-// Map for fallback image backgrounds to represent different styles if thumbnails aren't available
-const STYLE_COLORS = {
-  default: "bg-gray-100",
-  "barikoi-green": "bg-green-100",
-  "barikoi-dark": "bg-gray-800",
-  "planet-barikoi": "bg-blue-200",
-  satellite: "bg-amber-50",
-};
 
 interface MapLayerSwitcherProps {
   onStyleChange: (styleUrl: string) => void;
@@ -77,6 +64,43 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
   const selectedCountry = useAppSelector(
     (state) => state.country.selectedCountry
   );
+  const { current: mainMap } = useMap();
+  const [viewState, setViewState] = useState({
+    longitude: 90.3938,
+    latitude: 23.8103,
+    zoom: 12,
+    bearing: 0,
+    pitch: 0,
+    padding: { top: 0, bottom: 0, left: 0, right: 0 },
+    width: 1,
+    height: 1,
+  });
+
+  // Update viewState when main map moves
+  useEffect(() => {
+    if (!mainMap || !isOpen) return;
+
+    const handleMove = () => {
+      const center = mainMap.getCenter();
+      setViewState({
+        longitude: center.lng,
+        latitude: center.lat,
+        zoom: mainMap.getZoom() - 1,
+        bearing: mainMap.getBearing(),
+        pitch: mainMap.getPitch(),
+        padding: { top: 0, bottom: 0, left: 0, right: 0 },
+        width: mainMap.getContainer().clientWidth,
+        height: mainMap.getContainer().clientHeight,
+      });
+    };
+
+    mainMap.on("moveend", handleMove);
+    handleMove();
+
+    return () => {
+      mainMap.off("moveend", handleMove);
+    };
+  }, [mainMap, isOpen]);
 
   // Preload map styles sequentially
   useEffect(() => {
@@ -131,7 +155,7 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
     [loadedStyles, onStyleChange]
   );
 
-  // Render function for map style item
+  // Render function for map style item with mini-map
   const renderMapStyleItem = (style: (typeof MAP_STYLES)[0]) => {
     const isLoaded = loadedStyles.has(style.url);
     const isActive = style.url === currentStyleUrl;
@@ -141,7 +165,7 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
         key={style.id}
         whileHover={{ scale: isLoaded ? 1.04 : 1 }}
         whileTap={{ scale: isLoaded ? 0.98 : 1 }}
-        className={`cursor-pointer rounded-md ${
+        className={`cursor-pointer rounded-md overflow-hidden ${
           isActive
             ? "ring-2 ring-green-500"
             : isLoaded
@@ -150,28 +174,25 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
         }`}
         onClick={() => isLoaded && handleStyleSelect(style.url)}
       >
-        <div className="flex flex-col">
-          <div className="h-16 rounded-md overflow-hidden bg-gray-100 relative">
-            <div
-              className={`absolute inset-0 ${
-                STYLE_COLORS[style.id as keyof typeof STYLE_COLORS]
-              }`}
-            />
-            <Image
-              src={style.thumbnail}
-              alt={style.name}
-              fill
-              className="object-cover"
-              sizes="(max-width: 100px) 100vw, 100px"
-              priority={style.id === "default"}
-            />
+        <div className='flex flex-col'>
+          <div className='h-24 rounded-md overflow-hidden bg-gray-100 relative'>
+            {isLoaded && (
+              <Map
+                mapLib={maplibregl}
+                viewState={viewState}
+                style={{ width: "100%", height: "100%" }}
+                mapStyle={style.url}
+                interactive={false}
+                attributionControl={false}
+              />
+            )}
             {!isLoaded && (
-              <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-4 w-4 border-2 border-green-500 border-t-transparent" />
+              <div className='absolute inset-0 bg-white/50 flex items-center justify-center'>
+                <div className='animate-spin rounded-full h-4 w-4 border-2 border-green-500 border-t-transparent' />
               </div>
             )}
           </div>
-          <span className="text-gray-800 text-xs mt-1 text-center truncate px-1">
+          <span className='text-gray-800 text-xs mt-1 text-center truncate px-1'>
             {style.name}
           </span>
         </div>
@@ -180,12 +201,12 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
   };
 
   return (
-    <div className="absolute z-10 bottom-4 right-2 flex justify-center items-center">
+    <div className='absolute z-10 bottom-4 right-2 flex justify-center items-center'>
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 15 }}
-        className="relative"
+        className='relative'
       >
         <AnimatePresence>
           {isOpen && (
@@ -194,22 +215,22 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.5 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="absolute bottom-0 right-12 bg-white shadow-xl rounded-lg overflow-hidden"
+              className='absolute bottom-0 right-12 bg-white shadow-xl rounded-lg overflow-hidden'
               style={{ width: "280px", transformOrigin: "bottom right" }}
             >
-              <div className="flex justify-between items-center p-2 border-b border-gray-100">
-                <h3 className="text-gray-800 font-medium text-sm">
+              <div className='flex justify-between items-center p-2 border-b border-gray-100'>
+                <h3 className='text-gray-800 font-medium text-sm'>
                   Map Styles
                 </h3>
                 <button
                   onClick={togglePanel}
-                  className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+                  className='text-gray-400 hover:text-gray-600 transition-colors p-1'
                 >
                   <FaTimes size={14} />
                 </button>
               </div>
-              <div className="p-2">
-                <div className="grid grid-cols-3 gap-2 max-h-[45vh] p-2 overflow-y-auto">
+              <div className='p-2'>
+                <div className='grid grid-cols-2 gap-2 max-h-[45vh] p-2 overflow-y-auto'>
                   {MAP_STYLES.map(renderMapStyleItem)}
                 </div>
               </div>
@@ -218,10 +239,10 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
         </AnimatePresence>
 
         <Tooltip
-          title="Layers"
-          placement="top"
+          title='Layers'
+          placement='top'
           mouseEnterDelay={0.1}
-          className="map-style-tooltip"
+          className='map-style-tooltip'
           open={isLargeScreen ? undefined : false}
         >
           <motion.button
@@ -234,7 +255,7 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
           >
-            <div className="relative z-10 flex items-center justify-center w-full h-full">
+            <div className='relative z-10 flex items-center justify-center w-full h-full'>
               <motion.div
                 animate={{
                   scale: isOpen ? 1.2 : 1,
