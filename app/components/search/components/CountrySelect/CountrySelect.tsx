@@ -106,7 +106,7 @@ const CountrySelect: React.FC<CountrySelectProps> = ({
       >
         {filteredOptions.map((country) => (
           <Select.Option
-            key={country.uniqueId}
+            key={country.name}
             value={country.name}
             title={country.name}
             label={

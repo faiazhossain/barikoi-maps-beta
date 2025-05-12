@@ -1,53 +1,30 @@
 // components/SearchBar/SearchHandler.tsx
 "use client";
-import { useCallback } from "react";
+import { useMemo } from "react";
 import { setSuggestions } from "@/app/store/slices/searchSlice";
 import { AppDispatch } from "@/app/store/store";
+import debounce from "lodash.debounce";
 
 export const useSearchHandler = (dispatch: AppDispatch) => {
-  const handleSearch = useCallback(
-    async (
-      value: string,
-      countryCode?: string,
-      longitude?: number,
-      latitude?: number
-    ) => {
-      if (!value.trim()) {
-        dispatch(setSuggestions([]));
-        return;
-      }
+  const performSearch = async (value: string) => {
+    if (!value) {
+      dispatch(setSuggestions([]));
+      return;
+    }
 
-      try {
-        // Construct URL with search parameters
-        const params = new URLSearchParams({
-          query: value,
-        });
+    try {
+      const response = await fetch(`/api/autocomplete?query=${value}`);
+      if (!response.ok) throw new Error("Failed to fetch suggestions");
+      const data = await response.json();
+      dispatch(setSuggestions(data.places || []));
+    } catch (err) {
+      console.error("Error fetching suggestions:", err);
+    }
+  };
 
-        // Add country code if provided
-        if (countryCode) {
-          params.append("country_code", countryCode);
-        }
-
-        // Add coordinates if provided
-        if (longitude !== undefined && latitude !== undefined) {
-          params.append("longitude", longitude.toString());
-          params.append("latitude", latitude.toString());
-        }
-
-        const response = await fetch(`/api/autocomplete?${params.toString()}`);
-
-        if (!response.ok) {
-          throw new Error("Search request failed");
-        }
-
-        const data = await response.json();
-        dispatch(setSuggestions(data.places || []));
-      } catch (error) {
-        console.error("Search error:", error);
-        dispatch(setSuggestions([]));
-      }
-    },
-    [dispatch]
+  const handleSearch = useMemo(
+    () => debounce(performSearch, 300),
+    [dispatch] // Only recreate if dispatch changes
   );
 
   return { handleSearch };

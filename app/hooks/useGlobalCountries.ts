@@ -5,7 +5,6 @@ export interface CountryOption {
   name: string;
   flag: string;
   label: string;
-  uniqueId: string;
 }
 
 // Create a global store for countries data
@@ -44,58 +43,18 @@ export const getCountriesData = async (): Promise<CountryOption[]> => {
 
       const geojson = await response.json();
 
-      // Create a map to track unique names
-      const uniqueNames = new Map();
-
       const options = geojson.features
         .map(
           (feature: {
-            properties: {
-              ISO_A2: string;
-              ADMIN: string;
-              icon?: string;
-              NAME?: string;
-              TYPE?: string;
-              REGION?: string;
-            };
-          }) => {
-            const baseValue = feature.properties.ISO_A2;
-            const baseName = feature.properties.ADMIN;
-
-            // Create a unique identifier that includes all available location data
-            const locationParts = [
-              feature.properties.NAME,
-              feature.properties.TYPE,
-              feature.properties.REGION,
-            ].filter(Boolean);
-
-            // Create a unique name if this is a duplicate
-            let uniqueName = baseName;
-            let count = 1;
-
-            while (uniqueNames.has(uniqueName)) {
-              if (locationParts.length > 0) {
-                uniqueName = `${baseName} (${locationParts.join(", ")})`;
-              } else {
-                uniqueName = `${baseName} (${count})`;
-                count++;
-              }
-            }
-
-            uniqueNames.set(uniqueName, true);
-
-            const uniqueId = `${baseValue}-${locationParts.join("-")}`;
-
-            return {
-              value: baseValue,
-              name: uniqueName,
-              flag:
-                feature.properties.icon ||
-                `https://flagcdn.com/w40/${baseValue.toLowerCase()}.png`,
-              label: uniqueName,
-              uniqueId,
-            };
-          }
+            properties: { ISO_A2: string; ADMIN: string; icon?: string };
+          }) => ({
+            value: feature.properties.ISO_A2,
+            name: feature.properties.ADMIN,
+            flag:
+              feature.properties.icon ||
+              `https://flagcdn.com/w40/${feature.properties.ISO_A2.toLowerCase()}.png`,
+            label: feature.properties.ADMIN,
+          })
         )
         .sort((a: CountryOption, b: CountryOption) =>
           a.name.localeCompare(b.name)

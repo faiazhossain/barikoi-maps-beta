@@ -29,7 +29,6 @@ import { fetchPlaceDetails } from "@/app/store/thunks/searchThunks";
 import { useSearchHandler } from "../../hooks/useSearchHandler";
 import { getSuggestionOptions } from "../../hooks/useSuggestionsOptions";
 import useWindowSize from "@/app/hooks/useWindowSize";
-import { useGlobalCountries } from "@/app/hooks/useGlobalCountries";
 
 // Components
 import ClearButton from "../ClearButton";
@@ -54,9 +53,6 @@ const SearchBar: React.FC = () => {
     (state) => state.search.selectedCategories
   );
   const showNearbyResults = selectedCategories.length > 0;
-  const selectedCountry = useAppSelector((state) => state.map.selectedCountry);
-  const { countries } = useGlobalCountries();
-  const viewport = useAppSelector((state) => state.map.viewport);
   // Local state
   const [isMounted, setIsMounted] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -154,25 +150,16 @@ const SearchBar: React.FC = () => {
 
         // If we have a valid category, trigger nearby search
         if (category) {
+          // Capitalize first letter for consistency with your category format
           const formattedCategory =
             category.charAt(0).toUpperCase() + category.slice(1);
           dispatch(setSelectedCategories([formattedCategory]));
-          return;
+          return; // Skip regular search
         }
       }
     }
-
-    // Get the country code for the selected country
-    let countryCode = "BD"; // Default to Bangladesh
-    if (selectedCountry) {
-      const country = countries.find((c) => c.name === selectedCountry);
-      if (country) {
-        countryCode = country.value; // This is the ISO_A2 code from countries.geojson
-      }
-    }
-
-    // Perform search with country code and map center coordinates
-    handleSearch(value, countryCode, viewport.longitude, viewport.latitude);
+    // Perform regular search if not a "near me" query
+    handleSearch(value);
   };
 
   const handleDropdownVisibility = (open: boolean) => {
