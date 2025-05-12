@@ -1,10 +1,10 @@
 // components/SearchBar/SearchBar.tsx
-'use client';
+"use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { Space } from 'antd';
-import { useAppDispatch, useAppSelector } from '@/app/store/store';
-import { FaTimes } from 'react-icons/fa'; // Add this import for the close button
+import React, { useState, useEffect, useMemo } from "react";
+import { Space } from "antd";
+import { useAppDispatch, useAppSelector } from "@/app/store/store";
+import { FaTimes } from "react-icons/fa"; // Add this import for the close button
 
 // Redux actions and selectors
 import {
@@ -12,34 +12,35 @@ import {
   setSuggestions,
   setSelectedPlace,
   setSelectedCategories,
-} from '@/app/store/slices/searchSlice';
+} from "@/app/store/slices/searchSlice";
 import {
   selectSearchTerm,
   selectSuggestions,
   selectSearchMode,
-} from '@/app/store/selectors/searchSelectors';
+} from "@/app/store/selectors/searchSelectors";
 import {
   closeDrawer,
   openDrawer,
   openLeftBar,
-} from '@/app/store/slices/drawerSlice';
-import { fetchPlaceDetails } from '@/app/store/thunks/searchThunks';
+} from "@/app/store/slices/drawerSlice";
+import { fetchPlaceDetails } from "@/app/store/thunks/searchThunks";
 
 // Custom hooks
-import { useSearchHandler } from '../../hooks/useSearchHandler';
-import { getSuggestionOptions } from '../../hooks/useSuggestionsOptions';
-import useWindowSize from '@/app/hooks/useWindowSize';
+import { useSearchHandler } from "../../hooks/useSearchHandler";
+import { getSuggestionOptions } from "../../hooks/useSuggestionsOptions";
+import useWindowSize from "@/app/hooks/useWindowSize";
+import { useGlobalCountries } from "@/app/hooks/useGlobalCountries";
 
 // Components
-import ClearButton from '../ClearButton';
-import DirectionsToggle from '../DirectionToggle';
-import SearchInput from '../SearchInput';
-import CountrySelect from '../CountrySelect/CountrySelect';
-import NearbyResults from '../NearbyResults/NearbyResults';
-import DirectionsPanel from '../DirectionsPanel/DirectionsPanel';
+import ClearButton from "../ClearButton";
+import DirectionsToggle from "../DirectionToggle";
+import SearchInput from "../SearchInput";
+import CountrySelect from "../CountrySelect/CountrySelect";
+import NearbyResults from "../NearbyResults/NearbyResults";
+import DirectionsPanel from "../DirectionsPanel/DirectionsPanel";
 
 // Styles
-import './styles.css';
+import "./styles.css";
 
 const SearchBar: React.FC = () => {
   // Redux hooks
@@ -53,6 +54,9 @@ const SearchBar: React.FC = () => {
     (state) => state.search.selectedCategories
   );
   const showNearbyResults = selectedCategories.length > 0;
+  const selectedCountry = useAppSelector((state) => state.map.selectedCountry);
+  const { countries } = useGlobalCountries();
+  const viewport = useAppSelector((state) => state.map.viewport);
   // Local state
   const [isMounted, setIsMounted] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -92,7 +96,7 @@ const SearchBar: React.FC = () => {
   useEffect(() => {
     if (placeDetails) {
       const displayText =
-        placeDetails.business_name || placeDetails.address || '';
+        placeDetails.business_name || placeDetails.address || "";
       if (displayText) {
         dispatch(setSearchTerm(displayText));
       }
@@ -103,7 +107,7 @@ const SearchBar: React.FC = () => {
   useEffect(() => {
     // When nearby results appear, clear the search term
     if (showNearbyResults) {
-      dispatch(setSearchTerm(''));
+      dispatch(setSearchTerm(""));
     }
   }, [showNearbyResults, dispatch]);
 
@@ -123,10 +127,10 @@ const SearchBar: React.FC = () => {
 
         const currentUrl = new URL(window.location.href);
         currentUrl.searchParams.set(
-          'place',
+          "place",
           selectedData.uCode || selectedData.place_code
         );
-        window.history.replaceState({}, '', currentUrl.toString());
+        window.history.replaceState({}, "", currentUrl.toString());
       }
     }
 
@@ -150,16 +154,25 @@ const SearchBar: React.FC = () => {
 
         // If we have a valid category, trigger nearby search
         if (category) {
-          // Capitalize first letter for consistency with your category format
           const formattedCategory =
             category.charAt(0).toUpperCase() + category.slice(1);
           dispatch(setSelectedCategories([formattedCategory]));
-          return; // Skip regular search
+          return;
         }
       }
     }
-    // Perform regular search if not a "near me" query
-    handleSearch(value);
+
+    // Get the country code for the selected country
+    let countryCode = "BD"; // Default to Bangladesh
+    if (selectedCountry) {
+      const country = countries.find((c) => c.name === selectedCountry);
+      if (country) {
+        countryCode = country.value; // This is the ISO_A2 code from countries.geojson
+      }
+    }
+
+    // Perform search with country code and map center coordinates
+    handleSearch(value, countryCode, viewport.longitude, viewport.latitude);
   };
 
   const handleDropdownVisibility = (open: boolean) => {
@@ -195,10 +208,10 @@ const SearchBar: React.FC = () => {
 
       // Regular direct search if not a "near me" query
       const formData = new FormData();
-      formData.append('q', value);
+      formData.append("q", value);
 
-      const response = await fetch('/api/rupantor', {
-        method: 'POST',
+      const response = await fetch("/api/rupantor", {
+        method: "POST",
         body: formData,
       });
 
@@ -209,14 +222,14 @@ const SearchBar: React.FC = () => {
       const responseData = await response.json();
 
       const uCode = responseData.geocoded_address?.uCode;
-      if (!uCode) throw new Error('No uCode found in response');
+      if (!uCode) throw new Error("No uCode found in response");
 
       if (uCode) {
         dispatch(fetchPlaceDetails(uCode));
         dispatch(openLeftBar());
       }
     } catch (error) {
-      console.error('Search error:', error);
+      console.error("Search error:", error);
       throw error;
     }
   };
@@ -231,7 +244,7 @@ const SearchBar: React.FC = () => {
 
   // Determine what to render based on search mode
   const renderContent = () => {
-    if (searchMode === 'directions') {
+    if (searchMode === "directions") {
       return <DirectionsPanel />;
     } else if (showNearbyResults) {
       return (
@@ -239,7 +252,7 @@ const SearchBar: React.FC = () => {
           {/* Header with close button */}
           <div className='flex items-center p-3 border-b'>
             <h3 className='text-base font-medium flex-1'>
-              Nearby {selectedCategories.join(', ')}
+              Nearby {selectedCategories.join(", ")}
             </h3>
             <button
               onClick={handleCloseNearbyResults}
@@ -294,25 +307,25 @@ const SearchBar: React.FC = () => {
         className={`relative left-0 w-screen ${
           isMounted
             ? windowSize.width > 823
-              ? 'z-[1001]'
-              : 'z-10'
-            : 'z-[1001]'
+              ? "z-[1001]"
+              : "z-10"
+            : "z-[1001]"
         } min-w-[300px] sm:top-4 lg:left-4 sm:w-full sm:max-w-[400px]`}
       >
         {/* Search box wrapper */}
         <div
           className={`bg-white transition-all duration-100 ${
-            isExpanded || showNearbyResults || searchMode === 'directions'
+            isExpanded || showNearbyResults || searchMode === "directions"
               ? `${
                   isVisible
                     ? `${
-                        showNearbyResults || searchMode === 'directions'
-                          ? 'rounded-bl-2xl rounded-br-2xl pb-3'
-                          : 'rounded-none'
+                        showNearbyResults || searchMode === "directions"
+                          ? "rounded-bl-2xl rounded-br-2xl pb-3"
+                          : "rounded-none"
                       }`
-                    : 'rounded-t-[20px]'
+                    : "rounded-t-[20px]"
                 } sm:rounded-t-[20px]`
-              : 'rounded-none sm:rounded-full'
+              : "rounded-none sm:rounded-full"
           } shadow-deep`}
         >
           {renderContent()}
