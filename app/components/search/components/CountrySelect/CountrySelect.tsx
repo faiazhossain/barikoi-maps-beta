@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { Select, Spin } from 'antd'; // Import Spin from Ant Design
-import { createAction } from '@reduxjs/toolkit';
 import { FaFlag } from 'react-icons/fa';
 import { LoadingOutlined } from '@ant-design/icons';
 import Image from 'next/image';
@@ -12,10 +11,9 @@ import {
   useGlobalCountries,
   CountryOption,
 } from '@/app/hooks/useGlobalCountries';
-
-export const setSelectedCountry = createAction<{ code: string; name: string }>(
-  'map/setSelectedCountry'
-);
+import { useAppDispatch, useAppSelector } from '@/app/store/store';
+import { setSelectedCountry } from '@/app/store/slices/mapSlice';
+import { dispatchFitCountryEvent } from '@/app/utils/eventUtils';
 
 interface CountrySelectProps {
   onCountrySelect?: (value: string) => void;
@@ -30,15 +28,34 @@ const CountrySelect: React.FC<CountrySelectProps> = ({
   // Use our global countries hook instead of local fetching logic
   const { countries, loading, error } = useGlobalCountries();
   const [filteredOptions, setFilteredOptions] = useState<CountryOption[]>([]);
-  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+  const [localSelectedCountry, setLocalSelectedCountry] = useState<
+    string | null
+  >(null);
 
   // Update filtered options when countries change
   useEffect(() => {
     setFilteredOptions(countries);
   }, [countries]);
 
+  // Get the selected country from Redux store
+  const dispatch = useAppDispatch();
+  const selectedCountryFromStore = useAppSelector(
+    (state) => state.map.selectedCountry
+  );
+
+  // Update local state when Redux store changes
+  useEffect(() => {
+    if (selectedCountryFromStore) {
+      setLocalSelectedCountry(selectedCountryFromStore);
+    }
+  }, [selectedCountryFromStore]);
+
   const handleCountrySelect = (name: string) => {
-    setSelectedCountry(name);
+    setLocalSelectedCountry(name);
+    dispatch(setSelectedCountry(name));
+
+    // Dispatch an event to fit the map to the selected country
+    dispatchFitCountryEvent(name);
   };
 
   if (loading) {
@@ -46,8 +63,7 @@ const CountrySelect: React.FC<CountrySelectProps> = ({
       <div className='flex justify-center items-center h-10 !w-8 !mr-2'>
         <Spin
           indicator={<LoadingOutlined spin className='!text-primary-dark' />}
-        />{' '}
-        {/* Ant Design loading spinner */}
+        />
       </div>
     );
   }
@@ -59,15 +75,15 @@ const CountrySelect: React.FC<CountrySelectProps> = ({
   return (
     <div className='relative group'>
       <Select
-        className={`${className} !p-0`}
+        className={className}
         variant='borderless'
         dropdownStyle={{ minWidth: dropdownWidth }}
         suffixIcon={null}
         optionLabelProp='label'
         showSearch={false}
-        value={selectedCountry}
+        value={localSelectedCountry}
         onChange={handleCountrySelect}
-        title={selectedCountry || undefined}
+        title={localSelectedCountry || undefined}
         dropdownRender={(menu) => (
           <div>
             <div className='p-2'>
@@ -101,7 +117,6 @@ const CountrySelect: React.FC<CountrySelectProps> = ({
                   width={40}
                   height={12}
                 />
-                {/* <span>{country.name}</span> */}
               </div>
             }
           >
@@ -117,9 +132,27 @@ const CountrySelect: React.FC<CountrySelectProps> = ({
           </Select.Option>
         ))}
       </Select>
-      {!selectedCountry && (
+      {!localSelectedCountry && (
         <div className='absolute left-2 top-1/2 transform -translate-y-1/2 pointer-events-none'>
           <FaFlag className='text-gray-400 group-hover:text-primary transition-colors' />
+        </div>
+      )}
+      {localSelectedCountry && countries.length > 0 && (
+        <div className='absolute left-0 top-1/2 transform -translate-y-1/2 w-8 flex justify-center pointer-events-none'>
+          {countries.find(
+            (country) => country.name === localSelectedCountry
+          ) && (
+            <Image
+              src={
+                countries.find(
+                  (country) => country.name === localSelectedCountry
+                )?.flag || ''
+              }
+              alt={`${localSelectedCountry} flag`}
+              width={20}
+              height={12}
+            />
+          )}
         </div>
       )}
     </div>

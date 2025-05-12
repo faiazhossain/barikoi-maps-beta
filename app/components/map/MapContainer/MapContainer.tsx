@@ -18,6 +18,7 @@ import {
   setMapStyle,
   setMarkerCoords,
   setViewport,
+  setSelectedCountry,
 } from '@/app/store/slices/mapSlice';
 import { useAppDispatch, useAppSelector } from '@/app/store/store';
 import ResponsiveDrawer from '../../LeftPanel/ResponsiveDrawer';
@@ -33,6 +34,12 @@ import { NearbyPlace } from '@/app/types/map';
 import MapillaryLayer from '../Mapillary/MapillaryLayer';
 import RouteLayer from '../Layers/RouteLayer';
 import RouteMarkers from '../Markers/RouteMarkers';
+import {
+  findCountryAtPoint,
+  findCountryByName,
+  calculateBoundingBox,
+} from '@/app/utils/geoUtils';
+import { addFitCountryListener } from '@/app/utils/eventUtils';
 
 const MapContainer: React.FC = () => {
   const mapRef = useMapRef();
@@ -163,6 +170,44 @@ const MapContainer: React.FC = () => {
 
   // Handle place details effect
   usePlaceDetailsEffect(placeDetails, mapRef as React.RefObject<MapRef>);
+  // Function to detect country at map center
+  const detectCountryAtMapCenter = useCallback(
+    async (longitude: number, latitude: number) => {
+      try {
+        const countryFeature = await findCountryAtPoint(longitude, latitude);
+        if (countryFeature) {
+          const countryName = countryFeature.properties.ADMIN;
+          dispatch(setSelectedCountry(countryName));
+        } else {
+          // If no country is found, clear the selected country
+          dispatch(setSelectedCountry(null));
+        }
+      } catch (error) {
+        console.error('Error detecting country at map center:', error);
+      }
+    },
+    [dispatch]
+  );
+
+  // Add handler for map move end event
+  const handleMoveEnd = useCallback(() => {
+    if (mapRef.current) {
+      const map = mapRef.current;
+      const center = map.getCenter();
+
+      // Update viewport in store
+      dispatch(
+        setViewport({
+          longitude: center.lng,
+          latitude: center.lat,
+          zoom: map.getZoom(),
+        })
+      );
+
+      // Detect country at new center position
+      detectCountryAtMapCenter(center.lng, center.lat);
+    }
+  }, [dispatch, mapRef, detectCountryAtMapCenter]);
 
   const handleMapLoad = () => {
     dispatch(setMapLoaded(true));
@@ -180,6 +225,9 @@ const MapContainer: React.FC = () => {
           zoom: map.getZoom(),
         })
       );
+
+      // Detect country on initial load
+      detectCountryAtMapCenter(longitude, latitude);
     }
   };
 
@@ -279,13 +327,50 @@ const MapContainer: React.FC = () => {
       fitMarkersInView();
     }
   }, [showNearbyResults, nearbyPlaces, fitMarkersInView]);
-
   // Add useEffect to fit route bounds when route changes
   React.useEffect(() => {
     if (showDirections && route) {
       fitRouteBoundsInView();
     }
   }, [showDirections, route, fitRouteBoundsInView]);
+
+  // Function to fit the map to a selected country's bounds
+  const fitMapToCountry = useCallback(
+    async (countryName: string) => {
+      if (!mapRef.current) return;
+
+      try {
+        const countryFeature = await findCountryByName(countryName);
+        if (countryFeature && countryFeature.geometry) {
+          const boundingBox = calculateBoundingBox(countryFeature.geometry);
+          const [west, south, east, north] = boundingBox;
+
+          const bounds = new LngLatBounds([west, south], [east, north]);
+
+          mapRef.current.fitBounds(bounds, {
+            padding: 50,
+            maxZoom: 10,
+            duration: 1000,
+          });
+        }
+      } catch (error) {
+        console.error('Error fitting map to country:', error);
+      }
+    },
+    [mapRef]
+  );
+  // Add useEffect to set up listener for country selection events
+  useEffect(() => {
+    // Add listener for fit country events
+    const removeListener = addFitCountryListener((countryName) => {
+      fitMapToCountry(countryName);
+    });
+
+    // Clean up listener on unmount
+    return () => {
+      removeListener();
+    };
+  }, [fitMapToCountry]);
 
   return (
     <>
@@ -308,6 +393,7 @@ const MapContainer: React.FC = () => {
           onMouseLeave={handleMouseLeave}
           onDblClick={handleMapDoubleClick}
           onContextMenu={handleContextMenu}
+          onMoveEnd={handleMoveEnd}
           interactiveLayerIds={[
             'recreation',
             'commercial',
