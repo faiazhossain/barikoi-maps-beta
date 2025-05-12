@@ -1,17 +1,17 @@
-"use client";
-import React, { useState, useCallback, useEffect } from "react";
-import maplibregl, { LngLatBounds } from "maplibre-gl";
-import "maplibre-gl/dist/maplibre-gl.css";
-import MapGL, { MapRef } from "react-map-gl/maplibre";
-import { useMapRef } from "../hooks/useMapRef";
-import { useRouteFromUrl } from "../hooks/useRouteFromUrl";
-import { useMapEventHandlers } from "../hooks/useMapEventHandlers";
-import { usePlaceDetailsEffect } from "../hooks/usePlaceDetailsEffect";
-import MapControls from "./MapControls";
-import BarikoiAttribution from "./BarikoiAttribution";
-import MapLayerSwitcher from "./MapLayerSwitcher";
-import { AnimatePresence } from "framer-motion";
-import InfoCard from "../InfoCard/InfoCard";
+'use client';
+import React, { useState, useCallback, useEffect } from 'react';
+import maplibregl, { LngLatBounds } from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
+import MapGL, { MapRef } from 'react-map-gl/maplibre';
+import { useMapRef } from '../hooks/useMapRef';
+import { useRouteFromUrl } from '../hooks/useRouteFromUrl';
+import { useMapEventHandlers } from '../hooks/useMapEventHandlers';
+import { usePlaceDetailsEffect } from '../hooks/usePlaceDetailsEffect';
+import MapControls from './MapControls';
+import BarikoiAttribution from './BarikoiAttribution';
+import MapLayerSwitcher from './MapLayerSwitcher';
+import { AnimatePresence } from 'framer-motion';
+import InfoCard from '../InfoCard/InfoCard';
 
 import {
   setMapLoaded,
@@ -19,27 +19,28 @@ import {
   setMarkerCoords,
   setViewport,
   setSelectedCountry,
-} from "@/app/store/slices/mapSlice";
-import { useAppDispatch, useAppSelector } from "@/app/store/store";
-import ResponsiveDrawer from "../../LeftPanel/ResponsiveDrawer";
-import { useUrlParams } from "@/app/hooks/useUrlParams";
-import AnimatedMarker from "../Markers/AnimatedMarker";
-import MapContextMenu from "../ContextMenu/MapContextMenu";
-import ContextMarker from "../Markers/ContextMarker";
-import NearbySearchMarker from "../Markers/NearbySearchMarker";
-import NearbyPlaceMarker from "../Markers/NearbyPlaceMarker";
-import NearbyPlacePopup from "../Popups/NearbyPlacePopup";
-import NearbyPlaceModal from "../Modals/NearbyPlaceModal";
-import { NearbyPlace } from "@/app/types/map";
-import MapillaryLayer from "../Mapillary/MapillaryLayer";
-import RouteLayer from "../Layers/RouteLayer";
-import RouteMarkers from "../Markers/RouteMarkers";
+} from '@/app/store/slices/mapSlice';
+import { useAppDispatch, useAppSelector } from '@/app/store/store';
+import ResponsiveDrawer from '../../LeftPanel/ResponsiveDrawer';
+import { useUrlParams } from '@/app/hooks/useUrlParams';
+import AnimatedMarker from '../Markers/AnimatedMarker';
+import MapContextMenu from '../ContextMenu/MapContextMenu';
+import ContextMarker from '../Markers/ContextMarker';
+import NearbySearchMarker from '../Markers/NearbySearchMarker';
+import NearbyPlaceMarker from '../Markers/NearbyPlaceMarker';
+import NearbyPlacePopup from '../Popups/NearbyPlacePopup';
+import NearbyPlaceModal from '../Modals/NearbyPlaceModal';
+import { NearbyPlace } from '@/app/types/map';
+import MapillaryLayer from '../Mapillary/MapillaryLayer';
+import RouteLayer from '../Layers/RouteLayer';
+import RouteMarkers from '../Markers/RouteMarkers';
 import {
   findCountryAtPoint,
   findCountryByName,
   calculateBoundingBox,
-} from "@/app/utils/geoUtils";
-import { addFitCountryListener } from "@/app/utils/eventUtils";
+} from '@/app/utils/geoUtils';
+import { addFitCountryListener } from '@/app/utils/eventUtils';
+import { setSelectedCountryCode } from '@/app/store/slices/countrySlice';
 
 const MapContainer: React.FC = () => {
   const mapRef = useMapRef();
@@ -71,25 +72,26 @@ const MapContainer: React.FC = () => {
 
   // Local state for current map style url
   const [currentMapStyle, setCurrentMapStyle] = useState(
-    mapStyle || "/map-styles/light-style.json"
+    mapStyle || '/map-styles/light-style.json'
   );
 
   // Function to detect country at map center
   const detectCountryAtMapCenter = useCallback(
     async (longitude: number, latitude: number) => {
       try {
-        console.log("Detecting country at:", { longitude, latitude });
         const countryFeature = await findCountryAtPoint(longitude, latitude);
         if (countryFeature) {
           const countryName = countryFeature.properties.ADMIN;
-          console.log("Setting selected country to:", countryName);
+          const countryCode = countryFeature.properties.ISO_A2;
+
           dispatch(setSelectedCountry(countryName));
+          dispatch(setSelectedCountryCode(countryCode));
         } else {
-          console.log("No country found at point, clearing selection");
           dispatch(setSelectedCountry(null));
+          dispatch(setSelectedCountryCode(null));
         }
       } catch (error) {
-        console.error("Error detecting country at map center:", error);
+        console.error('Error detecting country at map center:', error);
       }
     },
     [dispatch]
@@ -109,7 +111,7 @@ const MapContainer: React.FC = () => {
     // Function to get user's geolocation
     const getUserLocation = () => {
       if (!navigator.geolocation) {
-        console.warn("Geolocation is not supported by this browser");
+        console.warn('Geolocation is not supported by this browser');
         return;
       }
 
@@ -136,7 +138,7 @@ const MapContainer: React.FC = () => {
               dispatch(setSelectedCountry(countryName));
             }
           } catch (error) {
-            console.error("Error detecting initial country:", error);
+            console.error('Error detecting initial country:', error);
           }
 
           // Update the viewport in Redux store with a slight delay
@@ -153,7 +155,7 @@ const MapContainer: React.FC = () => {
           setIsLocatingUser(false);
         },
         (error) => {
-          console.error("Error getting location:", error.message);
+          console.error('Error getting location:', error.message);
           setIsLocatingUser(false);
         },
         {
@@ -255,8 +257,6 @@ const MapContainer: React.FC = () => {
           zoom: map.getZoom(),
         })
       );
-
-      console.log("Map loaded, detecting initial country");
       // Detect country on initial load
       detectCountryAtMapCenter(longitude, latitude);
     }
@@ -324,10 +324,10 @@ const MapContainer: React.FC = () => {
 
       // Make sure all values are defined before creating bounds
       if (
-        typeof west === "number" &&
-        typeof south === "number" &&
-        typeof east === "number" &&
-        typeof north === "number"
+        typeof west === 'number' &&
+        typeof south === 'number' &&
+        typeof east === 'number' &&
+        typeof north === 'number'
       ) {
         const bounds = new LngLatBounds([west, south], [east, north]);
 
@@ -385,7 +385,7 @@ const MapContainer: React.FC = () => {
           });
         }
       } catch (error) {
-        console.error("Error fitting map to country:", error);
+        console.error('Error fitting map to country:', error);
       }
     },
     [mapRef]
@@ -406,7 +406,7 @@ const MapContainer: React.FC = () => {
   return (
     <>
       <div onClick={handleMapContainerClick}>
-        {" "}
+        {' '}
         <MapGL
           ref={mapRef as unknown as React.RefObject<MapRef>}
           mapLib={maplibregl}
@@ -415,8 +415,8 @@ const MapContainer: React.FC = () => {
             latitude: userLocation?.latitude || viewport.latitude || 23.8103, // Dhaka fallback
             zoom: userLocation ? 13 : viewport.zoom || 12,
           }}
-          style={{ width: "100vw", height: "100dvh" }}
-          mapStyle={currentMapStyle || "/map-styles/light-style.json"}
+          style={{ width: '100vw', height: '100dvh' }}
+          mapStyle={currentMapStyle || '/map-styles/light-style.json'}
           attributionControl={false}
           onLoad={handleMapLoad}
           onClick={handleMapClick}
@@ -426,21 +426,21 @@ const MapContainer: React.FC = () => {
           onContextMenu={handleContextMenu}
           onMoveEnd={handleMoveEnd}
           interactiveLayerIds={[
-            "recreation",
-            "commercial",
-            "residential",
-            "education",
-            "health",
-            "government",
-            "religious",
-            "mapillary-images",
-            "mapillary-sequences",
+            'recreation',
+            'commercial',
+            'residential',
+            'education',
+            'health',
+            'government',
+            'religious',
+            'mapillary-images',
+            'mapillary-sequences',
           ]}
-          cursor={hoveredFeatureId ? "pointer" : "default"}
+          cursor={hoveredFeatureId ? 'pointer' : 'default'}
           hash={true}
         >
           <MapControls /> <BarikoiAttribution />
-          {isLeftBarOpen && !isMapillaryVisible && <ResponsiveDrawer />}{" "}
+          {isLeftBarOpen && !isMapillaryVisible && <ResponsiveDrawer />}{' '}
           {/* Display locating indicator when trying to get user location */}
           {isLocatingUser && !userLocation && !isMapillaryVisible && (
             <div className='absolute bottom-24 left-1/2 transform -translate-x-1/2 bg-white px-4 py-2 rounded-full shadow-md flex items-center space-x-2 z-10'>

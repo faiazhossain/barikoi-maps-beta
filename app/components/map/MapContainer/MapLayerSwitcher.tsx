@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Tooltip } from "antd";
-import { FaLayerGroup, FaTimes } from "react-icons/fa";
-import { useAppSelector } from "@/app/store/store";
-import Map, { useMap } from "react-map-gl/maplibre";
-import maplibregl from "maplibre-gl";
+import React, { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Tooltip } from 'antd';
+import { FaLayerGroup, FaTimes } from 'react-icons/fa';
+import { useAppSelector } from '@/app/store/store';
+import Map, { useMap } from 'react-map-gl/maplibre';
+import maplibregl from 'maplibre-gl';
 
 // Helper function to preload a map style
 const preloadMapStyle = async (styleUrl: string) => {
@@ -23,29 +23,29 @@ const preloadMapStyle = async (styleUrl: string) => {
 // Map style definitions with thumbnails, labels, and URLs
 const MAP_STYLES = [
   {
-    id: "default",
-    name: "Default Style",
-    url: "/map-styles/light-style.json",
+    id: 'default',
+    name: 'Default Style',
+    url: '/map-styles/light-style.json',
   },
   {
-    id: "barikoi-green",
-    name: "Green Map",
-    url: "https://map.barikoi.com/styles/barkoi_green/style.json?key=NDE2NzpVNzkyTE5UMUoy",
+    id: 'barikoi-green',
+    name: 'Green Map',
+    url: 'https://map.barikoi.com/styles/barkoi_green/style.json?key=NDE2NzpVNzkyTE5UMUoy',
   },
   {
-    id: "barikoi-dark",
-    name: "Dark Map",
-    url: "https://map.barikoi.com/styles/barikoi-dark-mode/style.json?key=NDE2NzpVNzkyTE5UMUoy",
+    id: 'barikoi-dark',
+    name: 'Dark Map',
+    url: 'https://map.barikoi.com/styles/barikoi-dark-mode/style.json?key=NDE2NzpVNzkyTE5UMUoy',
   },
   {
-    id: "planet-barikoi",
-    name: "Planet Map",
-    url: "https://map.barikoi.com/styles/osm_barikoi_v2/style.json?key=NDE2NzpVNzkyTE5UMUoy",
+    id: 'planet-barikoi',
+    name: 'Planet Map',
+    url: 'https://map.barikoi.com/styles/osm_barikoi_v2/style.json?key=NDE2NzpVNzkyTE5UMUoy',
   },
   {
-    id: "satellite",
-    name: "Satellite View",
-    url: "https://api.maptiler.com/maps/dfa2a215-243b-4b69-87ef-ce275b09249c/style.json?key=ASrfqapsZfy4BRFJJdVy",
+    id: 'satellite',
+    name: 'Satellite View',
+    url: 'https://api.maptiler.com/maps/dfa2a215-243b-4b69-87ef-ce275b09249c/style.json?key=ASrfqapsZfy4BRFJJdVy',
   },
 ];
 
@@ -114,10 +114,10 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
       // Check if the new center is within Bangladesh and update style accordingly
       const inBangladesh = isWithinBangladesh(center.lat, center.lng);
       const defaultStyle = MAP_STYLES.find(
-        (style) => style.id === "default"
+        (style) => style.id === 'default'
       )?.url;
       const planetStyle = MAP_STYLES.find(
-        (style) => style.id === "planet-barikoi"
+        (style) => style.id === 'planet-barikoi'
       )?.url;
 
       if (inBangladesh && defaultStyle && currentStyleUrl !== defaultStyle) {
@@ -131,11 +131,11 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
       }
     };
 
-    mainMap.on("moveend", handleMove);
+    mainMap.on('moveend', handleMove);
     handleMove(); // Initial check
 
     return () => {
-      mainMap.off("moveend", handleMove);
+      mainMap.off('moveend', handleMove);
     };
   }, [mainMap, currentStyleUrl, onStyleChange]);
 
@@ -168,9 +168,9 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
     // Set the appropriate style based on selected country
     if (selectedCountry) {
       const styleToUse =
-        selectedCountry === "Bangladesh"
-          ? MAP_STYLES.find((style) => style.id === "default")?.url
-          : MAP_STYLES.find((style) => style.id === "planet-barikoi")?.url;
+        selectedCountry === 'Bangladesh'
+          ? MAP_STYLES.find((style) => style.id === 'default')?.url
+          : MAP_STYLES.find((style) => style.id === 'planet-barikoi')?.url;
 
       if (styleToUse && loadedStyles.has(styleToUse)) {
         onStyleChange(styleToUse);
@@ -195,10 +195,10 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
   // Function to get panel position based on screen size
   const getPanelPosition = () => {
     if (isLargeScreen) {
-      return "absolute bottom-0 right-12 bg-white shadow-xl rounded-lg overflow-hidden";
+      return 'absolute bottom-0 right-12 bg-white shadow-xl rounded-lg overflow-hidden';
     }
     // On mobile, position from bottom
-    return "fixed bottom-16 left-2 right-2 bg-white shadow-xl rounded-lg overflow-hidden";
+    return 'fixed bottom-16 left-2 right-2 bg-white shadow-xl rounded-lg overflow-hidden';
   };
 
   // Render function for map style item with mini-map
@@ -213,24 +213,24 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
         whileTap={{ scale: isLoaded ? 0.98 : 1 }}
         className={`cursor-pointer rounded-md overflow-hidden ${
           isActive
-            ? "ring-2 ring-green-500"
+            ? 'ring-2 ring-green-500'
             : isLoaded
-            ? "hover:bg-green-100"
-            : "opacity-50 cursor-wait"
+            ? 'hover:bg-green-100'
+            : 'opacity-50 cursor-wait'
         }`}
         onClick={() => isLoaded && handleStyleSelect(style.url)}
       >
         <div className='flex items-center gap-2'>
           <div
             className={`${
-              isLargeScreen ? "h-24 w-full" : "h-16 w-16"
+              isLargeScreen ? 'h-24 w-full' : 'h-16 w-16'
             } rounded-md overflow-hidden bg-gray-100 relative flex-shrink-0`}
           >
             {isLoaded && (
               <Map
                 mapLib={maplibregl}
                 viewState={viewState}
-                style={{ width: "100%", height: "100%" }}
+                style={{ width: '100%', height: '100%' }}
                 mapStyle={style.url}
                 interactive={false}
                 attributionControl={false}
@@ -260,7 +260,7 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: "spring", stiffness: 300, damping: 15 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 15 }}
         className='relative'
       >
         <AnimatePresence>
@@ -269,14 +269,14 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
               initial={{ opacity: 0, y: 20, scale: 0.5 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.5 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               className={getPanelPosition()}
               style={{
-                width: isLargeScreen ? "280px" : "auto",
+                width: isLargeScreen ? '280px' : 'auto',
                 transformOrigin: isLargeScreen
-                  ? "bottom right"
-                  : "bottom center",
-                maxHeight: isLargeScreen ? "auto" : "60vh",
+                  ? 'bottom right'
+                  : 'bottom center',
+                maxHeight: isLargeScreen ? 'auto' : '60vh',
               }}
             >
               <div className='flex justify-between items-center p-2 border-b border-gray-100'>
@@ -293,9 +293,9 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
               <div className='p-2'>
                 <div
                   className={`grid ${
-                    isLargeScreen ? "grid-cols-2 gap-2" : "grid-cols-1 gap-1"
+                    isLargeScreen ? 'grid-cols-2 gap-2' : 'grid-cols-1 gap-1'
                   } max-h-[${
-                    isLargeScreen ? "45vh" : "40vh"
+                    isLargeScreen ? '45vh' : '40vh'
                   }] p-2 overflow-y-auto`}
                 >
                   {MAP_STYLES.map(renderMapStyleItem)}
@@ -316,8 +316,8 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
             onClick={togglePanel}
             className={`relative group flex items-center justify-center w-8 h-8 rounded-md shadow-lg ${
               isOpen
-                ? "bg-gradient-to-tr from-green-500 to-emerald-400 border-2 border-emerald-300"
-                : "bg-white"
+                ? 'bg-gradient-to-tr from-green-500 to-emerald-400 border-2 border-emerald-300'
+                : 'bg-white'
             }`}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
@@ -330,12 +330,12 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
                 }}
                 transition={{
                   duration: 0.5,
-                  ease: "easeInOut",
+                  ease: 'easeInOut',
                 }}
               >
                 <FaLayerGroup
                   size={16}
-                  className={isOpen ? "text-white" : "text-gray-800"}
+                  className={isOpen ? 'text-white' : 'text-gray-800'}
                 />
               </motion.div>
             </div>

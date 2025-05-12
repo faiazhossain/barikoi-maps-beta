@@ -63,10 +63,6 @@ const MapillaryJSViewer: React.FC<MapillaryJSViewerProps> = ({
           const lat = position.lat;
           const currentImage = await viewer.getImage();
 
-          console.log(
-            `Image ID: ${currentImage?.id}, lng: ${lng}, lat: ${lat}`
-          );
-
           // Dispatch position to Redux
           dispatch(
             updateMapillaryPosition({
