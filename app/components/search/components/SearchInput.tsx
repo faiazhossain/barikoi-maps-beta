@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { AutoComplete } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
+import { FaSpinner } from "react-icons/fa";
+import { MdError } from "react-icons/md";
 import styles from "./SearchBar/SearchBar.module.css";
 import { useDropdownStyles } from "../hooks/useDropdownStyles";
 import Image from "next/image";
-import { useAppDispatch } from "@/app/store/store";
+import { useAppDispatch, useAppSelector } from "@/app/store/store";
 import { fetchReverseGeocode } from "@/app/store/thunks/searchThunks";
 import { openLeftBar } from "@/app/store/slices/drawerSlice";
+import { selectIsLoading } from "@/app/store/selectors/searchSelectors";
 
 interface AutoCompleteOption {
   value: string;
@@ -26,6 +29,7 @@ interface SearchInputProps {
   onBlur: () => void;
   onDropdownVisibleChange: (open: boolean) => void;
   onDirectSearch?: (value: string) => void;
+  error?: string | null;
 }
 
 const SearchInput: React.FC<SearchInputProps> = ({
@@ -40,12 +44,18 @@ const SearchInput: React.FC<SearchInputProps> = ({
   onBlur,
   onDropdownVisibleChange,
   onDirectSearch,
+  error,
 }) => {
   const dispatch = useAppDispatch();
   const dropdownStyle = useDropdownStyles();
   const [processedOptions, setProcessedOptions] =
     useState<AutoCompleteOption[]>(options);
   const [isCoordinate, setIsCoordinate] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(error || null);
+
+  // Get global loading state from Redux
+  const isLoading = useAppSelector(selectIsLoading);
 
   // Add ref for the input element
   const inputRef = React.useRef<any>(null);
@@ -119,6 +129,16 @@ const SearchInput: React.FC<SearchInputProps> = ({
     }
   }, [value, options]);
 
+  // Monitor global loading state
+  useEffect(() => {
+    setIsSearching(isLoading);
+  }, [isLoading]);
+
+  // Update error state when props change
+  useEffect(() => {
+    setSearchError(error ?? null);
+  }, [error]);
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       const coords = validateCoordinates(value);
@@ -138,7 +158,15 @@ const SearchInput: React.FC<SearchInputProps> = ({
       }
 
       if (onDirectSearch && value) {
-        onDirectSearch(value);
+        setIsSearching(true);
+        setSearchError(null);
+        Promise.resolve(onDirectSearch(value))
+          .catch((error) => {
+            setSearchError(error.message || "Search failed. Please try again.");
+          })
+          .finally(() => {
+            setIsSearching(false);
+          });
         onDropdownVisibleChange(false);
       }
     }
@@ -204,9 +232,28 @@ const SearchInput: React.FC<SearchInputProps> = ({
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         size='large'
-        prefix={<SearchOutlined className='!text-gray-400' />}
+        prefix={
+          isSearching ? (
+            <FaSpinner className='animate-spin text-green-500' />
+          ) : searchError ? (
+            <MdError className='text-red-500' />
+          ) : (
+            <SearchOutlined className='!text-gray-400' />
+          )
+        }
         dropdownRender={(menu) => (
           <div className='relative pb-8'>
+            {searchError && (
+              <div className='bg-red-50 text-red-700 p-2.5 text-sm mb-2 rounded'>
+                {searchError}
+              </div>
+            )}
+            {isSearching && !isExpanded && (
+              <div className='flex items-center justify-center p-4'>
+                <FaSpinner className='animate-spin text-green-500 mr-2' />
+                <span className='text-gray-700'>Searching...</span>
+              </div>
+            )}
             <div
               className={`${styles["dropdown-animation"]} ${
                 isExpanded || isAnimating ? styles["show"] : ""

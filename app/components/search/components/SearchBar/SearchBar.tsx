@@ -52,6 +52,7 @@ const SearchBar: React.FC = () => {
   const searchMode = useAppSelector(selectSearchMode);
   const isVisible = useAppSelector((state) => state.ui.isTopPanelVisible);
   const placeDetails = useAppSelector((state) => state.search.placeDetails);
+  const searchError = useAppSelector((state) => state.search.placeDetailsError);
   const selectedCategories = useAppSelector(
     (state) => state.search.selectedCategories
   );
@@ -60,6 +61,9 @@ const SearchBar: React.FC = () => {
   const [isMounted, setIsMounted] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [directSearchError, setDirectSearchError] = useState<string | null>(
+    null
+  );
 
   // Custom hooks
   const { handleSearch } = useSearchHandler(dispatch);
@@ -110,6 +114,11 @@ const SearchBar: React.FC = () => {
     }
   }, [showNearbyResults, dispatch]);
 
+  // Clear error when search term changes
+  useEffect(() => {
+    setDirectSearchError(null);
+  }, [searchTerm]);
+
   // Event handlers
   const handleSelect = (value: string, option: any) => {
     const selectedData = option.rawData;
@@ -144,6 +153,7 @@ const SearchBar: React.FC = () => {
 
   const handleInputChange = (value: string) => {
     dispatch(setSearchTerm(value));
+    setDirectSearchError(null);
 
     // Check for "near me" or "nearme" searches
     const lowerValue = value.toLowerCase();
@@ -216,7 +226,8 @@ const SearchBar: React.FC = () => {
       const responseData = await response.json();
 
       const uCode = responseData.geocoded_address?.uCode;
-      if (!uCode) throw new Error("No uCode found in response");
+      if (!uCode)
+        throw new Error("No location found. Please try a different search.");
 
       if (uCode) {
         dispatch(fetchPlaceDetails(uCode));
@@ -224,6 +235,11 @@ const SearchBar: React.FC = () => {
       }
     } catch (error) {
       console.error("Search error:", error);
+      setDirectSearchError(
+        error instanceof Error
+          ? error.message
+          : "Search failed. Please try again."
+      );
       throw error;
     }
   };
@@ -282,6 +298,7 @@ const SearchBar: React.FC = () => {
               onBlur={() => setIsExpanded(false)}
               onDropdownVisibleChange={handleDropdownVisibility}
               onDirectSearch={handleDirectSearch}
+              error={directSearchError || searchError}
             />
             <ClearButton searchTerm={searchTerm} />
           </div>
