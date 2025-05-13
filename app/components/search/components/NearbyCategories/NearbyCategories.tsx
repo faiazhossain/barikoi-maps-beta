@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
-import Slider from 'react-slick';
-import { Tooltip } from 'antd';
-import { motion } from 'framer-motion';
-import 'slick-carousel/slick/slick.css';
-import 'slick-carousel/slick/slick-theme.css';
-import styles from './NearbyCategories.module.css';
-import { useAppDispatch, useAppSelector } from '@/app/store/store';
+import React, { useState } from "react";
+import Slider from "react-slick";
+import { Tooltip } from "antd";
+import { motion } from "framer-motion";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import styles from "./NearbyCategories.module.css";
+import { useAppDispatch, useAppSelector } from "@/app/store/store";
 import {
   setSelectedCategories,
   setNearbyLoading,
-} from '@/app/store/slices/searchSlice';
+  setSearchCenter,
+} from "@/app/store/slices/searchSlice";
 import {
   FaUtensils,
   FaHotel,
@@ -20,8 +21,8 @@ import {
   FaSchool,
   FaParking,
   FaSpinner,
-} from 'react-icons/fa';
-import { setViewport } from '@/app/store/slices/mapSlice';
+} from "react-icons/fa";
+import { setViewport } from "@/app/store/slices/mapSlice";
 
 interface ArrowProps {
   className?: string;
@@ -33,13 +34,13 @@ function SampleNextArrow(props: ArrowProps) {
   const { className, style, onClick } = props;
   return (
     <div
-      className={`${className} ${styles['next-arrow']} !flex items-center justify-center opacity-70 hover:opacity-100`}
+      className={`${className} ${styles["next-arrow"]} !flex items-center justify-center opacity-70 hover:opacity-100`}
       style={{
         ...style,
-        display: 'block',
-        height: '100%',
-        top: '9px',
-        transform: 'translateY(0)',
+        display: "block",
+        height: "100%",
+        top: "9px",
+        transform: "translateY(0)",
       }}
       onClick={onClick}
     />
@@ -50,13 +51,13 @@ function SamplePrevArrow(props: ArrowProps) {
   const { className, style, onClick } = props;
   return (
     <div
-      className={`${className} ${styles['prev-arrow']} !flex items-center justify-center opacity-70 hover:opacity-100`}
+      className={`${className} ${styles["prev-arrow"]} !flex items-center justify-center opacity-70 hover:opacity-100`}
       style={{
         ...style,
-        display: 'block',
-        height: '100%',
-        top: '9px',
-        transform: 'translateY(0)',
+        display: "block",
+        height: "100%",
+        top: "9px",
+        transform: "translateY(0)",
       }}
       onClick={onClick}
     />
@@ -101,14 +102,14 @@ const NearbyCategories = () => {
   };
 
   const categories = [
-    { icon: <FaUtensils />, name: 'Restaurant', value: 'Restaurant' },
-    { icon: <FaHotel />, name: 'Hotels', value: 'Hotel' },
-    { icon: <FaCoffee />, name: 'Cafés', value: 'Cafe' },
-    { icon: <FaShoppingBag />, name: 'Shopping', value: 'Shopping' },
-    { icon: <FaGasPump />, name: 'Gas Stations', value: 'Gas Station' },
-    { icon: <FaHospital />, name: 'Hospitals', value: 'Hospital' },
-    { icon: <FaSchool />, name: 'Schools', value: 'School' },
-    { icon: <FaParking />, name: 'Parking', value: 'Parking' },
+    { icon: <FaUtensils />, name: "Restaurant", value: "Restaurant" },
+    { icon: <FaHotel />, name: "Hotels", value: "Hotel" },
+    { icon: <FaCoffee />, name: "Cafés", value: "Cafe" },
+    { icon: <FaShoppingBag />, name: "Shopping", value: "Shopping" },
+    { icon: <FaGasPump />, name: "Gas Stations", value: "Gas Station" },
+    { icon: <FaHospital />, name: "Hospitals", value: "Hospital" },
+    { icon: <FaSchool />, name: "Schools", value: "School" },
+    { icon: <FaParking />, name: "Parking", value: "Parking" },
   ];
 
   const handleCategoryClick = (category: string) => {
@@ -119,10 +120,16 @@ const NearbyCategories = () => {
 
       navigator.geolocation.getCurrentPosition(
         (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+
+          // Set the search center with user's location
+          dispatch(setSearchCenter({ latitude: lat, longitude: lng }));
+
           dispatch(
             setViewport({
-              longitude: position.coords.longitude,
-              latitude: position.coords.latitude,
+              longitude: lng,
+              latitude: lat,
               zoom: 16,
             })
           );
@@ -132,21 +139,25 @@ const NearbyCategories = () => {
           setLoadingCategory(null);
         },
         (error) => {
-          console.warn('Geolocation error:', error);
+          console.warn("Geolocation error:", error);
 
+          // If geolocation fails, use current viewport center
           const { hash } = window.location;
           let lat = viewport.latitude;
           let lng = viewport.longitude;
           let zoom = 16;
 
           if (hash) {
-            const hashParts = hash.substring(1).split('/');
+            const hashParts = hash.substring(1).split("/");
             if (hashParts.length >= 3) {
-              zoom = parseFloat(hashParts[0] ?? '0');
-              lat = parseFloat(hashParts[1] ?? '0');
-              lng = parseFloat(hashParts[2] ?? '0');
+              zoom = parseFloat(hashParts[0] ?? "0");
+              lat = parseFloat(hashParts[1] ?? "0");
+              lng = parseFloat(hashParts[2] ?? "0");
             }
           }
+
+          // Set the search center with current viewport
+          dispatch(setSearchCenter({ latitude: lat, longitude: lng }));
 
           dispatch(
             setViewport({
@@ -167,6 +178,14 @@ const NearbyCategories = () => {
         }
       );
     } else {
+      // If geolocation is not supported, use current viewport
+      dispatch(
+        setSearchCenter({
+          latitude: viewport.latitude,
+          longitude: viewport.longitude,
+        })
+      );
+
       dispatch(
         setViewport({
           latitude: viewport.latitude,
@@ -190,13 +209,13 @@ const NearbyCategories = () => {
                   <Tooltip
                     title={
                       loadingCategory === category.value
-                        ? 'Getting your location...'
+                        ? "Getting your location..."
                         : category.name
                     }
                     placement='bottom'
                     mouseEnterDelay={0.1}
                     mouseLeaveDelay={0.1}
-                    classNames={{ root: '!mt-2' }}
+                    classNames={{ root: "!mt-2" }}
                     arrow={{ pointAtCenter: true }}
                   >
                     <motion.button

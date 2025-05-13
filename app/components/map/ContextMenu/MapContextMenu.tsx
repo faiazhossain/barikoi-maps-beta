@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Popup } from 'react-map-gl/maplibre';
+import React, { useState } from "react";
+import { Popup } from "react-map-gl/maplibre";
 import {
   FaMapMarkerAlt,
   FaSearch,
@@ -8,28 +8,30 @@ import {
   FaCopy,
   FaCheck,
   FaInfoCircle,
-} from 'react-icons/fa';
-import { MdDirections } from 'react-icons/md';
-import { useAppDispatch } from '@/app/store/store';
-import { store } from '@/app/store/store';
-import { closeDrawer, openLeftBar } from '@/app/store/slices/drawerSlice';
-import { fetchReverseGeocode } from '@/app/store/thunks/searchThunks';
+} from "react-icons/fa";
+import { MdDirections } from "react-icons/md";
+import { useAppDispatch } from "@/app/store/store";
+import { store } from "@/app/store/store";
+import { closeDrawer, openLeftBar } from "@/app/store/slices/drawerSlice";
+import { fetchReverseGeocode } from "@/app/store/thunks/searchThunks";
 import {
   setMarkerCoords,
   setViewport,
   toggleDirections,
-} from '@/app/store/slices/mapSlice';
+} from "@/app/store/slices/mapSlice";
 import {
   setSelectedCategories,
   setSearchMode,
-} from '@/app/store/slices/searchSlice';
+  setNearbyPlaces,
+} from "@/app/store/slices/searchSlice";
 import {
   setOrigin,
   setDestination,
   setOriginSearch,
   setDestinationSearch,
   fetchRoute,
-} from '@/app/store/slices/directionsSlice';
+} from "@/app/store/slices/directionsSlice";
+import { setSearchCenter } from "@/app/store/slices/searchSlice";
 
 interface MapContextMenuProps {
   longitude: number;
@@ -64,7 +66,7 @@ const MapContextMenu: React.FC<MapContextMenuProps> = ({
         latitude: parseFloat(lat),
         longitude: parseFloat(lng),
         properties: {
-          source: 'contextMenu',
+          source: "contextMenu",
         },
       })
     );
@@ -79,24 +81,33 @@ const MapContextMenu: React.FC<MapContextMenuProps> = ({
   };
 
   const handleSearchNearby = () => {
+    dispatch(setSearchCenter(null));
+    dispatch(setSelectedCategories([]));
+    dispatch(setNearbyPlaces([]));
+    // Set the search center for nearby places
     dispatch(
-      setViewport({
-        latitude: latitude,
-        longitude: longitude,
-        zoom: 16, // Good zoom level for nearby places
+      setSearchCenter({
+        latitude: parseFloat(lat),
+        longitude: parseFloat(lng),
       })
     );
 
-    // Determine a relevant category based on the place type
-    const category = 'Restaurant'; // Default category
+    dispatch(
+      setViewport({
+        latitude: parseFloat(lat),
+        longitude: parseFloat(lng),
+        zoom: 16,
+      })
+    );
 
     // Set the selected category to trigger nearby search
-    dispatch(setSelectedCategories([category]));
+    dispatch(setSelectedCategories(["Restaurant"]));
 
     // Close the drawer to show the map and nearby results
     dispatch(closeDrawer());
     onClose();
   };
+
   const handleDirectionsFrom = () => {
     // Set the coordinates as the origin in the directions panel
     dispatch(
@@ -109,7 +120,7 @@ const MapContextMenu: React.FC<MapContextMenuProps> = ({
     dispatch(setOriginSearch(`${lat}, ${lng}`));
 
     // Set the search mode to directions
-    dispatch(setSearchMode('directions'));
+    dispatch(setSearchMode("directions"));
 
     // Make sure the directions panel is visible
     // Only toggle if it's not already visible to avoid turning it off
@@ -149,7 +160,7 @@ const MapContextMenu: React.FC<MapContextMenuProps> = ({
     dispatch(setDestinationSearch(`${lat}, ${lng}`));
 
     // Set the search mode to directions
-    dispatch(setSearchMode('directions'));
+    dispatch(setSearchMode("directions"));
 
     // Make sure the directions panel is visible
     // Only toggle if it's not already visible to avoid turning it off
@@ -181,7 +192,7 @@ const MapContextMenu: React.FC<MapContextMenuProps> = ({
     if (navigator.share) {
       navigator
         .share({
-          title: 'Location on Barikoi Maps',
+          title: "Location on Barikoi Maps",
           text: `Check out this location at ${lat}, ${lng}`,
           url: `${window.location.origin}/#${lat},${lng}`,
         })
@@ -189,7 +200,7 @@ const MapContextMenu: React.FC<MapContextMenuProps> = ({
     } else {
       const url = `${window.location.origin}/#${lat},${lng}`;
       navigator.clipboard.writeText(url);
-      alert('Link copied to clipboard');
+      alert("Link copied to clipboard");
     }
     onClose();
   };
@@ -217,7 +228,7 @@ const MapContextMenu: React.FC<MapContextMenuProps> = ({
               onClick={handleCopyCoords}
             >
               {copied ? <FaCheck size={10} /> : <FaCopy size={10} />}
-              <span className='text-xs'>{copied ? 'Copied' : 'Copy'}</span>
+              <span className='text-xs'>{copied ? "Copied" : "Copy"}</span>
             </button>
           </div>
           <div className='flex items-center'>

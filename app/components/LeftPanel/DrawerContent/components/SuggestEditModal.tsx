@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from "react";
 import {
   Modal,
   Tabs,
@@ -9,7 +9,7 @@ import {
   Typography,
   Row,
   Col,
-} from 'antd';
+} from "antd";
 import {
   FaEdit,
   FaTrashAlt,
@@ -19,10 +19,10 @@ import {
   FaRoad,
   FaCity,
   FaMailBulk,
-} from 'react-icons/fa';
-import { useAppSelector } from '@/app/store/store';
-import axios from 'axios';
-import { useMediaQuery } from '@/app/hooks/useMediaQuery';
+} from "react-icons/fa";
+import { useAppSelector } from "@/app/store/store";
+import axios from "axios";
+import { useMediaQuery } from "@/app/hooks/useMediaQuery";
 
 const { Item } = Form;
 const { Text, Title } = Typography;
@@ -30,7 +30,7 @@ const { Text, Title } = Typography;
 // Use the server-side API instead of calling external API directly
 const updatePlaceInformation = async (data: any) => {
   try {
-    const response = await axios.post('/api/place-suggestion', data);
+    const response = await axios.post("/api/place-suggestion", data);
     return response;
   } catch (error) {
     throw error;
@@ -47,7 +47,7 @@ const UpdateForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [form] = Form.useForm();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const placeDetails = useAppSelector((state) => state.search.placeDetails);
-  const isMobile = useMediaQuery('(max-width: 768px)');
+  const isMobile = useMediaQuery("(max-width: 768px)");
   // Using useCallback to memoize the function for dependency array
   const _onFillForm = useCallback(
     (data: any) => {
@@ -66,7 +66,7 @@ const UpdateForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     setIsSubmitting(true);
     const data = {
       ...values,
-      request_type: 'UPDATE',
+      request_type: "UPDATE",
     };
 
     updatePlaceInformation(data)
@@ -79,7 +79,7 @@ const UpdateForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 <br />
                 <Text>
                   {res?.data?.message ||
-                    'Place information updated successfully'}
+                    "Place information updated successfully"}
                 </Text>
               </>
             ),
@@ -95,7 +95,7 @@ const UpdateForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 <br />
                 <Text>
                   {res?.response?.data?.message ||
-                    'Failed to update place information'}
+                    "Failed to update place information"}
                 </Text>
               </>
             ),
@@ -110,7 +110,7 @@ const UpdateForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               <Text strong>Error!</Text>
               <br />
               <Text>
-                {err?.response?.data?.message || 'An unexpected error occurred'}
+                {err?.response?.data?.message || "An unexpected error occurred"}
               </Text>
             </>
           ),
@@ -137,7 +137,7 @@ const UpdateForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         layout='vertical'
         onFinish={_onFinish}
         requiredMark={false}
-        size={isMobile ? 'middle' : 'large'}
+        size={isMobile ? "middle" : "large"}
         className='space-y-1'
       >
         {/* Hidden place_code field */}
@@ -154,7 +154,7 @@ const UpdateForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   Place Name (English)
                 </div>
               }
-              rules={[{ required: true, message: 'Please enter place name' }]}
+              rules={[{ required: true, message: "Please enter place name" }]}
             >
               <Input
                 placeholder='Enter place name'
@@ -187,7 +187,7 @@ const UpdateForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               Address
             </div>
           }
-          rules={[{ required: true, message: 'Please enter address' }]}
+          rules={[{ required: true, message: "Please enter address" }]}
         >
           <Input
             placeholder='Enter full address'
@@ -238,7 +238,7 @@ const UpdateForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   Thana
                 </div>
               }
-              rules={[{ required: true, message: 'Please enter thana' }]}
+              rules={[{ required: true, message: "Please enter thana" }]}
             >
               <Input
                 placeholder='Enter thana name'
@@ -255,7 +255,7 @@ const UpdateForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   Postcode
                 </div>
               }
-              rules={[{ required: true, message: 'Please enter postcode' }]}
+              rules={[{ required: true, message: "Please enter postcode" }]}
             >
               <Input
                 placeholder='Enter postcode'
@@ -263,7 +263,7 @@ const UpdateForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               />
             </Item>
           </Col>
-        </Row>{' '}
+        </Row>{" "}
         <Item wrapperCol={{ span: 24 }} className='mt-4'>
           <Button
             type='primary'
@@ -272,7 +272,7 @@ const UpdateForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             block
             className='h-10 font-medium shadow-md transition-all duration-300 hover:shadow-lg bg-green-500 hover:bg-green-600 border-green-500 hover:border-green-600'
           >
-            {isSubmitting ? 'Updating...' : 'Update Information'}
+            {isSubmitting ? "Updating..." : "Update Information"}
           </Button>
         </Item>
       </Form>
@@ -285,7 +285,7 @@ const DeleteForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [form] = Form.useForm();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const placeDetails = useAppSelector((state) => state.search.placeDetails);
-  const isMobile = useMediaQuery('(max-width: 768px)');
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   useEffect(() => {
     if (placeDetails) {
@@ -300,7 +300,7 @@ const DeleteForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     setIsSubmitting(true);
     const data: any = {
       ...values,
-      request_type: 'DELETE',
+      request_type: "DELETE",
     };
 
     updatePlaceInformation(data)
@@ -313,7 +313,7 @@ const DeleteForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 <br />
                 <Text>
                   {res?.data?.message ||
-                    'Place deletion request submitted successfully'}
+                    "Place deletion request submitted successfully"}
                 </Text>
               </>
             ),
@@ -329,7 +329,7 @@ const DeleteForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 <br />
                 <Text>
                   {res?.response?.data?.message ||
-                    'Failed to submit deletion request'}
+                    "Failed to submit deletion request"}
                 </Text>
               </>
             ),
@@ -344,7 +344,7 @@ const DeleteForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               <Text strong>Error!</Text>
               <br />
               <Text>
-                {err?.response?.data?.message || 'An unexpected error occurred'}
+                {err?.response?.data?.message || "An unexpected error occurred"}
               </Text>
             </>
           ),
@@ -376,7 +376,7 @@ const DeleteForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         wrapperCol={{ span: 24 }}
         layout='vertical'
         onFinish={_onFinish}
-        size={isMobile ? 'middle' : 'large'}
+        size={isMobile ? "middle" : "large"}
         requiredMark={false}
       >
         {/* Hidden place_code field */}
@@ -395,11 +395,11 @@ const DeleteForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           rules={[
             {
               required: true,
-              message: 'Please provide a detailed reason for removal',
+              message: "Please provide a detailed reason for removal",
             },
             {
               min: 20,
-              message: 'Reason should be at least 20 characters long',
+              message: "Reason should be at least 20 characters long",
             },
           ]}
           className='mb-2'
@@ -420,7 +420,7 @@ const DeleteForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             block
             className='h-10 font-medium shadow-md transition-all duration-300 hover:shadow-lg'
           >
-            {isSubmitting ? 'Submitting...' : 'Submit Removal Request'}
+            {isSubmitting ? "Submitting..." : "Submit Removal Request"}
           </Button>
         </Item>
       </Form>
@@ -432,8 +432,8 @@ const SuggestEditModal: React.FC<SuggestEditModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const [activeTab, setActiveTab] = useState('update');
-  const isMobile = useMediaQuery('(max-width: 768px)');
+  const [activeTab, setActiveTab] = useState("update");
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   return (
     <Modal
@@ -447,7 +447,7 @@ const SuggestEditModal: React.FC<SuggestEditModalProps> = ({
       footer={null}
       onCancel={onClose}
       centered
-      width={isMobile ? '95%' : 680}
+      width={isMobile ? "95%" : 680}
       bodyStyle={{ padding: 0 }}
       maskClosable={false}
       className='suggest-edit-modal'
@@ -456,25 +456,25 @@ const SuggestEditModal: React.FC<SuggestEditModalProps> = ({
         activeKey={activeTab}
         onChange={setActiveTab}
         tabBarStyle={{
-          margin: '0 16px',
-          borderBottom: '1px solid #f0f0f0',
-          paddingTop: '8px',
+          margin: "0 16px",
+          borderBottom: "1px solid #f0f0f0",
+          paddingTop: "8px",
         }}
-        size={isMobile ? 'small' : 'large'}
+        size={isMobile ? "small" : "large"}
         items={[
           {
-            key: 'update',
+            key: "update",
             label: (
               <div
                 className={`flex items-center ${
-                  activeTab === 'update' ? 'text-green-600' : 'text-gray-600'
+                  activeTab === "update" ? "text-green-600" : "text-gray-600"
                 }`}
               >
                 <FaEdit className='mr-1.5' />
                 <span className='font-medium'>Update Information</span>
                 <div
                   className={`ml-1.5 w-2 h-2 rounded-full ${
-                    activeTab === 'update' ? 'bg-green-500' : 'bg-gray-300'
+                    activeTab === "update" ? "bg-green-500" : "bg-gray-300"
                   }`}
                 ></div>
               </div>
@@ -482,18 +482,18 @@ const SuggestEditModal: React.FC<SuggestEditModalProps> = ({
             children: <UpdateForm onClose={onClose} />,
           },
           {
-            key: 'delete',
+            key: "delete",
             label: (
               <div
                 className={`flex items-center ${
-                  activeTab === 'delete' ? 'text-red-600' : 'text-gray-600'
+                  activeTab === "delete" ? "text-red-600" : "text-gray-600"
                 }`}
               >
                 <FaTrashAlt className='mr-1.5' />
                 <span className='font-medium'>Request Removal</span>
                 <div
                   className={`ml-1.5 w-2 h-2 rounded-full ${
-                    activeTab === 'delete' ? 'bg-red-500' : 'bg-gray-300'
+                    activeTab === "delete" ? "bg-red-500" : "bg-gray-300"
                   }`}
                 ></div>
               </div>

@@ -1,12 +1,12 @@
-'use client';
-import React, { useEffect, useState } from 'react';
-import { useAppDispatch, useAppSelector } from '@/app/store/store';
-import { fetchNearbyPlaces } from '@/app/store/thunks/searchThunks';
+"use client";
+import React, { useEffect, useState } from "react";
+import { useAppDispatch, useAppSelector } from "@/app/store/store";
+import { fetchNearbyPlaces } from "@/app/store/thunks/searchThunks";
 import {
   setCurrentRadius,
   setSelectedCategories,
   setHoveredNearbyPlace,
-} from '@/app/store/slices/searchSlice';
+} from "@/app/store/slices/searchSlice";
 import {
   FaMapMarkerAlt,
   FaSpinner,
@@ -14,11 +14,11 @@ import {
   FaWalking,
   FaChevronDown,
   FaChevronUp,
-} from 'react-icons/fa';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Input, Tooltip } from 'antd';
-import { NearbyPlace } from '@/app/types/map';
-import NearbyPlaceModal from '@/app/components/map/Modals/NearbyPlaceModal';
+} from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
+import { Input, Tooltip } from "antd";
+import { NearbyPlace } from "@/app/types/map";
+import NearbyPlaceModal from "@/app/components/map/Modals/NearbyPlaceModal";
 
 // Place card component for displaying individual nearby places
 const PlaceCard = ({
@@ -89,8 +89,8 @@ const CategoryPill = ({
     onClick={onClick}
     className={`text-xs px-2.5 py-1 rounded-full transition-colors ${
       isActive
-        ? 'bg-blue-600 text-white font-medium'
-        : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+        ? "bg-blue-600 text-white font-medium"
+        : "bg-gray-50 text-gray-700 hover:bg-gray-100"
     }`}
   >
     {label}
@@ -187,34 +187,34 @@ const NearbyFilters = ({
 
 // Common categories for quick selection
 const COMMON_CATEGORIES = [
-  'Restaurant',
-  'Hotel',
-  'Cafe',
-  'Hospital',
-  'Bank',
-  'ATM',
-  'Pharmacy',
-  'Shop',
+  "Restaurant",
+  "Hotel",
+  "Cafe",
+  "Hospital",
+  "Bank",
+  "ATM",
+  "Pharmacy",
+  "Shop",
 ];
 
 const NearbyResults = () => {
   const dispatch = useAppDispatch();
 
   // Local state for search term
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   // State for panel expansion
   const [isPanelExpanded, setIsPanelExpanded] = useState(true);
   // State for selected place to show in modal
   const [selectedPlace, setSelectedPlace] = useState<NearbyPlace | null>(null);
 
   // Redux state
-  const { viewport } = useAppSelector((state) => state.map);
   const {
     nearbyPlaces,
     nearbyLoading,
     nearbyError,
     currentRadius,
     selectedCategories,
+    searchCenter,
   } = useAppSelector((state) => state.search);
 
   // Handle place selection
@@ -261,36 +261,28 @@ const NearbyResults = () => {
 
   // Fetch nearby places when coordinates, radius, or search term change
   useEffect(() => {
-    if (selectedCategories.length > 0) {
-      // Since your API only supports single category search currently,
-      // just use the first category in the array
+    if (selectedCategories.length > 0 && searchCenter) {
       const categoryToSearch = selectedCategories[0];
 
       dispatch(
         fetchNearbyPlaces({
-          latitude: viewport.latitude,
-          longitude: viewport.longitude,
+          latitude: searchCenter.latitude,
+          longitude: searchCenter.longitude,
           radius: currentRadius,
           categories: categoryToSearch,
         })
       );
     }
-  }, [
-    viewport.latitude,
-    viewport.longitude,
-    currentRadius,
-    selectedCategories,
-    dispatch,
-  ]);
+  }, [searchCenter, currentRadius, selectedCategories, dispatch]);
 
   useEffect(() => {
     // Set the input field to match the current selection
     if (selectedCategories.length > 0) {
-      setSearchTerm(selectedCategories[0] ?? '');
+      setSearchTerm(selectedCategories[0] ?? "");
     }
   }, [selectedCategories]);
 
-  if (!viewport.latitude || !viewport.longitude) {
+  if (!searchCenter) {
     return (
       <div className='flex flex-col items-center justify-center h-full text-gray-500 p-4'>
         <FaMapMarkerAlt className='text-4xl mb-3' />
@@ -308,7 +300,7 @@ const NearbyResults = () => {
           <motion.div
             className='flex flex-col'
             initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
+            animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
@@ -390,7 +382,7 @@ const NearbyResults = () => {
               <span className='text-xs font-medium'>
                 {nearbyPlaces.length > 0
                   ? `Show ${nearbyPlaces.length} places`
-                  : 'Expand'}
+                  : "Expand"}
               </span>
             </>
           )}

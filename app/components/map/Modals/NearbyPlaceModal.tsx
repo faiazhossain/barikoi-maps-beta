@@ -1,13 +1,17 @@
-'use client';
-import React from 'react';
-import { motion } from 'framer-motion';
-import { FaDirections, FaMapMarkerAlt, FaTimes } from 'react-icons/fa';
-import { NearbyPlace } from '@/app/types/map';
-import { fetchPlaceDetails } from '@/app/store/thunks/searchThunks';
-import { openDrawer } from '@/app/store/slices/drawerSlice';
-import { setSelectedCategories } from '@/app/store/slices/searchSlice';
-import { useAppDispatch } from '@/app/store/store';
-import { MdReadMore } from 'react-icons/md';
+"use client";
+import React from "react";
+import { motion } from "framer-motion";
+import { FaDirections, FaMapMarkerAlt, FaTimes } from "react-icons/fa";
+import { NearbyPlace } from "@/app/types/map";
+import { fetchPlaceDetails } from "@/app/store/thunks/searchThunks";
+import { openDrawer } from "@/app/store/slices/drawerSlice";
+import {
+  setNearbyPlaces,
+  setSearchCenter,
+  setSelectedCategories,
+} from "@/app/store/slices/searchSlice";
+import { useAppDispatch } from "@/app/store/store";
+import { MdReadMore } from "react-icons/md";
 interface NearbyPlaceModalProps {
   place: NearbyPlace;
   onClose: () => void;
@@ -21,7 +25,9 @@ const NearbyPlaceModal: React.FC<NearbyPlaceModalProps> = ({
     if (place.uCode) {
       dispatch(fetchPlaceDetails(place.uCode));
       dispatch(openDrawer());
+      dispatch(setSearchCenter(null));
       dispatch(setSelectedCategories([]));
+      dispatch(setNearbyPlaces([]));
       onClose();
     }
   };

@@ -13,6 +13,8 @@ import {
   setSelectedPlace,
   setSelectedCategories,
   setSelectedInternationalPlace,
+  setSearchCenter,
+  setNearbyPlaces,
 } from "@/app/store/slices/searchSlice";
 import {
   selectSearchTerm,
@@ -229,6 +231,8 @@ const SearchBar: React.FC = () => {
   // Handle closing nearby results
   const handleCloseNearbyResults = () => {
     dispatch(setSelectedCategories([]));
+    dispatch(setSearchCenter(null));
+    dispatch(setNearbyPlaces([]));
     if (placeDetails) {
       dispatch(openDrawer());
     }

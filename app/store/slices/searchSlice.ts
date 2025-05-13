@@ -24,6 +24,10 @@ interface SearchState {
     longitude: number;
     latitude: number;
   } | null;
+  searchCenter: {
+    latitude: number;
+    longitude: number;
+  } | null;
 }
 
 const initialState: SearchState = {
@@ -42,6 +46,7 @@ const initialState: SearchState = {
   currentRadius: 0.5, // Default 0.5 km radius
   hoveredNearbyPlaceId: null, // Add initial value
   selectedInternationalPlace: null,
+  searchCenter: null,
 };
 
 const searchSlice = createSlice({
@@ -108,6 +113,12 @@ const searchSlice = createSlice({
     ) => {
       state.selectedInternationalPlace = action.payload;
     },
+    setSearchCenter: (
+      state,
+      action: PayloadAction<{ latitude: number; longitude: number } | null>
+    ) => {
+      state.searchCenter = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -156,6 +167,7 @@ export const {
   setPlaceDetails, // Add this line
   setHoveredNearbyPlace, // Add this line
   setSelectedInternationalPlace,
+  setSearchCenter,
 } = searchSlice.actions;
 
 export default searchSlice.reducer;

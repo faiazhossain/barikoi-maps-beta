@@ -41,6 +41,7 @@ import {
 } from "@/app/utils/geoUtils";
 import { addFitCountryListener } from "@/app/utils/eventUtils";
 import { setSelectedCountryCode } from "@/app/store/slices/countrySlice";
+import { setSearchCenter } from "@/app/store/slices/searchSlice";
 
 const MapContainer: React.FC = () => {
   const mapRef = useMapRef();
@@ -75,10 +76,7 @@ const MapContainer: React.FC = () => {
     mapStyle || "/map-styles/light-style.json"
   );
 
-  const [searchCenterCoords, setSearchCenterCoords] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
+  const { searchCenter } = useAppSelector((state) => state.search);
 
   // Function to detect country at map center
   const detectCountryAtMapCenter = useCallback(
@@ -410,15 +408,15 @@ const MapContainer: React.FC = () => {
 
   // Initialize search center when nearby search is first activated
   useEffect(() => {
-    if (showNearbyResults && !searchCenterCoords) {
-      setSearchCenterCoords({
+    if (showNearbyResults && !searchCenter) {
+      setSearchCenter({
         latitude: viewport.latitude,
         longitude: viewport.longitude,
       });
     } else if (!showNearbyResults) {
-      setSearchCenterCoords(null);
+      setSearchCenter(null);
     }
-  }, [showNearbyResults, viewport, searchCenterCoords]);
+  }, [showNearbyResults, viewport, searchCenter]);
 
   return (
     <>
@@ -484,11 +482,11 @@ const MapContainer: React.FC = () => {
               />
             )}
           {/* Add nearby search center marker and results */}
-          {showNearbyResults && !isMapillaryVisible && searchCenterCoords && (
+          {showNearbyResults && !isMapillaryVisible && searchCenter && (
             <>
               <NearbySearchMarker
-                latitude={searchCenterCoords.latitude}
-                longitude={searchCenterCoords.longitude}
+                latitude={searchCenter.latitude}
+                longitude={searchCenter.longitude}
                 categories={selectedCategories}
               />
 

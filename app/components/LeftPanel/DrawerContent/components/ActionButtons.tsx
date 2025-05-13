@@ -1,21 +1,23 @@
 // components/ActionButtons.tsx
-import React, { useState } from 'react';
-import { FaShareAlt, FaMapMarkerAlt, FaEdit, FaCheck } from 'react-icons/fa';
-import { MdDirections } from 'react-icons/md';
-import { motion } from 'framer-motion';
-import ShareModal from './ShareModal';
-import SuggestEditModal from './SuggestEditModal';
-import { useAppSelector, useAppDispatch } from '@/app/store/store';
+import React, { useState } from "react";
+import { FaShareAlt, FaMapMarkerAlt, FaEdit, FaCheck } from "react-icons/fa";
+import { MdDirections } from "react-icons/md";
+import { motion } from "framer-motion";
+import ShareModal from "./ShareModal";
+import SuggestEditModal from "./SuggestEditModal";
+import { useAppSelector, useAppDispatch } from "@/app/store/store";
 import {
   setSelectedCategories,
   setSearchMode,
-} from '@/app/store/slices/searchSlice';
-import { setViewport, toggleDirections } from '@/app/store/slices/mapSlice';
-import { closeDrawer } from '@/app/store/slices/drawerSlice';
+  setNearbyPlaces,
+} from "@/app/store/slices/searchSlice";
+import { setViewport, toggleDirections } from "@/app/store/slices/mapSlice";
+import { closeDrawer } from "@/app/store/slices/drawerSlice";
 import {
   setDestination,
   setDestinationSearch,
-} from '@/app/store/slices/directionsSlice';
+} from "@/app/store/slices/directionsSlice";
+import { setSearchCenter } from "@/app/store/slices/searchSlice";
 
 export const ActionButtons = () => {
   const dispatch = useAppDispatch();
@@ -24,13 +26,13 @@ export const ActionButtons = () => {
   const [isSuggestEditModalOpen, setIsSuggestEditModalOpen] = useState(false);
   const placeDetails = useAppSelector((state) => state.search.placeDetails);
   const handleActionClick = (action: string) => {
-    if (action === 'share') {
+    if (action === "share") {
       setIsShareModalOpen(true);
-    } else if (action === 'nearby') {
+    } else if (action === "nearby") {
       handleNearbyClick();
-    } else if (action === 'directions') {
+    } else if (action === "directions") {
       handleDirectionsClick();
-    } else if (action === 'edit') {
+    } else if (action === "edit") {
       setIsSuggestEditModalOpen(true);
     }
 
@@ -40,25 +42,28 @@ export const ActionButtons = () => {
 
   // Handle the nearby action when a user clicks the "Nearby" button
   const handleNearbyClick = () => {
+    dispatch(setSearchCenter(null)); // Reset search center
+    dispatch(setSelectedCategories([])); // Clear selected categories
+    dispatch(setNearbyPlaces([]));
     if (placeDetails && placeDetails.latitude && placeDetails.longitude) {
       // Get place coordinates
       const lat = parseFloat(placeDetails.latitude);
       const lng = parseFloat(placeDetails.longitude);
 
-      // First update the map viewport to center on the selected place
+      // Set the search center for nearby places
+      dispatch(setSearchCenter({ latitude: lat, longitude: lng }));
+
+      // Update the map viewport to center on the selected place
       dispatch(
         setViewport({
           latitude: lat,
           longitude: lng,
-          zoom: 16, // Good zoom level for nearby places
+          zoom: 16,
         })
       );
 
-      // Determine a relevant category based on the place type
-      const category = 'Restaurant'; // Default category
-
       // Set the selected category to trigger nearby search
-      dispatch(setSelectedCategories([category]));
+      dispatch(setSelectedCategories(["Restaurant"]));
 
       // Close the drawer to show the map and nearby results
       dispatch(closeDrawer());
@@ -74,7 +79,7 @@ export const ActionButtons = () => {
       const name =
         placeDetails.business_name ||
         placeDetails.address ||
-        'Selected location';
+        "Selected location";
 
       // Set as destination in the directions panel
       dispatch(
@@ -90,7 +95,7 @@ export const ActionButtons = () => {
       dispatch(setDestinationSearch(name));
 
       // Set the search mode to directions
-      dispatch(setSearchMode('directions'));
+      dispatch(setSearchMode("directions"));
 
       // Make sure the directions panel is visible
       dispatch(toggleDirections());
@@ -116,10 +121,10 @@ export const ActionButtons = () => {
   };
 
   const buttons = [
-    { icon: <FaShareAlt />, label: 'Share', action: 'share' },
-    { icon: <MdDirections />, label: 'Directions', action: 'directions' },
-    { icon: <FaMapMarkerAlt />, label: 'Nearby', action: 'nearby' },
-    { icon: <FaEdit />, label: 'Suggest Edit', action: 'edit' },
+    { icon: <FaShareAlt />, label: "Share", action: "share" },
+    { icon: <MdDirections />, label: "Directions", action: "directions" },
+    { icon: <FaMapMarkerAlt />, label: "Nearby", action: "nearby" },
+    { icon: <FaEdit />, label: "Suggest Edit", action: "edit" },
   ];
   return (
     <>
@@ -135,21 +140,21 @@ export const ActionButtons = () => {
             whileTap={{ scale: 0.95 }}
             className={`flex flex-col items-center text-xs w-full ${
               activeAction === btn.action
-                ? 'text-blue-600'
-                : 'text-gray-600 hover:text-blue-500'
+                ? "text-blue-600"
+                : "text-gray-600 hover:text-blue-500"
             } transition-colors`}
             onClick={() => handleActionClick(btn.action)}
           >
             <div className='relative'>
               <div
                 className={`p-2 rounded-full ${
-                  activeAction === btn.action ? 'bg-blue-100' : 'bg-white'
+                  activeAction === btn.action ? "bg-blue-100" : "bg-white"
                 } transition-colors`}
               >
                 {activeAction === btn.action ? (
                   <FaCheck className='text-lg text-blue-600' />
                 ) : (
-                  React.cloneElement(btn.icon, { className: 'text-lg' })
+                  React.cloneElement(btn.icon, { className: "text-lg" })
                 )}
               </div>
             </div>
@@ -165,11 +170,11 @@ export const ActionButtons = () => {
             onClose={() => setIsShareModalOpen(false)}
             placeInfo={
               getShareInfo() || {
-                name: '',
-                address: '',
+                name: "",
+                address: "",
                 coordinates: { latitude: 0, longitude: 0 },
-                url: '',
-                uCode: '',
+                url: "",
+                uCode: "",
               }
             }
           />
