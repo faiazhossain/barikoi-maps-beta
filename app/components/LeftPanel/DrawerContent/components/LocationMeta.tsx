@@ -1,15 +1,43 @@
-import { FaLocationDot, FaHashtag, FaCopy, FaCheck } from 'react-icons/fa6';
-import { motion } from 'framer-motion';
-import { useState } from 'react';
+import React, { useState, useMemo } from "react";
+import { FaHashtag, FaCopy, FaCheck } from "react-icons/fa6";
+import { FaMapMarkerAlt } from "react-icons/fa";
+import { motion } from "framer-motion";
 
-const LocationMeta = ({ placeDetails }: any) => {
-  const [copiedItem, setCopiedItem] = useState<string | null>(null);
-
-  const copyToClipboard = (text: string, item: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedItem(item);
-    setTimeout(() => setCopiedItem(null), 1500);
+interface LocationMetaProps {
+  placeDetails: {
+    latitude?: number;
+    longitude?: number;
+    place_code?: string;
+    [key: string]: any;
   };
+}
+
+const LocationMeta: React.FC<LocationMetaProps> = ({ placeDetails }) => {
+  const [isCopied, setIsCopied] = useState(false);
+  const [copiedType, setCopiedType] = useState<"coordinates" | "code" | null>(
+    null
+  );
+
+  const coordinates = useMemo(() => {
+    if (!placeDetails) return null;
+    const lat = placeDetails.latitude;
+    const lng = placeDetails.longitude;
+    return lat && lng ? `${lat}, ${lng}` : null;
+  }, [placeDetails]);
+
+  const copyToClipboard = (text: string, type: "coordinates" | "code") => {
+    if (text) {
+      navigator.clipboard.writeText(text);
+      setIsCopied(true);
+      setCopiedType(type);
+      setTimeout(() => {
+        setIsCopied(false);
+        setCopiedType(null);
+      }, 2000);
+    }
+  };
+
+  if (!coordinates) return null;
 
   return (
     <motion.div
@@ -21,23 +49,16 @@ const LocationMeta = ({ placeDetails }: any) => {
         {/* Coordinates */}
         <div className='flex items-center justify-between'>
           <div className='flex items-center gap-2'>
-            <FaLocationDot className='text-blue-500 text-sm' />
+            <FaMapMarkerAlt className='text-blue-500 text-sm' />
             <span className='font-medium'>Location:</span>
-            <span className='font-mono text-xs'>
-              {placeDetails.latitude}, {placeDetails.longitude}
-            </span>
+            <span className='font-mono text-xs'>{coordinates}</span>
           </div>
           <button
-            onClick={() =>
-              copyToClipboard(
-                `${placeDetails.latitude}, ${placeDetails.longitude}`,
-                'location'
-              )
-            }
+            onClick={() => copyToClipboard(coordinates, "coordinates")}
             className='text-gray-400 hover:text-blue-500 transition-colors'
             title='Copy coordinates'
           >
-            {copiedItem === 'location' ? (
+            {isCopied && copiedType === "coordinates" ? (
               <FaCheck className='text-green-500 text-xs' />
             ) : (
               <FaCopy className='w-3 h-3' />
@@ -45,27 +66,29 @@ const LocationMeta = ({ placeDetails }: any) => {
           </button>
         </div>
 
-        {/* Place code */}
-        <div className='flex items-center justify-between'>
-          <div className='flex items-center gap-2'>
-            <FaHashtag className='text-blue-500 text-sm' />
-            <span className='font-medium'>Code:</span>
-            <span className='font-mono text-xs bg-gray-100 px-1.5 py-0.5 rounded'>
-              {placeDetails.place_code}
-            </span>
+        {/* Place code - only show if available */}
+        {placeDetails.place_code && (
+          <div className='flex items-center justify-between'>
+            <div className='flex items-center gap-2'>
+              <FaHashtag className='text-blue-500 text-sm' />
+              <span className='font-medium'>Code:</span>
+              <span className='font-mono text-xs bg-gray-100 px-1.5 py-0.5 rounded'>
+                {placeDetails.place_code}
+              </span>
+            </div>
+            <button
+              onClick={() => copyToClipboard(placeDetails.place_code!, "code")}
+              className='text-gray-400 hover:text-blue-500 transition-colors'
+              title='Copy place code'
+            >
+              {isCopied && copiedType === "code" ? (
+                <FaCheck className='text-green-500 text-xs' />
+              ) : (
+                <FaCopy className='w-3 h-3' />
+              )}
+            </button>
           </div>
-          <button
-            onClick={() => copyToClipboard(placeDetails.place_code, 'code')}
-            className='text-gray-400 hover:text-blue-500 transition-colors'
-            title='Copy place code'
-          >
-            {copiedItem === 'code' ? (
-              <FaCheck className='text-green-500 text-xs' />
-            ) : (
-              <FaCopy className='w-3 h-3' />
-            )}
-          </button>
-        </div>
+        )}
       </div>
     </motion.div>
   );

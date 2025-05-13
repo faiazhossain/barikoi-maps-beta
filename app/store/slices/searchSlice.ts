@@ -66,6 +66,7 @@ const searchSlice = createSlice({
       state.selectedPlace = null;
       state.placeDetails = null;
       state.placeDetailsError = null;
+      state.selectedInternationalPlace = null;
     },
     // Nearby search actions
     setNearbyPlaces: (state, action: PayloadAction<NearbyPlace[]>) => {
