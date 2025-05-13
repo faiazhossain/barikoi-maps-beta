@@ -129,7 +129,7 @@ const SearchBar: React.FC = () => {
           selectedData.uCode || selectedData.place_code
         );
         window.history.replaceState({}, "", currentUrl.toString());
-      } else {
+      } else if (selectedData.type !== "coordinates") {
         // Handle non-uCode places (like international places)
         dispatch(setSelectedInternationalPlace(selectedData));
       }

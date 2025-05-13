@@ -107,7 +107,6 @@ const searchSlice = createSlice({
       action: PayloadAction<SearchState["selectedInternationalPlace"]>
     ) => {
       state.selectedInternationalPlace = action.payload;
-      console.log("🚀 ~ action.payload:", action.payload);
     },
   },
   extraReducers: (builder) => {

@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { AutoComplete } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
-import styles from './SearchBar/SearchBar.module.css';
-import { useDropdownStyles } from '../hooks/useDropdownStyles';
-import Image from 'next/image';
-import { useAppDispatch } from '@/app/store/store';
-import { fetchReverseGeocode } from '@/app/store/thunks/searchThunks';
-import { openLeftBar } from '@/app/store/slices/drawerSlice';
+import React, { useEffect, useState } from "react";
+import { AutoComplete } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
+import styles from "./SearchBar/SearchBar.module.css";
+import { useDropdownStyles } from "../hooks/useDropdownStyles";
+import Image from "next/image";
+import { useAppDispatch } from "@/app/store/store";
+import { fetchReverseGeocode } from "@/app/store/thunks/searchThunks";
+import { openLeftBar } from "@/app/store/slices/drawerSlice";
 
 interface AutoCompleteOption {
   value: string;
@@ -52,7 +52,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
 
   // Move coordinate check to a separate function
   const validateCoordinates = (input: string) => {
-    const parts = input.split(',');
+    const parts = input.split(",");
     if (parts.length !== 2) return null;
 
     const [first, second] = parts.map((coord) => coord?.trim());
@@ -106,7 +106,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
           </div>
         ),
         rawData: {
-          type: 'coordinates',
+          type: "coordinates",
           lat: coords.lat,
           lng: coords.lng,
           originalInput: value,
@@ -120,13 +120,14 @@ const SearchInput: React.FC<SearchInputProps> = ({
   }, [value, options]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       const coords = validateCoordinates(value);
       if (coords) {
+        console.log("🚀 ~ handleKeyDown ~ coords:", coords);
         const coordinateOption = {
           value: `${coords.lat}, ${coords.lng}`,
           rawData: {
-            type: 'coordinates',
+            type: "coordinates",
             lat: coords.lat,
             lng: coords.lng,
             originalInput: value,
@@ -153,7 +154,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
       ).unwrap();
       dispatch(openLeftBar());
     } catch (error) {
-      console.error('Error in reverse geocoding:', error);
+      console.error("Error in reverse geocoding:", error);
     }
   };
 
@@ -167,7 +168,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
       document.activeElement.blur();
     }
 
-    if (option.rawData?.type === 'coordinates') {
+    if (option.rawData?.type === "coordinates") {
       const { lat, lng } = option.rawData;
       handleCoordinateSelect(lat, lng);
     }
@@ -207,8 +208,8 @@ const SearchInput: React.FC<SearchInputProps> = ({
         dropdownRender={(menu) => (
           <div className='relative pb-8'>
             <div
-              className={`${styles['dropdown-animation']} ${
-                isExpanded || isAnimating ? styles['show'] : ''
+              className={`${styles["dropdown-animation"]} ${
+                isExpanded || isAnimating ? styles["show"] : ""
               }`}
             >
               {menu}
