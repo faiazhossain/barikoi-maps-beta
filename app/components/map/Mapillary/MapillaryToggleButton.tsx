@@ -27,13 +27,14 @@ const MapillaryToggleButton: React.FC = () => {
       >
         <Tooltip
           title={isVisible ? "Hide Street View" : "Show Street View"}
-          placement="left"
+          placement='left'
           mouseEnterDelay={0.1}
-          className="mapillary-tooltip"
+          className='mapillary-tooltip'
           open={isLargeScreen ? undefined : false} // Only show on large screens
         >
           <motion.button
             onClick={handleToggle}
+            aria-label={isVisible ? "Hide Street View" : "Show Street View"}
             className={`relative group flex items-center justify-center w-8 h-8 rounded-md shadow-xl ${
               isVisible
                 ? "bg-gradient-to-tr from-green-500 to-emerald-400 border-2 border-emerald-300"
@@ -42,8 +43,8 @@ const MapillaryToggleButton: React.FC = () => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
           >
-            <div className="absolute inset-0 rounded-md bg-white bg-opacity-30 blur-sm"></div>
-            <div className="relative z-10 flex items-center justify-center w-full h-full">
+            <div className='absolute inset-0 rounded-md bg-white bg-opacity-30 blur-sm'></div>
+            <div className='relative z-10 flex items-center justify-center w-full h-full'>
               <motion.div
                 animate={{
                   rotate: isVisible ? [0, 360] : 0,
@@ -64,7 +65,7 @@ const MapillaryToggleButton: React.FC = () => {
             {/* Animated ring */}
             {isVisible && (
               <motion.div
-                className="absolute inset-0 rounded-full"
+                className='absolute inset-0 rounded-full'
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{
                   opacity: [0, 1, 0],
@@ -76,7 +77,7 @@ const MapillaryToggleButton: React.FC = () => {
                   ease: "easeOut",
                 }}
               >
-                <div className="w-full h-full rounded-full border-4 border-green-400 bg-transparent"></div>
+                <div className='w-full h-full rounded-full border-4 border-green-400 bg-transparent'></div>
               </motion.div>
             )}
           </motion.button>

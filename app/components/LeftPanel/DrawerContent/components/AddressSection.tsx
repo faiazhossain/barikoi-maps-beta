@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   FaCopy,
   FaMapMarkerAlt,
   FaCheck,
   FaBuilding,
   FaRoad,
-} from 'react-icons/fa';
-import { motion } from 'framer-motion';
-import { BsMailbox2Flag, BsGeoAlt } from 'react-icons/bs';
-import { Tooltip } from 'antd';
+} from "react-icons/fa";
+import { motion } from "framer-motion";
+import { BsMailbox2Flag, BsGeoAlt } from "react-icons/bs";
+import { Tooltip } from "antd";
 
 interface AddressSectionProps {
   address: string;
@@ -44,7 +44,7 @@ export const AddressSection = ({
         setTimeout(() => setIsCopied(false), 1500);
       })
       .catch((err) => {
-        console.error('Failed to copy address: ', err);
+        console.error("Failed to copy address: ", err);
       });
   };
 
@@ -69,10 +69,15 @@ export const AddressSection = ({
         <motion.button
           className={`flex items-center gap-2 text-sm px-3 py-1 rounded-full ${
             isCopied
-              ? 'bg-green-100 text-green-800'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              ? "bg-green-100 text-green-800"
+              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
           } transition-colors`}
           title='Copy address to clipboard'
+          aria-label={
+            isCopied
+              ? "Address copied to clipboard"
+              : "Copy address to clipboard"
+          }
           disabled={isCopied}
           onClick={(e) => {
             e.stopPropagation();

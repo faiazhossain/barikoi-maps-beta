@@ -325,6 +325,7 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
         >
           <motion.button
             onClick={togglePanel}
+            aria-label={isOpen ? "Close Map Styles" : "Open Map Styles"}
             className={`relative group flex items-center justify-center w-8 h-8 rounded-md shadow-lg ${
               isOpen
                 ? "bg-gradient-to-tr from-green-500 to-emerald-400 border-2 border-emerald-300"
