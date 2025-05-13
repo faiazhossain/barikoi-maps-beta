@@ -100,6 +100,8 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
 
     const handleMove = () => {
       const center = mainMap.getCenter();
+      const map = mainMap.getMap();
+
       setViewState({
         longitude: center.lng,
         latitude: center.lat,
@@ -113,9 +115,9 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
 
       // Check if the new center is within Bangladesh and update source URL accordingly
       const inBangladesh = isWithinBangladesh(center.lat, center.lng);
+      const style = map.getStyle();
 
-      const style = mainMap.getStyle();
-      if (style.sources?.openmaptiles) {
+      if (style?.sources?.openmaptiles) {
         const currentSource = style.sources
           .openmaptiles as maplibregl.VectorTileSource;
         const newUrl = inBangladesh
@@ -123,16 +125,34 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
           : "https://planet.tiles.bmapsbd.com/planet";
 
         if (currentSource.url !== newUrl) {
-          mainMap.getMap().setStyle({
-            ...style,
-            sources: {
-              ...style.sources,
-              openmaptiles: {
-                type: "vector",
-                url: newUrl,
-              },
-            },
-          });
+          try {
+            // Get all source layers that use openmaptiles
+            const sourceLayers = map
+              .getStyle()
+              .layers.filter(
+                (layer: maplibregl.LayerSpecification & { source?: string }) =>
+                  layer.source === "openmaptiles"
+              );
+
+            // Remove the layers that use this source
+            sourceLayers.forEach((layer) => {
+              map.removeLayer(layer.id);
+            });
+
+            // Remove and re-add the source with new URL
+            map.removeSource("openmaptiles");
+            map.addSource("openmaptiles", {
+              type: "vector",
+              url: newUrl,
+            });
+
+            // Re-add all the layers
+            sourceLayers.forEach((layer) => {
+              map.addLayer(layer);
+            });
+          } catch (error) {
+            console.error("Error updating map source:", error);
+          }
         }
       }
     };
@@ -143,7 +163,7 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
     return () => {
       mainMap.off("moveend", handleMove);
     };
-  }, [mainMap, currentStyleUrl, onStyleChange]);
+  }, [mainMap, currentStyleUrl]);
 
   // Preload map styles sequentially
   useEffect(() => {
