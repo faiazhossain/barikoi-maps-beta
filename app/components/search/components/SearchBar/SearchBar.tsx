@@ -12,6 +12,7 @@ import {
   setSuggestions,
   setSelectedPlace,
   setSelectedCategories,
+  setSelectedInternationalPlace,
 } from "@/app/store/slices/searchSlice";
 import {
   selectSearchTerm,
@@ -110,12 +111,13 @@ const SearchBar: React.FC = () => {
   // Event handlers
   const handleSelect = (value: string, option: any) => {
     const selectedData = option.rawData;
+    console.log("🚀 ~ handleSelect ~ selectedData:", selectedData);
 
     if (selectedData) {
       dispatch(setSelectedPlace(selectedData));
       dispatch(openLeftBar());
 
-      // Only update URL if we have a valid place code
+      // Only update URL and fetch place details if we have a uCode or place_code
       if (selectedData.uCode || selectedData.place_code) {
         dispatch(
           fetchPlaceDetails(selectedData.uCode || selectedData.place_code)
@@ -127,6 +129,9 @@ const SearchBar: React.FC = () => {
           selectedData.uCode || selectedData.place_code
         );
         window.history.replaceState({}, "", currentUrl.toString());
+      } else {
+        // Handle non-uCode places (like international places)
+        dispatch(setSelectedInternationalPlace(selectedData));
       }
     }
 

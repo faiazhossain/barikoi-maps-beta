@@ -1,11 +1,11 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { fetchPlaceDetails, fetchReverseGeocode } from '../thunks/searchThunks';
-import { NearbyPlace } from '@/app/types/map';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { fetchPlaceDetails, fetchReverseGeocode } from "../thunks/searchThunks";
+import { NearbyPlace } from "@/app/types/map";
 
 interface SearchState {
   searchTerm: string;
   suggestions: any[];
-  searchMode: 'search' | 'directions';
+  searchMode: "search" | "directions";
   selectedPlace: any | null;
   placeDetails: any | null;
   placeDetailsLoading: boolean;
@@ -17,12 +17,19 @@ interface SearchState {
   selectedCategories: string[];
   currentRadius: number;
   hoveredNearbyPlaceId: string | null; // Add this property
+  selectedInternationalPlace: {
+    id: string;
+    name: string;
+    address: string;
+    longitude: number;
+    latitude: number;
+  } | null;
 }
 
 const initialState: SearchState = {
-  searchTerm: '',
+  searchTerm: "",
   suggestions: [],
-  searchMode: 'search',
+  searchMode: "search",
   selectedPlace: null,
   placeDetails: null,
   placeDetailsLoading: false,
@@ -34,10 +41,11 @@ const initialState: SearchState = {
   selectedCategories: [],
   currentRadius: 0.5, // Default 0.5 km radius
   hoveredNearbyPlaceId: null, // Add initial value
+  selectedInternationalPlace: null,
 };
 
 const searchSlice = createSlice({
-  name: 'search',
+  name: "search",
   initialState,
   reducers: {
     setSearchTerm: (state, action: PayloadAction<string>) => {
@@ -46,14 +54,14 @@ const searchSlice = createSlice({
     setSuggestions: (state, action: PayloadAction<any[]>) => {
       state.suggestions = action.payload;
     },
-    setSearchMode: (state, action: PayloadAction<'search' | 'directions'>) => {
+    setSearchMode: (state, action: PayloadAction<"search" | "directions">) => {
       state.searchMode = action.payload;
     },
     setSelectedPlace: (state, action: PayloadAction<any | null>) => {
       state.selectedPlace = action.payload;
     },
     clearSearch: (state) => {
-      state.searchTerm = '';
+      state.searchTerm = "";
       state.suggestions = [];
       state.selectedPlace = null;
       state.placeDetails = null;
@@ -83,7 +91,7 @@ const searchSlice = createSlice({
     // Add this new action
     clearDirections: (state) => {
       // Reset direction-related state
-      state.searchTerm = '';
+      state.searchTerm = "";
       state.suggestions = [];
       // Add any other direction-specific state you want to clear
     },
@@ -92,6 +100,13 @@ const searchSlice = createSlice({
     },
     setHoveredNearbyPlace: (state, action: PayloadAction<string | null>) => {
       state.hoveredNearbyPlaceId = action.payload;
+    },
+    setSelectedInternationalPlace: (
+      state,
+      action: PayloadAction<SearchState["selectedInternationalPlace"]>
+    ) => {
+      state.selectedInternationalPlace = action.payload;
+      console.log("🚀 ~ action.payload:", action.payload);
     },
   },
   extraReducers: (builder) => {
@@ -107,7 +122,7 @@ const searchSlice = createSlice({
       .addCase(fetchPlaceDetails.rejected, (state, action) => {
         state.placeDetailsLoading = false;
         state.placeDetailsError =
-          action.error.message || 'Failed to fetch details';
+          action.error.message || "Failed to fetch details";
       })
       .addCase(fetchReverseGeocode.pending, (state) => {
         state.reverseGeocodeLoading = true; // Use the new property
@@ -120,7 +135,7 @@ const searchSlice = createSlice({
       .addCase(fetchReverseGeocode.rejected, (state, action) => {
         state.reverseGeocodeLoading = false; // Use the new property
         state.placeDetailsError =
-          action.error.message || 'Failed to reverse geocode';
+          action.error.message || "Failed to reverse geocode";
       });
   },
 });
@@ -140,6 +155,7 @@ export const {
   clearNearbySearch,
   setPlaceDetails, // Add this line
   setHoveredNearbyPlace, // Add this line
+  setSelectedInternationalPlace,
 } = searchSlice.actions;
 
 export default searchSlice.reducer;
