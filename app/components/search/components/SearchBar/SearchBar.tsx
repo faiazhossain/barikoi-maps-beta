@@ -60,6 +60,7 @@ const SearchBar: React.FC = () => {
   // Local state
   const [isMounted, setIsMounted] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+
   const [isAnimating, setIsAnimating] = useState(false);
   const [directSearchError, setDirectSearchError] = useState<string | null>(
     null
@@ -83,7 +84,7 @@ const SearchBar: React.FC = () => {
 
   // Handle suggestions visibility
   useEffect(() => {
-    setIsExpanded(suggestions.length > 0);
+    setIsExpanded(suggestions.length > 1);
   }, [suggestions]);
 
   // Handle animation states
@@ -122,7 +123,6 @@ const SearchBar: React.FC = () => {
   // Event handlers
   const handleSelect = (value: string, option: any) => {
     const selectedData = option.rawData;
-    console.log("🚀 ~ handleSelect ~ selectedData:", selectedData);
 
     if (selectedData) {
       dispatch(setSelectedPlace(selectedData));

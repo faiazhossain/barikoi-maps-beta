@@ -1,20 +1,20 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import { Select, Spin } from 'antd'; // Import Spin from Ant Design
-import { FaFlag } from 'react-icons/fa';
-import { LoadingOutlined } from '@ant-design/icons';
-import Image from 'next/image';
+import React, { useEffect, useState } from "react";
+import { Select, Spin } from "antd"; // Import Spin from Ant Design
+import { FaFlag } from "react-icons/fa";
+import { LoadingOutlined } from "@ant-design/icons";
+import Image from "next/image";
 
 // Import from our new global countries hook
 import {
   useGlobalCountries,
   CountryOption,
-} from '@/app/hooks/useGlobalCountries';
-import { useAppDispatch, useAppSelector } from '@/app/store/store';
-import { setSelectedCountry } from '@/app/store/slices/mapSlice'; // Fix import from countrySlice to mapSlice
-import { dispatchFitCountryEvent } from '@/app/utils/eventUtils';
-import { setSelectedCountryCode } from '@/app/store/slices/countrySlice';
+} from "@/app/hooks/useGlobalCountries";
+import { useAppDispatch, useAppSelector } from "@/app/store/store";
+import { setSelectedCountry } from "@/app/store/slices/mapSlice"; // Fix import from countrySlice to mapSlice
+import { dispatchFitCountryEvent } from "@/app/utils/eventUtils";
+import { setSelectedCountryCode } from "@/app/store/slices/countrySlice";
 
 interface CountrySelectProps {
   onCountrySelect?: (value: string) => void;
@@ -23,8 +23,8 @@ interface CountrySelectProps {
 }
 
 const CountrySelect: React.FC<CountrySelectProps> = ({
-  className = '!w-8 !mr-2 rounded-md [&_.ant-select-selector]:!border-none [&_.ant-select-selector]:!p-[6px] hover:!bg-gray-100 ',
-  dropdownWidth = '160px',
+  className = "!w-8 !mr-2 rounded-md [&_.ant-select-selector]:!border-none [&_.ant-select-selector]:!p-[6px] hover:!bg-gray-100 ",
+  dropdownWidth = "160px",
 }) => {
   // Use our global countries hook instead of local fetching logic
   const { countries, loading, error } = useGlobalCountries();
@@ -51,10 +51,6 @@ const CountrySelect: React.FC<CountrySelectProps> = ({
 
   const handleCountrySelect = (name: string) => {
     const selectedCountry = countries.find((country) => country.name === name);
-    console.log(
-      '🚀 ~ handleCountrySelect ~ selectedCountry:',
-      selectedCountry?.value
-    );
     setLocalSelectedCountry(name);
     dispatch(setSelectedCountry(name));
     dispatch(setSelectedCountryCode(selectedCountry?.value || null));
@@ -74,7 +70,7 @@ const CountrySelect: React.FC<CountrySelectProps> = ({
   }
 
   if (error) {
-    console.error('Error loading countries:', error);
+    console.error("Error loading countries:", error);
     return <Select placeholder='Error loading countries' disabled />;
   }
 
@@ -152,7 +148,7 @@ const CountrySelect: React.FC<CountrySelectProps> = ({
               src={
                 countries.find(
                   (country) => country.name === localSelectedCountry
-                )?.flag || ''
+                )?.flag || ""
               }
               alt={`${localSelectedCountry} flag`}
               width={20}

@@ -2,10 +2,9 @@ import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { uCode: string } }
 ) {
-  console.log("🚀 ~ request:", request);
   const { uCode } = params;
 
   try {

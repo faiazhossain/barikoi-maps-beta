@@ -143,7 +143,6 @@ const SearchInput: React.FC<SearchInputProps> = ({
     if (e.key === "Enter") {
       const coords = validateCoordinates(value);
       if (coords) {
-        console.log("🚀 ~ handleKeyDown ~ coords:", coords);
         const coordinateOption = {
           value: `${coords.lat}, ${coords.lng}`,
           rawData: {
