@@ -126,30 +126,15 @@ const MapLayerSwitcher: React.FC<MapLayerSwitcherProps> = ({
 
         if (currentSource.url !== newUrl) {
           try {
-            // Get all source layers that use openmaptiles
-            const sourceLayers = map
-              .getStyle()
-              .layers.filter(
-                (layer: maplibregl.LayerSpecification & { source?: string }) =>
-                  layer.source === "openmaptiles"
-              );
-
-            // Remove the layers that use this source
-            sourceLayers.forEach((layer) => {
-              map.removeLayer(layer.id);
-            });
-
-            // Remove and re-add the source with new URL
-            map.removeSource("openmaptiles");
-            map.addSource("openmaptiles", {
-              type: "vector",
-              url: newUrl,
-            });
-
-            // Re-add all the layers
-            sourceLayers.forEach((layer) => {
-              map.addLayer(layer);
-            });
+            // Update the source URL directly using type assertion to bypass TypeScript error
+            const source = map.getSource("openmaptiles");
+            // @ts-expect-error: setUrl exists on the actual implementation but not in type definitions
+            if (source && source.setUrl) {
+              // @ts-expect-error:: Using setUrl method that exists at runtime
+              source.setUrl(newUrl);
+            } else {
+              console.error("Source not found or setUrl not supported.");
+            }
           } catch (error) {
             console.error("Error updating map source:", error);
           }
