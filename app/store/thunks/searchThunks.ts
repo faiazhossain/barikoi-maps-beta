@@ -6,6 +6,10 @@ import {
   setNearbyError,
 } from "../slices/searchSlice";
 
+// Track the last request timestamp for nearby searches to prevent duplicates
+let lastNearbyRequestTimestamp = 0;
+const DEBOUNCE_INTERVAL = 300; // 300ms debounce
+
 export const fetchPlaceDetails = createAsyncThunk(
   "search/fetchPlaceDetails",
   async (uCode: string) => {
@@ -68,6 +72,16 @@ export const fetchNearbyPlaces = createAsyncThunk(
     { dispatch, getState }
   ) => {
     try {
+      // Check if this request is too close to the previous request
+      const now = Date.now();
+      if (now - lastNearbyRequestTimestamp < DEBOUNCE_INTERVAL) {
+        console.log("Skipping duplicate nearby request due to debounce");
+        return [];
+      }
+
+      // Update the request timestamp
+      lastNearbyRequestTimestamp = now;
+
       dispatch(setNearbyPlaces([]));
       dispatch(setNearbyLoading(true));
 
@@ -93,8 +107,11 @@ export const fetchNearbyPlaces = createAsyncThunk(
         params.append("categories", categories);
       }
 
-      // Make API request
-      const response = await fetch(`/api/nearby?${params.toString()}`);
+      // Make API request with cache busting
+      const cacheParam = `_cache=${Date.now()}`;
+      const response = await fetch(
+        `/api/nearby?${params.toString()}&${cacheParam}`
+      );
 
       if (!response.ok) {
         throw new Error(`Failed to fetch nearby places: ${response.status}`);

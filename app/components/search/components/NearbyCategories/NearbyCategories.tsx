@@ -68,6 +68,10 @@ const NearbyCategories = () => {
   const dispatch = useAppDispatch();
   const { viewport } = useAppSelector((state) => state.map);
   const [loadingCategory, setLoadingCategory] = useState<string | null>(null);
+  // Add flag to prevent multiple rapid requests for the same category
+  const [lastSelectedCategory, setLastSelectedCategory] = useState<
+    string | null
+  >(null);
 
   const settings = {
     dots: false,
@@ -113,7 +117,13 @@ const NearbyCategories = () => {
   ];
 
   const handleCategoryClick = (category: string) => {
+    // Skip if we've just selected this category to prevent duplicate API calls
+    if (category === lastSelectedCategory && loadingCategory) {
+      return;
+    }
+
     setLoadingCategory(category);
+    setLastSelectedCategory(category);
 
     if (navigator.geolocation) {
       dispatch(setNearbyLoading(true));
