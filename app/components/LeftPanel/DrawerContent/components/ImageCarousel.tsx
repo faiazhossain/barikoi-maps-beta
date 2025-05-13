@@ -1,10 +1,10 @@
-import React from 'react';
-import Slider from 'react-slick';
-import { useImageUrls } from '@/app/hooks/useImageUrls';
-import 'slick-carousel/slick/slick.css';
-import 'slick-carousel/slick/slick-theme.css';
-import { Image as AntImage, Card } from 'antd';
-import ImageLoader from '@/app/components/common/LoadingPage/ImageLoader';
+import React from "react";
+import Slider from "react-slick";
+import { useImageUrls } from "@/app/hooks/useImageUrls";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import { Image as AntImage, Card } from "antd";
+import ImageLoader from "@/app/components/common/LoadingPage/ImageLoader";
 
 interface ImageCarouselProps {
   images: Array<{ key: string; url: string }>;
@@ -24,23 +24,23 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images }) => {
     appendDots: (dots: React.ReactNode) => (
       <div
         style={{
-          position: 'absolute',
-          bottom: '1px',
-          width: '100%',
+          position: "absolute",
+          bottom: "1px",
+          width: "100%",
         }}
       >
-        <ul style={{ margin: '0', padding: '0' }}>{dots}</ul>
+        <ul style={{ margin: "0", padding: "0" }}>{dots}</ul>
       </div>
     ),
     customPaging: () => (
       <div
         style={{
-          width: '8px',
-          height: '8px',
-          borderRadius: '50%',
-          backgroundColor: 'rgba(255,255,255,0.5)',
-          margin: '0 4px',
-          transition: 'all 0.3s ease',
+          width: "8px",
+          height: "8px",
+          borderRadius: "50%",
+          backgroundColor: "rgba(255,255,255,0.5)",
+          margin: "0 4px",
+          transition: "all 0.3s ease",
         }}
       />
     ),

@@ -89,12 +89,9 @@ const DrawerContent = () => {
       animate='visible'
       variants={containerVariants}
     >
-      {/* Only show image carousel for places with images */}
-      {displayData?.images?.length > 0 && (
-        <motion.div variants={itemVariants}>
-          <ImageCarousel images={displayData.images} />
-        </motion.div>
-      )}
+      <motion.div variants={itemVariants}>
+        <ImageCarousel images={displayData.images} />
+      </motion.div>
 
       {displayName && (
         <motion.div className='flex align-middle px-4' variants={itemVariants}>
