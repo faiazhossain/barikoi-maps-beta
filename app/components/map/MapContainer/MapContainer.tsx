@@ -1,8 +1,8 @@
 "use client";
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import maplibregl, { LngLatBounds } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import MapGL, { MapRef } from "react-map-gl/maplibre";
+import MapGL, { MapRef, Marker } from "react-map-gl/maplibre";
 import { useMapRef } from "../hooks/useMapRef";
 import { useRouteFromUrl } from "../hooks/useRouteFromUrl";
 import { useMapEventHandlers } from "../hooks/useMapEventHandlers";
@@ -12,6 +12,7 @@ import BarikoiAttribution from "./BarikoiAttribution";
 import MapLayerSwitcher from "./MapLayerSwitcher";
 import { AnimatePresence } from "framer-motion";
 import InfoCard from "../InfoCard/InfoCard";
+import mqtt from "mqtt";
 
 import {
   setMapLoaded,
@@ -77,6 +78,53 @@ const MapContainer: React.FC = () => {
   );
 
   const { searchCenter } = useAppSelector((state) => state.search);
+
+  // MQTT state
+  const [mqttMarkers, setMqttMarkers] = useState<
+    Map<
+      string,
+      {
+        deviceId: string;
+        latitude: number;
+        longitude: number;
+        timestamp: number;
+        isOnline: boolean;
+      }
+    >
+  >(new Map());
+  const mqttClientRef = useRef<any>(null);
+  // Time threshold to consider a device offline (10 seconds in milliseconds)
+  const OFFLINE_THRESHOLD = 10 * 1000;
+
+  // Function to check if devices are offline
+  const checkOfflineDevices = useCallback(() => {
+    const now = Date.now();
+    setMqttMarkers((prevMarkers) => {
+      const newMarkers = new Map(prevMarkers);
+      let hasUpdates = false;
+
+      newMarkers.forEach((marker, deviceId) => {
+        const timeSinceLastUpdate = now - marker.timestamp;
+        const shouldBeOnline = timeSinceLastUpdate < OFFLINE_THRESHOLD;
+
+        if (marker.isOnline !== shouldBeOnline) {
+          newMarkers.set(deviceId, {
+            ...marker,
+            isOnline: shouldBeOnline,
+          });
+          hasUpdates = true;
+        }
+      });
+
+      return hasUpdates ? newMarkers : prevMarkers;
+    });
+  }, []);
+
+  // Set up interval to regularly check for offline devices
+  useEffect(() => {
+    const intervalId = setInterval(checkOfflineDevices, 30000); // Check every 30 seconds
+    return () => clearInterval(intervalId);
+  }, [checkOfflineDevices]);
 
   // Function to detect country at map center
   const detectCountryAtMapCenter = useCallback(
@@ -186,6 +234,107 @@ const MapContainer: React.FC = () => {
       }
     }
   }, [userLocation, mapRef]);
+
+  // Connect to MQTT broker and subscribe to topic
+  useEffect(() => {
+    if (typeof window === "undefined") return; // Only run on client side
+
+    // Configure MQTT connection options using WebSockets instead of direct MQTT protocol
+    const host = "202.72.236.166";
+    const port = 8083; // Use WebSocket port instead of direct MQTT port
+    const mqttUri = `ws://${host}:${port}/mqtt`; // WebSocket connection URL format
+
+    const options = {
+      clientId: `barikoi-maps_${Math.random().toString(16).substring(2, 8)}`,
+      clean: true,
+      connectTimeout: 4000,
+      reconnectPeriod: 1000,
+    };
+
+    console.log("Connecting to MQTT broker:", mqttUri);
+
+    try {
+      // Create MQTT client
+      const client = mqtt.connect(mqttUri, options);
+      mqttClientRef.current = client;
+
+      // Handle connection
+      client.on("connect", () => {
+        console.log("MQTT Connected successfully");
+        // Subscribe to device location topic
+        const topic = "company/65a4b3873d02929363aae653/location";
+        client.subscribe(topic, { qos: 0 }, (err) => {
+          if (!err) {
+            console.log(`Subscribed to ${topic}`);
+            // Optionally publish a message to confirm connection
+            // client.publish(topic, JSON.stringify({ connected: true }));
+          } else {
+            console.error("Subscription error:", err);
+          }
+        });
+      });
+
+      // Handle connection errors
+      client.on("error", (err) => {
+        console.error("MQTT Connection error:", err);
+      });
+
+      // Handle connection loss/close
+      client.on("close", () => {
+        console.log("MQTT Connection closed");
+      });
+
+      // Handle connection failure
+      client.on("offline", () => {
+        console.log("MQTT Client is offline");
+      });
+
+      // Handle messages
+      client.on("message", (topic, message) => {
+        try {
+          // Parse the incoming message
+          const payload = JSON.parse(message.toString());
+          console.log("MQTT message received:", payload);
+
+          // Check if payload has location data
+          if (payload.latitude && payload.longitude) {
+            // Use deviceId from the payload or generate a default one
+            const deviceId = payload.deviceId || "unknown-device";
+
+            setMqttMarkers((prevMarkers) => {
+              const newMarkers = new Map(prevMarkers);
+              newMarkers.set(deviceId, {
+                deviceId: deviceId,
+                latitude: parseFloat(payload.latitude),
+                longitude: parseFloat(payload.longitude),
+                timestamp: Date.now(),
+                isOnline: true,
+              });
+              return newMarkers;
+            });
+          }
+        } catch (error) {
+          console.error(
+            "Error parsing MQTT message:",
+            error,
+            message.toString()
+          );
+        }
+      });
+
+      // Clean up on component unmount
+      return () => {
+        if (client) {
+          client.unsubscribe("company/65a4b3873d02929363aae653/location");
+          client.end(true, () => {
+            console.log("MQTT Connection terminated");
+          });
+        }
+      };
+    } catch (error) {
+      console.error("MQTT Setup error:", error);
+    }
+  }, []); // Empty dependency array to run only on mount
 
   // Handle map style change
   const handleMapStyleChange = useCallback(
@@ -530,6 +679,34 @@ const MapContainer: React.FC = () => {
             onStyleChange={handleMapStyleChange}
             currentStyleUrl={currentMapStyle}
           />
+          {/* MQTT Device Location Markers */}
+          {Array.from(mqttMarkers.values()).map((marker) => (
+            <Marker
+              key={marker.deviceId}
+              longitude={marker.longitude}
+              latitude={marker.latitude}
+              anchor='bottom'
+            >
+              <div className='relative'>
+                {/* Pulsing effect for real-time tracking */}
+                <div className='absolute -top-2 -left-2 w-8 h-8 rounded-full bg-blue-400 opacity-30 animate-ping'></div>
+
+                {/* Device marker */}
+                <div className='relative z-10 flex items-center justify-center w-4 h-4 bg-blue-600 rounded-full border-2 border-white shadow-md transform-gpu'>
+                  <div className='w-1 h-1 bg-white rounded-full'></div>
+                </div>
+              </div>
+
+              {/* Label for the device with device ID */}
+              <div
+                className={`absolute -mt-8 ${
+                  marker.isOnline ? "bg-green-400" : "bg-red-400"
+                } px-1 py-0.5 rounded-md shadow-md text-xs font-medium whitespace-nowrap border border-gray-100`}
+              >
+                {marker.deviceId}
+              </div>
+            </Marker>
+          ))}
         </MapGL>
         {!isMapillaryVisible && (
           <AnimatePresence>
