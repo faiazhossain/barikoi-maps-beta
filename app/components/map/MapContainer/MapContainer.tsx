@@ -290,7 +290,7 @@ const MapContainer: React.FC = () => {
       });
 
       // Handle messages
-      client.on("message", (topic, message) => {
+      client.on("message", (_, message) => {
         try {
           // Parse the incoming message
           const payload = JSON.parse(message.toString());
